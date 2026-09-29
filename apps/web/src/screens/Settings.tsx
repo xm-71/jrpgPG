@@ -4,11 +4,12 @@ import { newProfile } from '@duskline/core';
 import { STARTER_HEROES } from '@duskline/content';
 import { now } from '../game/clock';
 import { back } from '../game/nav';
-import { applyUpdate, cacheVersion, canInstall, installed, needsShareSheet, offlineState, online, persisted, promptInstall, updateReady } from '../game/offline';
+import { applyUpdate, cacheVersion, canAddToHome, canInstall, installed, needsShareSheet, offlineState, online, persisted, promptInstall, updateReady } from '../game/offline';
 import { copyMode, downloadOfflineCopy, isDownloadedCopy, type CopyMode } from '../game/offlineCopy';
 import { exportProfile, importProfile } from '../game/persist';
 import { sfx } from '../game/sfx';
 import { isFreshSave, mutate, profile, replaceProfile, resetProfile, savingWorks, toast } from '../game/store';
+import { AddToHomeSteps } from '../ui/AddToHome';
 import { ask } from '../ui/Dialog';
 import { Sky } from '../ui/Sky';
 
@@ -22,7 +23,7 @@ const SIZES = [
 function offlineStatus(): { text: string; tone: 'good' | 'wait' | 'warn' | 'plain' } {
   const state = offlineState.value;
   if (isDownloadedCopy()) return { text: 'You are playing the offline copy. It needs no connection.', tone: 'good' };
-  if (installed.value) return { text: 'Installed. Duskline opens from your home screen or app list, with or without a connection.', tone: 'good' };
+  if (installed.value && state === 'ready') return { text: 'Installed. Duskline opens from your home screen or app list, with or without a connection.', tone: 'good' };
   if (state === 'ready') return { text: online.value ? 'Ready. This device has everything it needs, so Duskline opens with no connection.' : 'You are offline, and the game is running from this device.', tone: 'good' };
   if (state === 'preparing') return { text: 'Saving Duskline to this device. Stay connected until this says Ready.', tone: 'wait' };
   if (state === 'failed') return { text: 'Duskline could not be saved for offline play. The browser may be out of space or blocking storage. You can still play while connected.', tone: 'warn' };
@@ -42,7 +43,6 @@ function OfflinePanel(): JSX.Element {
     };
   }, []);
   const status = offlineStatus();
-  const iphone = !installed.value && !canInstall.value && needsShareSheet() && offlineState.value === 'ready';
   return (
     <section class="panel panel-pad offline" aria-labelledby="offline-title">
       <h2 class="label" id="offline-title">
@@ -77,7 +77,16 @@ function OfflinePanel(): JSX.Element {
           Install Duskline
         </button>
       )}
-      {iphone && <p class="muted small">To install on an iPhone or iPad, tap Share in Safari, then Add to Home Screen.</p>}
+      {canAddToHome() && (
+        <div class="offline-steps">
+          <p class="label">Add it to your Home Screen</p>
+          <AddToHomeSteps />
+          <p class="muted small">Safari can clear a site's saved files after a week away. The Home Screen app is exempt, so it is the safer place to play offline on an iPhone or iPad.</p>
+        </div>
+      )}
+      {installed.value && needsShareSheet() && isFreshSave.value && (
+        <p class="muted small">Played in Safari before? Its save is separate from this app's. Open Duskline in Safari, tap Copy save, then come back here and use Paste a save below.</p>
+      )}
       {(mode === 'checking' || mode === 'viewer' || mode === 'link') && (
         <button
           class="btn btn-block btn-stacked"
@@ -208,7 +217,14 @@ export function Settings(): JSX.Element {
           </div>
           {shown && (
             <>
-              <textarea aria-label="Save data" value={text} onInput={(e) => setText(e.currentTarget.value)} placeholder="Paste save data here" />
+              <textarea
+                aria-label="Save data"
+                value={text}
+                onInput={(e) => setText(e.currentTarget.value)}
+                // iOS can leave the page nudged up after its keyboard closes.
+                onBlur={() => window.scrollTo(0, 0)}
+                placeholder="Paste save data here"
+              />
               <button class="btn btn-small btn-gold" disabled={text.trim().length === 0} onClick={() => void load()}>
                 Load this save
               </button>

@@ -15,6 +15,7 @@ import { Settings } from './screens/Settings';
 import { Title } from './screens/Title';
 import { DialogHost } from './ui/Dialog';
 import { Toasts } from './ui/Toasts';
+import { TurnUpright } from './ui/TurnUpright';
 
 function applySettings(): void {
   const s = profile.value.settings;
@@ -70,6 +71,7 @@ export function App(): JSX.Element {
       {view}
       <Toasts />
       <DialogHost />
+      <TurnUpright />
     </div>
   );
 }

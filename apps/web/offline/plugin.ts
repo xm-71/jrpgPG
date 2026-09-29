@@ -4,12 +4,14 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Plugin } from 'vite';
 import { iconSvg, maskableIconSvg } from './icon.ts';
+import { launchImages, TOUCH_ICON_SIZES, touchIconFile } from './ios.ts';
+import { splashSvg } from './splash.ts';
 
 /**
  * Makes the production build an installable app that plays with no connection. After Vite has
- * written the site, this adds the icons (rendered from one SVG), the web manifest and the service
- * worker, and points the page at them. Nothing here runs in `vite dev`, and the single-file build
- * does not use it.
+ * written the site, this adds the icons (rendered from one SVG), the launch images iOS shows while a
+ * Home Screen app starts (see ios.ts), the web manifest and the service worker, and points the page at
+ * them. Nothing here runs in `vite dev`, and the single-file build does not use it.
  */
 
 export const APP = {
@@ -19,8 +21,12 @@ export const APP = {
   backgroundColor: '#07060B',
 } as const;
 
-/** Files that are never worth caching: debugging maps, the older font format, the worker itself, and the on-request offline copy. */
-const SKIP = [/\.map$/, /\.woff$/, /^sw\.js$/, /^duskline-offline\.html$/, /(^|\/)\.[^/]*$/];
+/**
+ * Files that are never worth caching: debugging maps, the older font format, the worker itself, the
+ * on-request offline copy, and the launch images (iOS reads one of them when the app is added to the
+ * Home Screen, and the rest would only fill the device).
+ */
+const SKIP = [/\.map$/, /\.woff$/, /^sw\.js$/, /^duskline-offline\.html$/, /^splash\//, /(^|\/)\.[^/]*$/];
 
 /** Every file under `dir` the game needs to run, as sorted `/`-separated paths relative to it. */
 export function precacheList(dir: string): string[] {
@@ -71,6 +77,7 @@ export function manifest(): Record<string, unknown> {
   };
 }
 
+/** Write the app icons and the iOS launch images. Rendering needs a native module, so a machine without it gets a warning, not a failed build. */
 async function writeIcons(dir: string, warn: (message: string) => void): Promise<void> {
   const icons = join(dir, 'icons');
   mkdirSync(icons, { recursive: true });
@@ -81,9 +88,11 @@ async function writeIcons(dir: string, warn: (message: string) => void): Promise
     writeFileSync(join(icons, 'icon-192.png'), png(iconSvg(), 192));
     writeFileSync(join(icons, 'icon-512.png'), png(iconSvg(), 512));
     writeFileSync(join(icons, 'maskable-512.png'), png(maskableIconSvg(), 512));
-    writeFileSync(join(icons, 'apple-touch-icon.png'), png(iconSvg(), 180));
+    for (const size of TOUCH_ICON_SIZES) writeFileSync(join(dir, touchIconFile(size)), png(iconSvg(), size));
+    mkdirSync(join(dir, 'splash'), { recursive: true });
+    for (const image of launchImages()) writeFileSync(join(dir, image.file), png(splashSvg(image.width, image.height), image.width));
   } catch (error) {
-    warn(`Could not render the PNG app icons (${(error as Error).message}). The app still installs from icon.svg on most browsers, but iOS needs the PNG.`);
+    warn(`Could not render the PNG app icons and launch images (${(error as Error).message}). The app still installs from icon.svg on most browsers, but iOS needs the PNGs.`);
   }
 }
 
@@ -104,11 +113,12 @@ export function offlinePlugin(): Plugin {
       return [
         link('manifest', 'manifest.webmanifest'),
         link('icon', 'icons/icon.svg', { type: 'image/svg+xml' }),
-        link('apple-touch-icon', 'icons/apple-touch-icon.png'),
+        ...TOUCH_ICON_SIZES.map((size) => link('apple-touch-icon', touchIconFile(size), { sizes: `${size}x${size}` })),
         meta('mobile-web-app-capable', 'yes'),
         meta('apple-mobile-web-app-capable', 'yes'),
         meta('apple-mobile-web-app-title', APP.name),
         meta('apple-mobile-web-app-status-bar-style', 'black-translucent'),
+        ...launchImages().map((image) => link('apple-touch-startup-image', image.file, { media: image.media })),
       ];
     },
     async closeBundle() {

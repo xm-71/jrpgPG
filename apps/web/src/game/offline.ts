@@ -53,6 +53,11 @@ export function needsShareSheet(): boolean {
   return /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
+/** An iPhone or iPad browser that can put the game on the Home Screen: a worker is there to save it, and it is not already an app. */
+export function canAddToHome(): boolean {
+  return needsShareSheet() && !installed.value && (offlineState.value === 'preparing' || offlineState.value === 'ready');
+}
+
 function said(): boolean {
   try {
     return localStorage.getItem(TOLD_KEY) === '1';

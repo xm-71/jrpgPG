@@ -53,8 +53,11 @@
     background 0.15s;
 }
 
-.btn:hover:not(:disabled) {
-  filter: brightness(1.2);
+/* Only where a pointer can hover: on a touch screen the highlight would stick to the button after a tap. */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
 }
 
 .btn:active:not(:disabled) {
@@ -348,6 +351,11 @@
   padding: 0.3rem 0.9rem 1.2rem;
 }
 
+/* A list that runs to the bottom of the screen scrolls clear of the iPhone home indicator. A screen with a footer bar leaves that to the bar. */
+.screen > .body:last-child {
+  padding-bottom: calc(var(--safe-bottom) + 1.2rem);
+}
+
 /* Overlays and sheets */
 .overlay {
   position: absolute;
@@ -513,7 +521,8 @@ textarea {
   background: var(--ink-1);
   color: var(--bone);
   border: 1px solid var(--hair-2);
-  font: 0.75rem/1.4 ui-monospace, monospace;
+  /* 16px: iOS zooms the whole page when a smaller field is focused, and the game has no way to zoom back out. */
+  font: 16px/1.4 ui-monospace, monospace;
   resize: vertical;
 }
 
@@ -606,4 +615,51 @@ textarea {
   font-weight: 800;
   font-size: 0.95rem;
   box-shadow: 0 0 0 2px var(--ink-0), 0 0 0 3px var(--blood);
+}
+
+/*
+ * The game is a portrait column. Android installs lock it upright from the manifest, but iOS ignores
+ * that, and on a phone turned sideways the fight has no room for the foes. So a sideways phone is
+ * asked to turn back. Tablets and desktop windows are tall enough and never see this.
+ */
+.turn-upright {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 480px) and (pointer: coarse) {
+  .turn-upright {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem calc(var(--safe-right) + 1rem) 1rem calc(var(--safe-left) + 1rem);
+    background: var(--ink-0);
+    text-align: center;
+  }
+}
+
+.turn-upright svg {
+  width: 56px;
+  height: 56px;
+  color: var(--bone-2);
+  animation: turn-upright 2.4s ease-in-out infinite;
+}
+
+@keyframes turn-upright {
+  0%,
+  25% {
+    transform: rotate(-90deg);
+  }
+  65%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.turn-upright .display {
+  font-size: 1.4rem;
 }

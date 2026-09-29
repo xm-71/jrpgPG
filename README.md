@@ -22,16 +22,33 @@ Useful URL parameters while testing: `?now=2026-10-05T10:00:00Z` moves the game 
 
 Duskline needs no connection once it has loaded, and there are two ways to keep it.
 
-- **Install it.** On the website, Chrome, Edge and Android browsers offer **Install Duskline** on the title screen and in Settings; on an iPhone or iPad, tap Share in Safari, then Add to Home Screen. The installed app opens from your home screen or app list, full screen, with or without a connection.
+- **Install it.** On the website, Chrome, Edge and Android browsers offer **Install Duskline** on the title screen and in Settings; on an iPhone or iPad, use Add to Home Screen (steps below). The installed app opens from your home screen or app list, full screen, with or without a connection.
 - **Download it.** Settings, then Play offline, then **Download offline copy** saves one file, `duskline-offline.html`, with the whole game inside it. Open it in any browser, no install and no server. This is also how to keep the game from the claude.ai page, which cannot install itself.
 
 The first visit saves every file on the device (Settings shows *Ready* when it has). A new version downloads quietly in the background and is offered in Settings as **Restart to update**, so an update never swaps files under a fight in progress.
 
 Progress is stored per place: in the installed app, in each browser, and in the offline file. To move it between them, use **Copy save** and **Paste a save** in Settings.
 
+### On an iPhone or iPad
+
+iOS has no install prompt a page can trigger, so the title screen shows **Add to Home Screen** in Safari (and Chrome or Edge on iOS 16.4 and later), which opens the steps; Settings carries them too.
+
+1. Tap the Share button in the browser's toolbar.
+2. Choose **Add to Home Screen**. If iOS asks whether to open it as a web app, leave that on.
+3. Tap **Add**, then open Duskline from the Home Screen once while online. The app saves its own copy of the game there, and works with no connection from then on.
+
+Things worth knowing:
+
+- **The app's save is separate from Safari's.** iOS gives a Home Screen app its own storage. To bring progress across, tap **Copy save** in Safari, then **Paste a save** in the app; the app's first launch says so.
+- **The app is the safer place to play offline.** Safari can clear a site's saved files after a week without a visit. Home Screen apps are exempt.
+- **Icon and launch screen.** The build draws the Home Screen icon at 180, 167, 152 and 120 px and a launch image for every iPhone and iPad screen size (portrait for phones, both ways for tablets). iOS shows a blank screen unless one matches the device exactly, and ignores the manifest's `background_color`, so a new model needs one line in `SCREENS` in `apps/web/offline/ios.ts`. iOS reads the launch image when the app is added, so a changed one reaches a phone only when the app is added again.
+- **It plays like an app.** In the installed app, text selection, the long-press menu and pinch zoom are off; content runs under the status bar and clears the home indicator with the safe-area insets; the paste box is 16 px so iOS does not zoom the page. iOS ignores the manifest's `orientation`, so a phone held sideways is covered with a note to turn it upright (there is not room for a fight).
+
+The end-to-end suite checks all of this in an iPhone-shaped Chromium with real safe-area insets, because CI has no WebKit. It has not been run on a physical iPhone, so give it a pass on one before a release.
+
 ### How it works
 
-`apps/web/offline/plugin.ts` runs after the production build. It renders the app icons from one SVG (`icon.ts`), writes the web manifest, and writes `sw.js` from the template in `sw.js`: a service worker with a hash of every cached file as its version, so every build gets a fresh cache and old ones are deleted. Every page load is answered with the cached shell and every saved file from the cache. `src/game/offline.ts` registers the worker and tracks its state for Settings, and `src/game/offlineCopy.ts` saves the copy. `pnpm build:site` builds the site, builds the single-file version and puts it beside the site as `duskline-offline.html`.
+`apps/web/offline/plugin.ts` runs after the production build. It renders the app icons from one SVG (`icon.ts`) and the iOS launch images (`splash.ts`, sizes in `ios.ts`), writes the web manifest, and writes `sw.js` from the template in `sw.js`: a service worker with a hash of every cached file as its version, so every build gets a fresh cache and old ones are deleted. Every page load is answered with the cached shell and every saved file from the cache (the launch images are not saved, since iOS reads only one of them). `src/game/offline.ts` registers the worker and tracks its state for Settings, and `src/game/offlineCopy.ts` saves the copy. `pnpm build:site` builds the site, builds the single-file version and puts it beside the site as `duskline-offline.html`.
 
 ## Hosting it
 
@@ -105,9 +122,9 @@ packages/core     Rules and data types. No DOM, no randomness except a seeded RN
   profile.ts        The player's whole save, its migration from version 1, and every way to change it.
 packages/content  Heroes and their decks, cards, Fades, strata, events, Glimmers, story scenes and banners, with schema validation.
 apps/web          Vite + Preact + PixiJS client.
-  offline/          The build step that makes it installable and offline: icons, manifest, service worker.
+  offline/          The build step that makes it installable and offline: icons, iOS launch images, manifest, service worker.
 tools/sim         Headless simulator used to balance the game.
-tools/e2e         Browser smoke test: a new player's first climb, first Kindling and a reload.
+tools/e2e         Browser smoke test: a new player's first climb, first Kindling, a reload, play with no connection, and the iPhone Home Screen pieces.
 docs/roadmap.html The original research and roadmap.
 ```
 
@@ -119,7 +136,7 @@ pnpm test         # Vitest across packages
 pnpm build        # production build to apps/web/dist
 pnpm build:site   # that, plus the single-file build copied in as dist/duskline-offline.html (what Vercel runs)
 pnpm check        # all three
-pnpm e2e          # after a build: plays the first climb in headless Chromium, then again with the network cut
+pnpm e2e          # after a build: plays the first climb in headless Chromium, again with the network cut, then checks the iPhone app pieces
 pnpm sim all      # balance report: climbs, single fights, Kindling
 pnpm sim climb --stratum 1 --hero io --n 200
 ```

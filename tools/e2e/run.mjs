@@ -1,5 +1,5 @@
 // End-to-end smoke test: a new player climbs the Root for the first time, meets Io, kindles, reloads,
-// and plays again with the connection cut.
+// and plays again with the connection cut. Then an iPhone-shaped browser checks the Home Screen app pieces.
 // Run `pnpm build` first. Uses the Chromium that Playwright is configured to find (PLAYWRIGHT_BROWSERS_PATH)
 // or CHROMIUM_PATH. Falls back to /opt/pw-browsers/chromium when it exists.
 import { spawn } from 'node:child_process';
@@ -40,6 +40,103 @@ const check = (cond, msg) => {
 
 const saved = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('duskline:profile') ?? 'null'));
 const shown = async (page, sel) => (await page.locator(sel).count()) > 0 && (await page.locator(sel).first().isVisible());
+
+/** The pixel size of a PNG, read from its header. */
+async function pngSize(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${url} answered ${res.status}`);
+  const b = Buffer.from(await res.arrayBuffer());
+  if (b.readUInt32BE(0) !== 0x89504e47) throw new Error(`${url} is not a PNG`);
+  return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+}
+
+/**
+ * What iOS needs to make the site an app: an icon and a launch image the size of each screen, and
+ * touch, layout and guidance that suit an installed game. An iPhone-shaped Chromium stands in for
+ * Safari (there is no WebKit here), with real safe-area insets for the status bar and home indicator.
+ */
+async function iosChecks(browser) {
+  const html = await (await fetch(GAME_URL)).text();
+  const tags = (re) => [...html.matchAll(re)].map((m) => m[0]);
+  const attr = (tag, name) => tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
+
+  const icons = tags(/<link rel="apple-touch-icon"[^>]*>/g);
+  check(icons.length >= 3, `the page names ${icons.length} Home Screen icon sizes`);
+  for (const tag of icons) {
+    const size = attr(tag, 'sizes').split('x').map(Number);
+    const got = await pngSize(new URL(attr(tag, 'href'), GAME_URL));
+    check(got.width === size[0] && got.height === size[1], `icon ${attr(tag, 'href')} is ${got.width}x${got.height}, as its link says`);
+  }
+
+  const launches = tags(/<link rel="apple-touch-startup-image"[^>]*>/g);
+  check(launches.length >= 30, `the page names ${launches.length} launch images`);
+  let wrong = [];
+  const seen = new Set();
+  for (const tag of launches) {
+    const m = attr(tag, 'media').match(/device-width: (\d+)px\) and \(device-height: (\d+)px\) and \(-webkit-device-pixel-ratio: (\d)\) and \(orientation: (portrait|landscape)\)/);
+    if (!m) throw new Error('unreadable launch image media query: ' + attr(tag, 'media'));
+    const [w, h, r] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    const want = m[4] === 'portrait' ? { width: w * r, height: h * r } : { width: h * r, height: w * r };
+    const got = await pngSize(new URL(attr(tag, 'href'), GAME_URL));
+    if (got.width !== want.width || got.height !== want.height) wrong.push(`${attr(tag, 'href')} is ${got.width}x${got.height}, wanted ${want.width}x${want.height}`);
+    seen.add(`${w}x${h}@${r}`);
+  }
+  check(wrong.length === 0, `every launch image is the exact pixel size its media query asks for${wrong.length ? ': ' + wrong.join('; ') : ''}`);
+  for (const screen of ['402x874@3', '440x956@3', '420x912@3', '393x852@3', '390x844@3', '1032x1376@2']) check(seen.has(screen), `a launch image exists for ${screen}`);
+  const metas = Object.fromEntries(tags(/<meta name="[^"]*" content="[^"]*"[^>]*>/g).map((t) => [attr(t, 'name'), attr(t, 'content')]));
+  check(metas['apple-mobile-web-app-capable'] === 'yes' && metas['apple-mobile-web-app-status-bar-style'] === 'black-translucent' && metas['apple-mobile-web-app-title'] === 'Duskline', 'iOS is asked to open it as a full-screen app called Duskline');
+  check(/viewport-fit=cover/.test(metas.viewport) && /telephone=no/.test(metas['format-detection']), 'the page runs edge to edge, and iOS is told not to turn numbers into phone links');
+
+  const phone = { viewport: { width: 402, height: 874 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' };
+  const insets = { top: 62, bottom: 34, left: 0, right: 0 };
+  const open = async (standalone) => {
+    const c = await browser.newContext(phone);
+    if (standalone) await c.addInitScript(() => Object.defineProperty(navigator, 'standalone', { get: () => true }));
+    const pg = await c.newPage();
+    (await c.newCDPSession(pg)).send('Emulation.setSafeAreaInsetsOverride', { insets });
+    pg.on('pageerror', (e) => errors.push('ios: ' + e.message));
+    await pg.goto(GAME_URL);
+    await pg.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 30000 });
+    return { c, pg };
+  };
+
+  // In Safari: the steps.
+  {
+    const { c, pg } = await open(false);
+    check(await pg.evaluate(() => !document.documentElement.hasAttribute('data-standalone')), 'a browser tab is not treated as an installed app');
+    await pg.getByRole('button', { name: 'Add to Home Screen' }).tap();
+    await pg.locator('.sheet .steps li').first().waitFor();
+    check((await pg.locator('.sheet .steps li').count()) === 3, 'Add to Home Screen opens the three steps');
+    await pg.getByRole('button', { name: 'Got it' }).tap();
+    await pg.locator('.title-actions .btn-ghost', { hasText: 'Settings' }).tap();
+    await pg.locator('.offline-steps').waitFor();
+    check(/Add to Home Screen/.test(await pg.locator('.offline-steps').innerText()), 'Settings carries the steps too');
+    await c.close();
+  }
+
+  // As the app: standalone touch, safe areas, guidance, and no sideways play.
+  {
+    const { c, pg } = await open(true);
+    check(await pg.evaluate(() => document.documentElement.hasAttribute('data-standalone')), 'the installed app is recognised');
+    check((await pg.getByRole('button', { name: 'Add to Home Screen' }).count()) === 0, 'and does not offer to add itself');
+    await pg.locator('.pill-note', { hasText: 'Played in Safari before' }).waitFor();
+    check(true, 'its first launch says where a Safari save went');
+    check(await pg.evaluate(() => { const e = new Event('gesturestart', { cancelable: true }); document.dispatchEvent(e); return e.defaultPrevented; }), 'a pinch is cancelled, so the fixed layout cannot be zoomed and stranded');
+    check((await pg.evaluate(() => getComputedStyle(document.body).userSelect)) === 'none', 'its controls do not start a text selection');
+    const top = await pg.evaluate(() => Math.round(document.querySelector('.title-logo').getBoundingClientRect().top));
+    const bottom = await pg.evaluate(() => Math.round(Math.max(...[...document.querySelectorAll('.title-actions > *')].map((e) => e.getBoundingClientRect().bottom))));
+    check(top >= insets.top && bottom <= 874 - insets.bottom, `the title clears the status bar and home indicator (${top}px from the top, ends ${874 - bottom}px from the bottom)`);
+    await pg.locator('.title-actions .btn-ghost', { hasText: 'Settings' }).tap();
+    await pg.getByRole('button', { name: 'Paste a save' }).tap();
+    check((await pg.getByLabel('Save data').evaluate((e) => getComputedStyle(e).fontSize)) === '16px', 'the paste box is 16px, so iOS does not zoom the page when it is focused');
+    await pg.getByRole('button', { name: 'Back' }).tap();
+    check((await pg.evaluate(() => getComputedStyle(document.querySelector('.turn-upright')).display)) === 'none', 'held upright, there is no turn-upright cover');
+    await pg.setViewportSize({ width: 874, height: 402 });
+    await pg.waitForTimeout(200);
+    check((await pg.evaluate(() => getComputedStyle(document.querySelector('.turn-upright')).display)) === 'flex', 'held sideways, the phone is asked to turn upright');
+    await c.close();
+  }
+}
 
 /** Fights on Auto and returns true for a win. */
 async function fight(page) {
@@ -203,6 +300,7 @@ try {
     return { keys, urls };
   });
   check(cached.keys.length === 1 && cached.urls.includes('/index.html') && cached.urls.some((u) => u.endsWith('.woff2')) && cached.urls.length >= 20, `the game is saved on the device (${cached.urls.length} files)`);
+  check(!cached.urls.some((u) => u.startsWith('/splash/')) && cached.urls.some((u) => u.includes('apple-touch-icon')), 'the launch images stay out of the offline cache, and the Home Screen icons are in it');
   const failedRequests = [];
   page.on('requestfailed', (r) => failedRequests.push(r.url()));
   await ctx.setOffline(true);
@@ -218,6 +316,8 @@ try {
   check(true, 'with no connection, the game reloads and a fight starts');
   check(failedRequests.filter((u) => u.startsWith(`http://127.0.0.1:${PORT}`)).length === 0, 'nothing the game needs was fetched from the network');
   await ctx.setOffline(false);
+
+  await iosChecks(browser);
 
   check(errors.length === 0, `no console or page errors${errors.length ? ': ' + errors.join(' | ') : ''}`);
   await browser.close();

@@ -6,7 +6,9 @@ import { runInNewContext } from 'node:vm';
 import { Resvg } from '@resvg/resvg-js';
 import { afterEach, describe, expect, test } from 'vitest';
 import { iconSvg, maskableIconSvg } from './icon.ts';
-import { buildServiceWorker, manifest, precacheList, versionOf } from './plugin.ts';
+import { launchImages, SCREENS, TOUCH_ICON_SIZES, touchIconFile } from './ios.ts';
+import { buildServiceWorker, manifest, offlinePlugin, precacheList, versionOf } from './plugin.ts';
+import { splashSvg } from './splash.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const template = readFileSync(join(here, 'sw.js'), 'utf8');
@@ -30,7 +32,7 @@ afterEach(() => {
 });
 
 describe('what gets cached', () => {
-  test('lists the files the game runs from, sorted, and leaves out maps, old fonts, the worker and the offline copy', () => {
+  test('lists the files the game runs from, sorted, and leaves out maps, old fonts, the worker, the offline copy and the launch images', () => {
     const dir = site({
       'index.html': '<html>',
       'sw.js': 'worker',
@@ -42,8 +44,10 @@ describe('what gets cached', () => {
       'assets/font.woff': 'old',
       'assets/font.woff2': 'new',
       'icons/icon.svg': '<svg/>',
+      'icons/apple-touch-icon.png': 'png',
+      'splash/1290x2796.png': 'launch image',
     });
-    expect(precacheList(dir)).toEqual(['assets/font.woff2', 'assets/index-1.js', 'icons/icon.svg', 'index.html', 'manifest.webmanifest']);
+    expect(precacheList(dir)).toEqual(['assets/font.woff2', 'assets/index-1.js', 'icons/apple-touch-icon.png', 'icons/icon.svg', 'index.html', 'manifest.webmanifest']);
   });
 
   test('the version changes with any file name or content, and not otherwise', () => {
@@ -97,6 +101,68 @@ describe('the manifest and icons', () => {
       expect(bright).toBeGreaterThan(20);
       expect(dark).toBeGreaterThan(1000);
     }
+  });
+});
+
+describe('the iPhone and iPad Home Screen app', () => {
+  const pixels = (svg: string, width: number) => new Resvg(svg, { fitTo: { mode: 'width', value: width }, font: { loadSystemFonts: false } }).render();
+
+  test('every screen gets a launch image of exactly its pixel size, upright, and on its side for tablets only', () => {
+    const images = launchImages();
+    for (const s of SCREENS) {
+      const upright = images.find((i) => i.media.includes(`(device-width: ${s.width}px) and (device-height: ${s.height}px) and (-webkit-device-pixel-ratio: ${s.ratio}) and (orientation: portrait)`));
+      expect(upright, `${s.devices} upright`).toMatchObject({ width: s.width * s.ratio, height: s.height * s.ratio });
+      const sideways = images.find((i) => i.media.includes(`(device-width: ${s.width}px) and (device-height: ${s.height}px) and (-webkit-device-pixel-ratio: ${s.ratio}) and (orientation: landscape)`));
+      if (s.kind === 'tablet') expect(sideways, `${s.devices} on its side`).toMatchObject({ width: s.height * s.ratio, height: s.width * s.ratio });
+      else expect(sideways, `${s.devices} on its side`).toBeUndefined();
+    }
+  });
+
+  test('no two launch images share a file or a media query, or iOS would pick the wrong one', () => {
+    const images = launchImages();
+    expect(new Set(images.map((i) => i.file)).size).toBe(images.length);
+    expect(new Set(images.map((i) => i.media)).size).toBe(images.length);
+    expect(images.every((i) => /^splash\/\d+x\d+\.png$/.test(i.file))).toBe(true);
+  });
+
+  test('the current iPhones are covered, from the 16e and 17 to the Air and the largest Pro Max', () => {
+    const sizes = new Set(launchImages().map((i) => `${i.width}x${i.height}`));
+    for (const wanted of ['1170x2532', '1179x2556', '1290x2796', '1206x2622', '1320x2868', '1260x2736', '750x1334', '2064x2752', '2752x2064']) expect(sizes.has(wanted), wanted).toBe(true);
+  });
+
+  test('the launch image is drawn at the size asked for, opaque, dark at the edges, with the icon lit in the middle', () => {
+    for (const [w, h] of [[640, 1136], [1136, 640]] as const) {
+      const image = pixels(splashSvg(w, h), w);
+      expect([image.width, image.height]).toEqual([w, h]);
+      // `pixels` copies the whole picture each time it is read, so read it once.
+      const data = image.pixels;
+      const at = (x: number, y: number): number => {
+        const i = (y * w + x) * 4;
+        expect(data[i + 3]).toBe(255);
+        return (data[i]! + data[i + 1]! + data[i + 2]!) / 3;
+      };
+      for (const [x, y] of [[2, 2], [w - 3, 2], [2, h - 3], [w - 3, h - 3]] as const) expect(at(x, y)).toBeLessThan(40);
+      let bright = 0;
+      for (let y = Math.round(h * 0.4); y < Math.round(h * 0.5); y++) for (let x = Math.round(w * 0.3); x < Math.round(w * 0.7); x++) if (at(x, y) > 120) bright++;
+      expect(bright).toBeGreaterThan(20);
+    }
+  });
+
+  test('the icon comes in every size iOS draws, under stable names, with the 180 one where the page has always pointed', () => {
+    expect([...TOUCH_ICON_SIZES]).toEqual([180, 167, 152, 120]);
+    expect(touchIconFile(180)).toBe('icons/apple-touch-icon.png');
+    expect(touchIconFile(167)).toBe('icons/apple-touch-icon-167.png');
+  });
+
+  test('the page links every icon size and launch image, and asks iOS to open it as a full-screen app', () => {
+    const tags = (offlinePlugin().transformIndexHtml as unknown as () => Array<{ tag: string; attrs: Record<string, string> }>)();
+    const links = (rel: string) => tags.filter((t) => t.tag === 'link' && t.attrs['rel'] === rel).map((t) => t.attrs);
+    expect(links('apple-touch-icon').map((a) => a['sizes'])).toEqual(TOUCH_ICON_SIZES.map((n) => `${n}x${n}`));
+    expect(links('apple-touch-startup-image').map((a) => [a['href'], a['media']])).toEqual(launchImages().map((i) => [i.file, i.media]));
+    const meta = Object.fromEntries(tags.filter((t) => t.tag === 'meta').map((t) => [t.attrs['name'], t.attrs['content']]));
+    expect(meta['apple-mobile-web-app-capable']).toBe('yes');
+    expect(meta['apple-mobile-web-app-title']).toBe('Duskline');
+    expect(meta['apple-mobile-web-app-status-bar-style']).toBe('black-translucent');
   });
 });
 

@@ -21,6 +21,7 @@ import { cycleOverride, now } from './game/clock';
 import { startNavigation } from './game/nav';
 import { startOffline } from './game/offline';
 import { mutate, profile, toast } from './game/store';
+import { startTouchGuards } from './game/touch';
 
 // When a rate-up banner ends, leftover spark points turn into Gloam.
 const cycle = activeBanners(now(), cycleOverride).cycle;
@@ -29,6 +30,7 @@ if (profile.value.lastCycle < cycle) {
   if (refunded > 0) toast(`A banner ended. ${refunded} Gloam came back from unused spark points.`, 'good', 6000);
 }
 
+startTouchGuards();
 startNavigation({ name: 'title' });
 render(<App />, document.getElementById('app')!);
 startOffline();

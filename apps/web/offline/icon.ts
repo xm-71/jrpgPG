@@ -50,9 +50,14 @@ const DEFS = `<defs>
   <radialGradient id="sun"><stop offset="0" stop-color="#FFF1D0"/><stop offset=".45" stop-color="#F0B060"/><stop offset="1" stop-color="${BLOOD}"/></radialGradient>
 </defs>`;
 
+/** The icon's drawing and its gradients, for a page that places it inside a larger picture (the launch images). */
+export function iconMarkup(): string {
+  return `${DEFS}${art()}`;
+}
+
 /** The icon at full bleed: the square the manifest and the favicon use. */
 export function iconSvg(): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">${DEFS}${art()}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">${iconMarkup()}</svg>`;
 }
 
 /**

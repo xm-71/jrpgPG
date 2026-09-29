@@ -3,9 +3,10 @@ import { BLOOD, BONE } from '../art/palette';
 import { sigil } from '../art/sigil';
 import { afterward } from '../game/flow';
 import { go } from '../game/nav';
-import { canInstall, installed, promptInstall } from '../game/offline';
+import { canAddToHome, canInstall, installed, needsShareSheet, promptInstall } from '../game/offline';
 import { sfx } from '../game/sfx';
 import { isFreshSave, profile, recoveredSave, savingWorks } from '../game/store';
+import { showAddToHome } from '../ui/AddToHome';
 import { Sky } from '../ui/Sky';
 
 export function Title(): JSX.Element {
@@ -59,6 +60,17 @@ export function Title(): JSX.Element {
             Install to play offline
           </button>
         )}
+        {canAddToHome() && (
+          <button
+            class="btn btn-ghost btn-block"
+            onClick={() => {
+              sfx.tap();
+              void showAddToHome();
+            }}
+          >
+            Add to Home Screen
+          </button>
+        )}
         <button
           class="btn btn-ghost btn-block"
           onClick={() => {
@@ -68,6 +80,7 @@ export function Title(): JSX.Element {
         >
           Settings
         </button>
+        {installed.value && needsShareSheet() && !started && <p class="pill-note">Played in Safari before? Progress there stays there. In Settings, Paste a save brings it here.</p>}
         {recoveredSave.value && <p class="pill-note">Your last save could not be read, so a new game was started. The old data is kept aside in this browser.</p>}
         {!savingWorks.value && <p class="pill-note">This browser is blocking storage, so progress will not be saved after you close the page.</p>}
         <p class="label title-foot" style={{ color: BLOOD }}>
