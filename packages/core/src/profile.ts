@@ -15,12 +15,16 @@ import {
   expireBannerInPlace,
   newCollection,
   newKindlingState,
+  pullManyInPlace,
+  redeemSparkInPlace,
   type ApplyOutcome,
+  type BannerDef,
   type Collection,
   type ItemCatalog,
   type KindlingState,
   type PullResult,
 } from './kindling';
+import type { RngState } from './rng';
 import { RANK_UP_GLOAM, applyXp } from './progression';
 import { cardPassives, heroUnit } from './setup';
 import { TASK_GLOAM, newTaskState, tasksForDay, type TaskDef, type TaskEvent, type TaskState } from './tasks';
@@ -305,6 +309,30 @@ export function applyPulls(p: Profile, results: readonly PullResult[], catalog: 
     if (outcome.isNew && outcome.kind === 'hero' && p.party.length < PARTY_SIZE) p.party.push(pull.item);
     return { ...outcome, pull };
   });
+}
+
+/** Gloam price of a pull run: the ten-pull discount applies to exactly ten. */
+export function kindleCost(banner: BannerDef, count: number): number {
+  return count === 10 ? banner.cost.ten : banner.cost.single * count;
+}
+
+/** Spend Gloam and pull. Returns null, changing nothing, when the player cannot afford it. */
+export function kindle(p: Profile, banner: BannerDef, count: number, rng: RngState, catalog: ItemCatalog, now: number): PullOutcome[] | null {
+  if (!spendGloam(p, kindleCost(banner, count), now)) return null;
+  const results = pullManyInPlace(banner, p.kindling, rng, count, { at: now });
+  return applyPulls(p, results, catalog, now);
+}
+
+/** Trade a banner's spark points for a featured 5-star. Returns null when the spark is not ready. */
+export function redeemSpark(p: Profile, banner: BannerDef, itemId: string, catalog: ItemCatalog, now: number): ApplyOutcome | null {
+  const at = banner.rules.spark?.at;
+  if (at === undefined || (p.kindling.spark[banner.id] ?? 0) < at || !banner.featured.five.includes(itemId)) return null;
+  redeemSparkInPlace(banner, p.kindling, itemId);
+  const outcome = applyPullInPlace(p.collection, itemId, catalog);
+  if (outcome.gloam > 0) outcome.gloam = grantGloam(p, 'dupe', outcome.gloam, now);
+  if (outcome.isNew && outcome.kind === 'hero' && p.party.length < PARTY_SIZE) p.party.push(itemId);
+  p.updatedAt = now;
+  return outcome;
 }
 
 /** When a rate-up banner ends, leftover spark points become Gloam. Call when the current cycle changes. */

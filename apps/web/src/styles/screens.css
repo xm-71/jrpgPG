@@ -515,3 +515,375 @@
   background: var(--rose);
   color: #fff;
 }
+
+/* Kindling */
+.kx-tabs {
+  position: relative;
+  z-index: 3;
+  margin: 0 0.9rem 0.4rem;
+}
+
+.kx-banner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-bottom: 1rem;
+}
+
+.kx-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 190px;
+  padding: 0.9rem;
+  overflow: hidden;
+  background: linear-gradient(120deg, var(--night), var(--violet) 70%, var(--rose));
+}
+
+.kx-hero.standard {
+  background: linear-gradient(120deg, var(--night), #1d5a7a 80%, var(--teal));
+}
+
+.kx-hero img {
+  position: absolute;
+  right: -4%;
+  bottom: 0;
+  height: 120%;
+  width: auto;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 16px rgba(242, 180, 58, 0.5));
+}
+
+.kx-hero-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  max-width: 62%;
+}
+
+.kx-hero-text h2 {
+  font-size: 1.2rem;
+  text-shadow: 2px 2px 0 var(--night);
+}
+
+.kx-hero-text p {
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.kx-pity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kx-line {
+  font-size: 0.85rem;
+}
+
+.kx-spark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 2px solid var(--gold);
+}
+
+.kx-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kx-actions .btn {
+  flex-direction: column;
+  gap: 0;
+  min-height: 60px;
+}
+
+.kx-actions .sub {
+  font-size: 0.85rem;
+}
+
+.kx-links {
+  gap: 8px;
+}
+
+.kx-overlay {
+  z-index: 60;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 40%, #3b1f5e, #0c0a18 75%);
+  cursor: pointer;
+}
+
+.kx-overlay.center {
+  cursor: default;
+}
+
+.kx-burst {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  background: repeating-conic-gradient(from 0deg at 50% 42%, rgba(255, 255, 255, 0.07) 0 6deg, transparent 6deg 16deg);
+  animation: spin 40s linear infinite;
+}
+
+.kx-r5 .kx-burst {
+  background: repeating-conic-gradient(from 0deg at 50% 42%, rgba(242, 180, 58, 0.28) 0 6deg, transparent 6deg 16deg);
+}
+
+.kx-r4 .kx-burst {
+  background: repeating-conic-gradient(from 0deg at 50% 42%, rgba(181, 140, 255, 0.24) 0 6deg, transparent 6deg 16deg);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kx-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.kx-card .stars svg {
+  width: 26px;
+  height: 26px;
+}
+
+.kx-art img {
+  display: block;
+  max-height: 42vh;
+  width: auto;
+  max-width: 80vw;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
+}
+
+.kx-r5 .kx-art img {
+  filter: drop-shadow(0 0 24px var(--gold));
+}
+
+.kx-art.card img {
+  height: 40vh;
+  border: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+.kx-name {
+  font-size: 1.6rem;
+  text-shadow: 3px 3px 0 var(--rose);
+}
+
+.kx-note {
+  font: 600 0.85rem var(--font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.kx-skip {
+  position: absolute;
+  top: calc(var(--safe-top) + 0.8rem);
+  right: 0.8rem;
+  z-index: 2;
+}
+
+.kx-count {
+  position: absolute;
+  bottom: calc(var(--safe-bottom) + 1.2rem);
+  z-index: 1;
+}
+
+.kx-summary {
+  width: min(94%, 420px);
+  text-align: center;
+}
+
+.kx-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0.8rem 0 1rem;
+}
+
+.kx-mini {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 2px;
+  background: var(--panel-2);
+  border-bottom: 3px solid var(--r3);
+}
+
+.kx-mini.r4 {
+  border-color: var(--r4);
+}
+
+.kx-mini.r5 {
+  border-color: var(--r5);
+  background: linear-gradient(var(--panel-2), #4a3512);
+}
+
+.kx-mini img {
+  width: 100%;
+  height: 54px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.kx-mini .stars svg {
+  width: 9px;
+  height: 9px;
+}
+
+.kx-mini-name {
+  max-width: 100%;
+  font: 600 0.58rem var(--font-label);
+  word-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kx-new {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0 3px;
+  font: 700 0.5rem var(--font-label);
+  background: var(--rose);
+}
+
+/* Odds and history */
+.odds {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-bottom: 1.5rem;
+}
+
+.odds-title {
+  font-size: 1.3rem;
+}
+
+.odds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.odds-table td {
+  padding: 0.28rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.odds-table td:last-child {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.odds-note {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.odds-chart {
+  width: 100%;
+  height: auto;
+  margin-top: 0.6rem;
+}
+
+.odds-pool {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.odds-rar {
+  flex: none;
+  width: 2rem;
+  font-weight: 700;
+}
+
+.odds-feat {
+  color: var(--gold);
+}
+
+.hist-stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hist-stats b {
+  font-size: 1.3rem;
+}
+
+.hist-note {
+  margin: 0.4rem 0;
+  font-size: 0.8rem;
+}
+
+.hist-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hist-row {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr auto;
+  gap: 0 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: var(--panel);
+  border-left: 4px solid var(--r3);
+}
+
+.hist-row.r4 {
+  border-color: var(--r4);
+}
+
+.hist-row.r5 {
+  border-color: var(--r5);
+  background: #2a2010;
+}
+
+.hist-when {
+  grid-column: 2 / 4;
+  font-size: 0.7rem;
+}
+
+.hist-row .stars svg {
+  width: 10px;
+  height: 10px;
+}
+
+.kx-art.hero img {
+  height: 42vh;
+  aspect-ratio: 150 / 230;
+}
