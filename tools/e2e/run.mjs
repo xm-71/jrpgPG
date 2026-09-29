@@ -120,7 +120,7 @@ try {
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.locator('.glimmer').first().waitFor();
   let p = await saved(page);
-  check(p.v === 2 && p.climb.run?.hero === 'wren' && p.climb.run.seed === 'first-light', 'the first climb starts with Wren on the tutorial seed');
+  check(p.v === 2 && p.climb.run?.hero === 'wren' && p.climb.run.seed === 'hush', 'the first climb starts with Wren on the tutorial seed');
   check(p.climb.run.deck.length === 8, 'Wren starts with 8 cards');
   await page.locator('.glimmer').first().click();
 

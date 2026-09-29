@@ -11,7 +11,7 @@ import { mutate } from './store';
 export const finished = signal<ClimbRun | null>(null);
 
 /** Every new Lamplighter's first climb uses this seed: one fair, hand-checked map for the tutorial. */
-export const FIRST_CLIMB_SEED = 'first-light';
+export const FIRST_CLIMB_SEED = 'hush';
 
 export function beginClimb(o: { stratum: number; daily: boolean; hero?: string; seed?: string }): void {
   mutate((p) => {
