@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Test and tool output
+test-results/
+playwright-report/
+.e2e-output/
+
+# Local environment
+.env
+.env.*
+!.env.example

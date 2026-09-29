@@ -1,0 +1,22 @@
+{
+  "name": "@duskline/sim",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Headless simulators for balance and economy: thousands of battles and millions of pulls, no graphics.",
+  "scripts": {
+    "sim": "tsx src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "echo \"no tests in @duskline/sim\""
+  },
+  "dependencies": {
+    "@duskline/content": "workspace:*",
+    "@duskline/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

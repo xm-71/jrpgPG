@@ -1,0 +1,31 @@
+{
+  "name": "@duskline/web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "description": "Duskline client: PixiJS scenes, Preact menus. Runs in the browser, wrapped later for iOS and Android.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "echo \"no unit tests in @duskline/web yet\""
+  },
+  "dependencies": {
+    "@duskline/content": "workspace:*",
+    "@duskline/core": "workspace:*",
+    "@fontsource/chakra-petch": "^5.3.0",
+    "@fontsource/dela-gothic-one": "^5.3.0",
+    "@fontsource/zen-kaku-gothic-new": "^5.3.0",
+    "@preact/signals": "^2.11.2",
+    "pixi.js": "^8.21.0",
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@preact/preset-vite": "^2.10.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}
