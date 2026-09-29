@@ -73,6 +73,7 @@ export function checkInvariants(s: BattleState): string[] {
     if (u.alive !== u.hp > 0) problems.push(`${u.id}: alive flag disagrees with hp`);
     if (u.broken && u.maxShell === 0) problems.push(`${u.id}: broken without a shell`);
     if (u.broken && u.shell !== 0) problems.push(`${u.id}: broken but shell is ${u.shell}`);
+    if (u.hardened && (u.broken || u.maxShell === 0)) problems.push(`${u.id}: hardened while broken or shell-less`);
     if (!u.alive && u.intent) problems.push(`${u.id}: dead unit still has an intent`);
     for (const m of u.mods) if (m.turns <= 0) problems.push(`${u.id}: expired mod ${m.key} still active`);
   }

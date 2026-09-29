@@ -70,6 +70,7 @@ function makeUnit(us: UnitSetup, side: Side, slot: number, shared: readonly Pass
     weaknesses: [...(us.weaknesses ?? [])],
     resists: [...(us.resists ?? [])],
     broken: false,
+    hardened: false,
     gauge: clamp(startGauge, 0, GAUGE_MAX),
     mods: [],
     guarding: false,
@@ -87,6 +88,8 @@ function makeUnit(us: UnitSetup, side: Side, slot: number, shared: readonly Pass
 function emptyStats(): BattleStats {
   return {
     turns: 0,
+    foeActions: 0,
+    foeSkips: 0,
     breaks: 0,
     weakHits: 0,
     encores: 0,
@@ -95,6 +98,7 @@ function emptyStats(): BattleStats {
     ultimates: 0,
     crits: 0,
     kos: 0,
+    partyKos: 0,
     damageDealt: 0,
     damageTaken: 0,
     healed: 0,
@@ -278,7 +282,7 @@ function hit(
   const standing = !target.broken;
   const weakStanding = roll.weak && standing && !isBurst;
   let broke = false;
-  if (target.hp > 0 && weakStanding && target.maxShell > 0) {
+  if (target.hp > 0 && weakStanding && target.maxShell > 0 && !target.hardened) {
     target.shell = Math.max(0, target.shell - (skill.shell + passive(actor, 'shellBonus')));
     broke = target.shell === 0;
   }
@@ -305,6 +309,7 @@ function hit(
     target.hp = 0;
     target.intent = null;
     s.stats.kos++;
+    if (target.side === 'party') s.stats.partyKos++;
     ev.push({ t: 'ko', unit: target.id });
   } else if (broke) {
     breakUnit(s, actor, target, ev);
@@ -400,6 +405,7 @@ function doBurst(s: BattleState, actor: Unit, ev: BattleEvent[]): void {
   // The Break is spent: survivors stand back up and act normally.
   for (const foe of living(s, 'foe')) {
     foe.broken = false;
+    foe.hardened = foe.maxShell > 0;
     foe.shell = foe.maxShell;
     ev.push({ t: 'recover', unit: foe.id, shell: foe.shell });
     pickIntent(s, foe, ev);
@@ -462,7 +468,9 @@ function runFoeTurn(s: BattleState, foe: Unit, ev: BattleEvent[]): void {
 
   if (foe.broken) {
     ev.push({ t: 'skip', unit: foe.id, reason: 'broken' });
+    s.stats.foeSkips++;
     foe.broken = false;
+    foe.hardened = foe.maxShell > 0;
     foe.shell = foe.maxShell;
     ev.push({ t: 'recover', unit: foe.id, shell: foe.shell });
     foe.nextAt = s.now + cycleOf(foe);
@@ -477,6 +485,8 @@ function runFoeTurn(s: BattleState, foe: Unit, ev: BattleEvent[]): void {
   const intent = foe.intent;
   const skill = foe.foeKit.find((k) => k.id === intent?.skill) ?? foe.foeKit[0];
   if (skill) resolveSkill(s, foe, skill, intent?.target ?? null, 1, ev);
+  s.stats.foeActions++;
+  foe.hardened = false;
   if (checkEnd(s, ev)) return;
 
   foe.nextAt = s.now + cycleOf(foe) * (skill?.timeCost ?? 1);

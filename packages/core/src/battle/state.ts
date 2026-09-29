@@ -35,6 +35,8 @@ export interface Unit {
   weaknesses: Affinity[];
   resists: Affinity[];
   broken: boolean;
+  /** Recovered from a Break and has not acted yet: weakness hits deal no Shell damage. */
+  hardened: boolean;
   gauge: number;
   mods: Mod[];
   guarding: boolean;
@@ -72,6 +74,9 @@ export interface Chain {
 
 export interface BattleStats {
   turns: number;
+  /** Enemy turns where the enemy acted, and where it lost its turn to a Break. */
+  foeActions: number;
+  foeSkips: number;
   breaks: number;
   weakHits: number;
   encores: number;
@@ -80,6 +85,7 @@ export interface BattleStats {
   ultimates: number;
   crits: number;
   kos: number;
+  partyKos: number;
   damageDealt: number;
   damageTaken: number;
   healed: number;
