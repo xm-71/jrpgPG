@@ -23,8 +23,8 @@ export const APP = {
 
 /**
  * Files that are never worth caching: debugging maps, the older font format, the worker itself, the
- * on-request offline copy, and the launch images (iOS reads one of them when the app is added to the
- * Home Screen, and the rest would only fill the device).
+ * on-request offline copy, and the launch images (iOS takes the one that fits when the app is added to
+ * the Home Screen, and the rest would only fill the device).
  */
 const SKIP = [/\.map$/, /\.woff$/, /^sw\.js$/, /^duskline-offline\.html$/, /^splash\//, /(^|\/)\.[^/]*$/];
 
