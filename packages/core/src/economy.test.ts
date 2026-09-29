@@ -48,12 +48,12 @@ describe('earning Gloam', () => {
   test('the next day resets daily caps but not weekly ones', () => {
     const l = newLedger(now);
     earn(l, 'task', 75, now);
-    earn(l, 'descentFloor', 300, now);
+    earn(l, 'climbFloor', 300, now);
     const tomorrow = at('2026-09-30T10:00:00Z');
     expect(earn(l, 'task', 25, tomorrow)).toBe(25);
-    expect(earn(l, 'descentFloor', 40, tomorrow)).toBe(0);
+    expect(earn(l, 'climbFloor', 40, tomorrow)).toBe(0);
     const nextWeek = at('2026-10-05T10:00:00Z');
-    expect(earn(l, 'descentFloor', 40, nextWeek)).toBe(40);
+    expect(earn(l, 'climbFloor', 40, nextWeek)).toBe(40);
   });
 
   test('rolling the ledger is idempotent within a day', () => {
@@ -72,8 +72,8 @@ describe('earning Gloam', () => {
   });
 
   test('the weekly budget from free play is in the range the roadmap promises (about 20 pulls)', () => {
-    const daily = EARN_CAPS.task.daily! + EARN_CAPS.descentDaily.daily!;
-    const week = daily * 7 + EARN_CAPS.descentFloor.weekly! + EARN_CAPS.descentWeekly.weekly!;
+    const daily = EARN_CAPS.task.daily! + EARN_CAPS.climbDaily.daily!;
+    const week = daily * 7 + EARN_CAPS.climbFloor.weekly! + EARN_CAPS.climbWeekly.weekly!;
     expect(week / 100).toBeGreaterThan(16);
     expect(week / 100).toBeLessThan(26);
   });

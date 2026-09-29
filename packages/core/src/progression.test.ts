@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { MAX_RANK } from './battle/scaling';
-import { applyXp, xpToNext } from './progression';
+import { MAX_RANK, applyXp, xpToNext } from './progression';
 
 describe('Lamplighter Rank', () => {
   test('each rank asks for a little more XP than the last', () => {
@@ -15,15 +14,9 @@ describe('Lamplighter Rank', () => {
     expect(applyXp({ rank: 1, xp: 0 }, 40 + 60 + 80 + 5)).toEqual({ rank: 4, xp: 5, ranksGained: 3 });
   });
 
-  test('the story XP is tuned so the player arrives at each stage at that stage’s level', () => {
-    const stageXp = [40, 60, 80, 100, 120, 140, 160];
-    let s = { rank: 1, xp: 0 };
-    const enteredAt: number[] = [];
-    for (const xp of stageXp) {
-      enteredAt.push(s.rank);
-      s = applyXp(s, xp);
-    }
-    expect(enteredAt).toEqual([1, 2, 3, 4, 5, 6, 7]);
+  test('a first climb is worth a Rank or two', () => {
+    // Eight fights and two floors: 8 × 10 + 2 × 20 XP.
+    expect(applyXp({ rank: 1, xp: 0 }, 120)).toEqual({ rank: 3, xp: 20, ranksGained: 2 });
   });
 
   test('stops at the maximum rank', () => {

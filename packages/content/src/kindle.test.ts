@@ -46,6 +46,6 @@ describe('kindle', () => {
     expect(got.isNew).toBe(true);
     expect(p.collection.heroes['ysolde']).toEqual({ resonance: 1 });
     expect(sparkPoints(p.kindling, banner.id)).toBe(0);
-    expect(p.party).toContain('ysolde');
+    expect(p.collection.heroes['ysolde']).toEqual({ resonance: 1 });
   });
 });

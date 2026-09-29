@@ -1,50 +1,50 @@
 import type { GlimmerDef } from '@duskline/core';
 
 /**
- * Glimmers: boons picked after each Descent battle. They belong to three Paths, named for the
- * regions of Hesper. Taking Glimmers from a Path makes more of that Path turn up.
+ * Glimmers: boons that last one climb. They belong to three Paths, named for the regions of Hesper.
+ * Taking Glimmers from a Path makes more of that Path turn up.
  */
 export const GLIMMERS: readonly GlimmerDef[] = [
   // Noonward: hit harder, break faster.
-  { id: 'sunstruck', name: 'Sunstruck', path: 'noonward', rarity: 1, text: 'Party ATK +10%.', passives: [{ type: 'stat', stat: 'atk', pct: 0.1 }] },
-  { id: 'whetted-edge', name: 'Whetted Edge', path: 'noonward', rarity: 2, text: 'Party ATK +16%.', passives: [{ type: 'stat', stat: 'atk', pct: 0.16 }] },
-  { id: 'overture', name: 'Overture', path: 'noonward', rarity: 2, text: 'Start every battle with 30 ultimate charge.', passives: [{ type: 'startGauge', value: 30 }] },
-  { id: 'long-shadows', name: 'Long Shadows', path: 'noonward', rarity: 2, text: 'Horizon Burst deals 25% more damage.', passives: [{ type: 'burstDamage', value: 0.25 }] },
-  { id: 'breakers-mark', name: "Breaker's Mark", path: 'noonward', rarity: 3, text: 'Weakness hits remove 1 more Shell.', passives: [{ type: 'shellBonus', value: 1 }] },
-  { id: 'encore-fever', name: 'Encore!', path: 'noonward', rarity: 3, text: 'Encore and passed actions deal 20% more damage.', passives: [{ type: 'encoreDamage', value: 0.2 }] },
+  { id: 'sunstruck', name: 'Sunstruck', path: 'noonward', rarity: 1, text: 'Deal 10% more damage.', passives: [{ type: 'damage', pct: 0.1 }] },
+  { id: 'whetted-edge', name: 'Whetted Edge', path: 'noonward', rarity: 1, text: 'The first card you play each turn deals 3 more per hit.', passives: [{ type: 'firstStrike', value: 3 }] },
+  { id: 'overture', name: 'Overture', path: 'noonward', rarity: 2, text: 'Start every fight with 50 ultimate charge.', passives: [{ type: 'startGauge', value: 50 }] },
+  { id: 'long-shadows', name: 'Long Shadows', path: 'noonward', rarity: 2, text: 'Each Chain step adds 10% more damage.', passives: [{ type: 'chainBonus', pct: 0.1 }] },
+  { id: 'breakers-mark', name: "Breaker's Mark", path: 'noonward', rarity: 3, text: 'Weakness hits chip 1 more Shell.', passives: [{ type: 'shellBonus', value: 1 }] },
+  { id: 'encore-fever', name: 'Encore!', path: 'noonward', rarity: 3, text: 'Breaking a foe draws 2 more cards.', passives: [{ type: 'breakDraw', value: 2 }] },
 
-  // Duskward: tempo and balance.
-  { id: 'quickening', name: 'Quickening', path: 'duskward', rarity: 1, text: 'Party SPD +6%.', passives: [{ type: 'stat', stat: 'spd', pct: 0.06 }] },
-  { id: 'deep-breath', name: 'Deep Breath', path: 'duskward', rarity: 1, text: 'Start every battle with 1 more Lantern.', passives: [{ type: 'startLantern', value: 1 }] },
-  { id: 'second-wind', name: 'Second Wind', path: 'duskward', rarity: 2, text: 'Breaking an enemy heals the party for 4% of max HP.', passives: [{ type: 'breakHeal', value: 0.04 }] },
-  { id: 'trade-winds', name: 'Trade Winds', path: 'duskward', rarity: 2, text: 'Ultimates charge 20% faster.', passives: [{ type: 'gaugeGain', value: 0.2 }] },
-  { id: 'long-stride', name: 'Long Stride', path: 'duskward', rarity: 2, text: 'Party SPD +10%.', passives: [{ type: 'stat', stat: 'spd', pct: 0.1 }] },
+  // Duskward: tempo.
+  { id: 'quickening', name: 'Quickening', path: 'duskward', rarity: 1, text: 'Draw 1 more card on the first turn of a fight.', passives: [{ type: 'openingDraw', value: 1 }] },
+  { id: 'deep-breath', name: 'Deep Breath', path: 'duskward', rarity: 1, text: '+2 Light on the first turn of a fight.', passives: [{ type: 'openingLight', value: 2 }] },
+  { id: 'second-wind', name: 'Second Wind', path: 'duskward', rarity: 2, text: 'Breaking a foe heals you 4.', passives: [{ type: 'breakHeal', value: 4 }] },
+  { id: 'trade-winds', name: 'Trade Winds', path: 'duskward', rarity: 2, text: 'Your ultimate charges 30% faster.', passives: [{ type: 'gaugeGain', pct: 0.3 }] },
+  { id: 'long-stride', name: 'Long Stride', path: 'duskward', rarity: 3, text: 'Hold up to 1 more card.', passives: [{ type: 'handLimit', value: 1 }] },
+  { id: 'two-lanterns', name: 'Two Lanterns', path: 'duskward', rarity: 3, text: '+1 Light every turn.', passives: [{ type: 'maxLight', value: 1 }] },
+
+  // Nightward: endure.
+  { id: 'iron-lantern', name: 'Iron Lantern', path: 'nightward', rarity: 1, text: 'Every card you hold wards 1 more.', passives: [{ type: 'heldWard', value: 1 }] },
+  { id: 'hearthglow', name: 'Hearthglow', path: 'nightward', rarity: 1, text: '+10 max HP.', passives: [{ type: 'maxHp', value: 10 }] },
+  { id: 'patient-hands', name: 'Patient Hands', path: 'nightward', rarity: 2, text: 'Start every fight with 8 ward.', passives: [{ type: 'startWard', value: 8 }] },
   {
-    id: 'two-lanterns',
-    name: 'Two Lanterns',
-    path: 'duskward',
-    rarity: 3,
-    text: 'Start every battle with 2 more Lantern and 20 ultimate charge.',
+    id: 'second-chorus',
+    name: 'Second Chorus',
+    path: 'nightward',
+    rarity: 2,
+    text: 'Healing is 30% stronger, and you heal 3 after every fight you win.',
     passives: [
-      { type: 'startLantern', value: 2 },
-      { type: 'startGauge', value: 20 },
+      { type: 'healPower', pct: 0.3 },
+      { type: 'victoryHeal', value: 3 },
     ],
   },
-
-  // Nightward: endure and control.
-  { id: 'iron-lantern', name: 'Iron Lantern', path: 'nightward', rarity: 1, text: 'Party DEF +12%.', passives: [{ type: 'stat', stat: 'def', pct: 0.12 }] },
-  { id: 'hearthglow', name: 'Hearthglow', path: 'nightward', rarity: 1, text: 'Party max HP +12%.', passives: [{ type: 'stat', stat: 'hp', pct: 0.12 }] },
-  { id: 'patient-hands', name: 'Patient Hands', path: 'nightward', rarity: 2, text: 'Guarding blocks 15% more damage.', passives: [{ type: 'guardPower', value: 0.15 }] },
-  { id: 'second-chorus', name: 'Second Chorus', path: 'nightward', rarity: 2, text: 'Healing is 25% stronger.', passives: [{ type: 'healPower', value: 0.25 }] },
   {
     id: 'bastion',
     name: 'Bastion',
     path: 'nightward',
     rarity: 2,
-    text: 'Party DEF +18% and max HP +8%.',
+    text: 'Every card you hold wards 1 more. +5 max HP.',
     passives: [
-      { type: 'stat', stat: 'def', pct: 0.18 },
-      { type: 'stat', stat: 'hp', pct: 0.08 },
+      { type: 'heldWard', value: 1 },
+      { type: 'maxHp', value: 5 },
     ],
   },
   {
@@ -52,10 +52,10 @@ export const GLIMMERS: readonly GlimmerDef[] = [
     name: 'Dawn Vow',
     path: 'nightward',
     rarity: 3,
-    text: 'Party max HP +20%, and breaking an enemy heals 5% of max HP.',
+    text: '+15 max HP, and you heal 5 after every fight you win.',
     passives: [
-      { type: 'stat', stat: 'hp', pct: 0.2 },
-      { type: 'breakHeal', value: 0.05 },
+      { type: 'maxHp', value: 15 },
+      { type: 'victoryHeal', value: 5 },
     ],
   },
 ];
