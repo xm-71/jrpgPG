@@ -41,6 +41,7 @@ export function generateFloor(seed: string, stratum: StratumDef, floor: number, 
     const row: MapNode[] = [];
     for (const col of cols) {
       let kind = pickKind(rng, ROW_WEIGHTS[r]!);
+      if (kind === 'elite' && floor < (stratum.eliteFrom ?? 0)) kind = 'battle';
       if (UNIQUE_IN_ROW.has(kind) && row.some((n) => n.kind === kind)) kind = r === 0 ? 'battle' : rng.pick(['battle', 'event'] as const);
       row.push({ id: `f${floor}r${r}c${col}`, kind, row: r, col, next: [], encounter: null, event: null });
     }

@@ -152,6 +152,7 @@ const stratumSchema = z.strictObject({
   events: z.array(z.string()).min(4),
   hpScale: z.number().positive(),
   powerScale: z.number().positive(),
+  eliteFrom: z.number().int().min(0).max(2).optional(),
 });
 
 const outcome: z.ZodType<EventOutcome> = z.lazy(() =>

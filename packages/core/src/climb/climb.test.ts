@@ -81,6 +81,15 @@ describe('floor maps', () => {
   test('the same seed draws the same floor', () => {
     expect(generateFloor('same', s, 1, new Set())).toEqual(generateFloor('same', s, 1, new Set()));
   });
+
+  test('a stratum can keep elites off its early floors', () => {
+    const gentle = { ...s, eliteFrom: 1 };
+    const elitesOn = (f: number, def = gentle): number =>
+      Array.from({ length: 60 }, (_, i) => generateFloor(`e${i}`, def, f, new Set()).rows.flat().filter((n) => n.kind === 'elite').length).reduce((a, b) => a + b, 0);
+    expect(elitesOn(0)).toBe(0);
+    expect(elitesOn(1)).toBeGreaterThan(0);
+    expect(elitesOn(0, { ...s, eliteFrom: 0 })).toBeGreaterThan(0);
+  });
 });
 
 describe('starting a climb', () => {

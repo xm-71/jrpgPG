@@ -85,12 +85,13 @@ const NOUNS: Record<Exclude<CardKind, 'curse' | 'rite'>, readonly string[]> = {
 
 const HOURS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth', 'Eleventh', 'Twelfth'] as const;
 
-const FLAVOR: Record<EchoTrait, readonly string[]> = {
-  breaker: ['The Gnomon heard you break them, and kept the sound.', 'Shell remembers the hand that cracked it.'],
-  chainer: ['One motion, repeated until it became a prayer.', 'The tower counted your rhythm and wrote it down.'],
-  warden: ['Every card you held back, the tower held too.', 'A patience the stairs had not seen in an age.'],
-  survivor: ['Written in what you bled on the stairs.', 'The shadow kept a little of what you lost.'],
-  striker: ['The shadow learned your stance before you did.', 'You never waited. Neither will this.'],
+/** Three lines per trait, picked by the Echo's index, so the two Echoes a Mirror offers never share one. */
+const FLAVOR: Record<EchoTrait, readonly [string, string, string]> = {
+  breaker: ['The Gnomon heard you break them, and kept the sound.', 'Shell remembers the hand that cracked it.', 'Every Break left a hairline in the glass. This is the glass.'],
+  chainer: ['One motion, repeated until it became a prayer.', 'The tower counted your rhythm and wrote it down.', 'You played the same colour until the stair hummed it back.'],
+  warden: ['Every card you held back, the tower held too.', 'A patience the stairs had not seen in an age.', 'What you would not spend, the Gnomon kept warm for you.'],
+  survivor: ['Written in what you bled on the stairs.', 'The shadow kept a little of what you lost.', 'You should have fallen three floors ago. The tower noticed.'],
+  striker: ['The shadow learned your stance before you did.', 'You never waited. Neither will this.', 'First blow, every time. The tower has stopped being surprised.'],
 };
 
 /** What the affinity's signature effect costs out of the card's budget. */
@@ -193,7 +194,8 @@ export function generateEcho(style: PlayStyle, o: EchoOptions): CardDef {
   const hour = 1 + rng.int(12);
   const adj = rng.pick(ADJECTIVES[affinity]);
   const noun = rng.pick(NOUNS[kind]);
-  const name = rng.chance(0.4) ? `${adj} ${noun} of the ${HOURS[hour - 1]} Hour` : `${adj} ${noun}`;
+  // Two words either way, so the name fits a card: "Candent Talon" or "Ninth-Hour Talon".
+  const name = rng.chance(0.4) ? `${HOURS[hour - 1]}-Hour ${noun}` : `${adj} ${noun}`;
 
   const plus: CardDef['plus'] =
     kind === 'strike' ? { atk: atk + (hits > 1 ? 2 : 3) } : kind === 'guard' ? { ward: ward + 3 } : { atk: atk + 2, ward: ward + 2 };
@@ -213,7 +215,7 @@ export function generateEcho(style: PlayStyle, o: EchoOptions): CardDef {
     plus,
     tier: rare ? 'rare' : 'uncommon',
     source: 'echo',
-    flavor: rng.pick(FLAVOR[trait]),
+    flavor: FLAVOR[trait][o.index % 3]!,
     art: { glyph: 'sigil', hue: AFFINITY_HUE[affinity] },
     hour,
   };

@@ -81,6 +81,8 @@ export const STRATA: readonly StratumDef[] = [
     events: ['ev.survivor', 'ev.shrine', 'ev.stoker', 'ev.moths', 'ev.fade', 'ev.market', 'ev.well', 'ev.clock'],
     hpScale: 1,
     powerScale: 1,
+    // The first floor of the tower is where new Lamplighters learn: no elites until the second.
+    eliteFrom: 1,
   },
   {
     id: 'hollow',

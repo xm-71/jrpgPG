@@ -102,6 +102,8 @@ export interface StratumDef {
   /** Foe HP and power multipliers for the whole stratum. */
   hpScale: number;
   powerScale: number;
+  /** The first floor (0-based) whose maps may hold elites. Leave it out to allow them from the start. */
+  eliteFrom?: number;
 }
 
 export interface GlimmerDef {

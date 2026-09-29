@@ -3,7 +3,7 @@
  *
  * The state is a plain 4-number array so it survives structuredClone and JSON.
  * Every random decision in the rules goes through here, which is what makes a battle,
- * a Descent seed or a pull sequence replayable from its seed and inputs alone.
+ * a climb or a pull sequence replayable from its seed and inputs alone.
  */
 
 export type RngState = [number, number, number, number];
@@ -28,7 +28,7 @@ export function hashString(str: string): number {
   return xmur3(str)();
 }
 
-/** Derive a new seed from labelled parts, e.g. deriveSeed('descent', '2026-09-29', 'floor', 2). */
+/** Derive a new seed from labelled parts, e.g. deriveSeed('floor', 'daily-2026-09-29-0', 'root', 2). */
 export function deriveSeed(...parts: Array<string | number>): number {
   return hashString(parts.join('␟'));
 }
