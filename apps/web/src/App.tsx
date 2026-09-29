@@ -2,13 +2,13 @@ import { useEffect } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { screen } from './game/nav';
 import { profile } from './game/store';
+import { Descent } from './screens/Descent';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
 import { Kindling } from './screens/Kindling';
 import { Odds } from './screens/Odds';
 import { Roster } from './screens/Roster';
 import { Settings } from './screens/Settings';
-import { Soon } from './screens/Soon';
 import { Stage } from './screens/Stage';
 import { Story } from './screens/Story';
 import { Title } from './screens/Title';
@@ -48,6 +48,9 @@ export function App(): JSX.Element {
     case 'history':
       view = <History />;
       break;
+    case 'descent':
+      view = <Descent />;
+      break;
     case 'story':
       view = <Story />;
       break;
@@ -57,8 +60,6 @@ export function App(): JSX.Element {
     case 'settings':
       view = <Settings />;
       break;
-    default:
-      view = <Soon name={s.name} />;
   }
   return (
     <div class="stage">

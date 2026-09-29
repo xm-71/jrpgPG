@@ -30,6 +30,8 @@ interface Props {
   onQuit?: () => void;
   /** Shown above the action bar for the first fights. */
   tip?: string;
+  /** What retreating costs, for the confirmation. */
+  quitNote?: string;
 }
 
 function TurnBar({ ctl }: { ctl: BattleController }): JSX.Element {
@@ -121,7 +123,7 @@ function PartyCard({ u, active, targetable, ready, onTap }: { u: UnitView; activ
   );
 }
 
-export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit, tip }: Props): JSX.Element {
+export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit, tip, quitNote }: Props): JSX.Element {
   const ctl = useMemo(() => {
     const c = new BattleController(setup, seed);
     c.speed.value = settings.value.battleSpeed;
@@ -196,7 +198,7 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
   };
   const quit = async (): Promise<void> => {
     if (!onQuit) return;
-    const ok = await ask({ title: 'Retreat?', body: 'You will leave this fight and earn nothing from it.', confirm: 'Retreat', cancel: 'Keep fighting', danger: true });
+    const ok = await ask({ title: 'Retreat?', body: quitNote ?? 'You will leave this fight and earn nothing from it.', confirm: 'Retreat', cancel: 'Keep fighting', danger: true });
     if (ok) onQuit();
   };
 

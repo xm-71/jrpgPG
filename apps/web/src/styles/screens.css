@@ -887,3 +887,169 @@
   height: 42vh;
   aspect-ratio: 150 / 230;
 }
+
+/* Descent */
+.ds-entry,
+.body.ds-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ds-crew {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 0.8rem;
+}
+
+.ds-entry .ds-crew {
+  margin-top: 0;
+}
+
+.ds-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+}
+
+.ds-member img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+}
+
+.ds-member .meter {
+  width: 100%;
+  height: 5px;
+}
+
+.ds-name {
+  font: 600 0.68rem var(--font-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ds-pay p.row {
+  padding: 0.15rem 0;
+  font-size: 0.9rem;
+}
+
+.ds-note {
+  font-size: 0.78rem;
+}
+
+.ds-h {
+  margin: 1rem 0 0.4rem;
+}
+
+.ds-offers,
+.ds-nodes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0.6rem;
+}
+
+.ds-glimmer,
+.ds-node {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.8rem 0.9rem;
+  border: 0;
+  color: var(--ink);
+  text-align: left;
+  width: 100%;
+}
+
+.ds-glimmer {
+  border-left: 5px solid var(--gold);
+}
+
+.ds-glimmer.path-duskward {
+  border-color: var(--rose);
+}
+
+.ds-glimmer.path-nightward {
+  border-color: var(--violet);
+}
+
+.ds-gtext {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.ds-path.path-noonward {
+  background: var(--gold);
+  color: #241a05;
+}
+
+.ds-path.path-duskward {
+  background: var(--rose);
+}
+
+.ds-path.path-nightward {
+  background: var(--violet);
+}
+
+.ds-node {
+  border-left: 5px solid var(--teal);
+}
+
+.ds-node.kind-elite {
+  border-color: var(--rose);
+}
+
+.ds-node.kind-boss {
+  border-color: var(--gold);
+  background: linear-gradient(90deg, #3a2a10, var(--panel));
+}
+
+.ds-node.kind-rest {
+  border-color: var(--good);
+}
+
+.ds-kind {
+  flex: 1;
+  font-size: 1rem;
+}
+
+.ds-foes {
+  font-weight: 700;
+}
+
+.ds-progress {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 0.7rem;
+}
+
+.ds-progress i {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  transform: skewX(-20deg);
+}
+
+.ds-progress i.done {
+  background: var(--teal);
+}
+
+.ds-progress i.now {
+  background: var(--gold);
+}
+
+.foot .btn {
+  flex-direction: column;
+  gap: 0;
+}
+
+.foot .btn .sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.85;
+}

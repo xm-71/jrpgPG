@@ -1,0 +1,1613 @@
+<title>Duskline JRPG Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: a twilight game bible. A sticky chapter menu on wide screens, one reading column,
+   hard-edged panels, and a slanted horizon that repeats from the hero to the section rules. */
+:root {
+  --paper: #F5F3FA;
+  --surface: #FDFCFF;
+  --surface-2: #EFECF6;
+  --ink: #17132B;
+  --ink-2: #4B4668;
+  --muted: #6B6588;
+  --line: #E4E0EF;
+  --rose: #C22E66;
+  --on-rose: #FFFFFF;
+  --rose-wash: #F8E6ED;
+  --gold: #9A6105;
+  --gold-wash: #FBF1DE;
+  --indigo: #3D2F95;
+  --teal: #0B7A70;
+  --focus: #3D2F95;
+  --viz-feature: #C22E66;
+  --viz-context: #8E88A6;
+  --viz-grid: #ECE9F3;
+  --viz-axis: #CFCAE0;
+  /* In-game art colors: the same in both themes, used by the hero, swatches and HUD specimen */
+  --art-gold: #F2B43A;
+  --art-rose: #E0457B;
+  --art-violet: #6A3A9E;
+  --art-night: #1E1846;
+  --art-deep: #110E26;
+  --art-teal: #2BB5A6;
+  --art-paper: #F4F1F8;
+  --art-fade: #8A86A0;
+  --art-bezel: #0B0918;
+  --art-ink: #FFFFFF;
+  --art-soft: #E4DEFF;
+  --font-display: "Dela Gothic One", "Arial Black", "Helvetica Neue", Impact, sans-serif;
+  --font-body: "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans", sans-serif;
+  --font-label: "Chakra Petch", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F0D1C; --surface: #181530; --surface-2: #221E3E; --ink: #EFEBFA; --ink-2: #BDB6D6;
+    --muted: #9A94B8; --line: #2B2645; --rose: #FF6B9A; --on-rose: #1B0A14; --rose-wash: #34182B;
+    --gold: #F5B94F; --gold-wash: #2E2412; --indigo: #A597FF; --teal: #43D3C3; --focus: #A597FF;
+    --viz-feature: #EC5588; --viz-context: #938DB8; --viz-grid: #25213D; --viz-axis: #3A3558;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F0D1C; --surface: #181530; --surface-2: #221E3E; --ink: #EFEBFA; --ink-2: #BDB6D6;
+  --muted: #9A94B8; --line: #2B2645; --rose: #FF6B9A; --on-rose: #1B0A14; --rose-wash: #34182B;
+  --gold: #F5B94F; --gold-wash: #2E2412; --indigo: #A597FF; --teal: #43D3C3; --focus: #A597FF;
+  --viz-feature: #EC5588; --viz-context: #938DB8; --viz-grid: #25213D; --viz-axis: #3A3558;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 1rem; line-height: 1.65;
+  padding-inline: 16px; padding-block: 16px 80px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--rose); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.page { max-width: 1240px; margin-inline: auto; }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden; color: var(--art-ink);
+  background:
+    radial-gradient(circle at 62% 12%, rgba(255,255,255,.85) 0 1.3px, transparent 2px),
+    radial-gradient(circle at 68% 34%, rgba(255,255,255,.5) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 74% 8%, rgba(255,255,255,.7) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 79% 42%, rgba(255,255,255,.45) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 83% 22%, rgba(255,255,255,.9) 0 1.4px, transparent 2.1px),
+    radial-gradient(circle at 88% 50%, rgba(255,255,255,.4) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 91% 11%, rgba(255,255,255,.6) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 96% 33%, rgba(255,255,255,.55) 0 1px, transparent 1.6px),
+    linear-gradient(to top, var(--art-gold) 0, var(--art-rose) 86px, var(--art-violet) 186px, var(--art-night) 330px, var(--art-deep) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), 0 100%);
+  padding: clamp(28px, 6vw, 64px) clamp(20px, 5vw, 64px) 212px;
+}
+.hero-horizon { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 184px; display: block; }
+@media (max-width: 760px) {
+  .hero {
+    background: linear-gradient(to top, var(--art-gold) 0, var(--art-rose) 60px, var(--art-violet) 140px, var(--art-night) 280px, var(--art-deep) 100%);
+    padding-bottom: 150px;
+  }
+  .hero-horizon { height: 128px; }
+}
+.hero-sun { transform-box: fill-box; transform-origin: center; animation: sunrise 1.8s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes sunrise { from { transform: translateY(14px); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .hero-sun { animation: none; } }
+.hero-inner { position: relative; max-width: 780px; }
+.hero-eyebrow { font-family: var(--font-label); font-weight: 600; font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; color: var(--art-soft); margin: 0; }
+.hero-kana { font-weight: 500; font-size: .9375rem; letter-spacing: .5em; color: var(--art-gold); margin: 18px 0 0; }
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400; text-transform: uppercase;
+  font-size: clamp(2.75rem, 9.5vw, 7.25rem); line-height: .95; letter-spacing: .03em;
+  margin: 6px 0 18px; text-shadow: .05em .05em 0 var(--art-rose);
+}
+.hero-lede { font-size: clamp(1.0625rem, 2.1vw, 1.25rem); line-height: 1.55; max-width: 46ch; color: var(--art-soft); margin: 0; }
+
+/* ---------- At a glance strip ---------- */
+.glance { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.chip {
+  font-family: var(--font-label); font-weight: 600; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-2); background: var(--surface-2); padding: 5px 16px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.glance-meta { font-size: .875rem; color: var(--muted); margin: 0; max-width: 70ch; }
+
+/* ---------- Layout ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 36px; }
+@media (min-width: 1100px) {
+  .layout { grid-template-columns: 210px minmax(0, 880px); gap: 56px; justify-content: center; }
+  .toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; max-height: calc(100vh - 48px); overflow: auto; }
+}
+.toc { font-family: var(--font-label); }
+.toc-title { font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+@media (min-width: 560px) and (max-width: 1099px) { .toc ol { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; } }
+.toc a {
+  position: relative; isolation: isolate; display: block; padding: 6px 14px;
+  color: var(--ink-2); text-decoration: none; font-weight: 500; font-size: .9375rem; letter-spacing: .02em;
+}
+.toc a::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--rose);
+  transform: skewX(-14deg) scaleX(0); transform-origin: left; transition: transform .18s ease;
+}
+.toc a:hover { color: var(--ink); }
+.toc a[aria-current="true"] { color: var(--on-rose); }
+.toc a[aria-current="true"]::before { transform: skewX(-14deg) scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .toc a::before { transition: none; } }
+
+main { min-width: 0; display: grid; gap: 64px; }
+main > section { min-width: 0; }
+main > section + section { border-top: 1px solid var(--line); padding-top: 48px; }
+
+/* ---------- Type ---------- */
+.eyebrow { font-family: var(--font-label); font-weight: 600; font-size: .8125rem; letter-spacing: .16em; text-transform: uppercase; color: var(--rose); margin: 0; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.75rem, 4.4vw, 2.375rem); line-height: 1.15; letter-spacing: .01em; text-wrap: balance; margin: 6px 0 20px; }
+h2::after { content: ""; display: block; width: 64px; height: 4px; margin-top: 16px; background: linear-gradient(90deg, var(--art-gold), var(--art-rose)); transform: skewX(-32deg); transform-origin: left; }
+h3 { font-size: 1.1875rem; font-weight: 700; line-height: 1.35; text-wrap: balance; margin: 36px 0 10px; }
+h4 { font-size: 1rem; font-weight: 700; line-height: 1.35; margin: 0 0 6px; }
+p { margin: 0 0 14px; max-width: 68ch; }
+.lead { font-size: 1.0625rem; color: var(--ink-2); }
+ul.plain, ol.plain { margin: 0 0 16px; padding-left: 1.2em; max-width: 70ch; }
+ul.plain li, ol.plain li { margin-bottom: 6px; }
+strong { font-weight: 700; }
+.small { font-size: .875rem; color: var(--muted); }
+
+/* ---------- Generic blocks ---------- */
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); margin: 18px 0 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); padding: 18px 18px 16px; min-width: 0; }
+.card h3 { margin: 0 0 6px; font-size: 1.0625rem; }
+.card p { margin: 0; color: var(--ink-2); font-size: .9375rem; line-height: 1.6; }
+.card .take { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink); }
+.card .take b { font-family: var(--font-label); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rose); margin-right: 6px; }
+
+.note { background: var(--gold-wash); padding: 16px 18px; margin: 22px 0; max-width: 76ch; }
+.note.rose { background: var(--rose-wash); }
+.note p { margin: 0; }
+.tag {
+  display: inline-block; font-family: var(--font-label); font-weight: 600; font-size: .6875rem; letter-spacing: .14em; text-transform: uppercase;
+  background: var(--ink); color: var(--paper); padding: 2px 12px; margin-bottom: 8px;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; border: 1px solid var(--line); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9375rem; line-height: 1.5; }
+table.wide { min-width: 760px; }
+table.mid { min-width: 0; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--font-label); font-weight: 600; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); white-space: nowrap; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+tbody th { font-weight: 700; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.total td, tr.total th { font-weight: 700; background: var(--surface-2); }
+.rec { color: var(--rose); }
+.meter { display: inline-flex; gap: 3px; vertical-align: middle; margin-right: 8px; }
+.meter i { display: block; width: 11px; height: 7px; background: var(--line); transform: skewX(-20deg); }
+.meter[data-l="1"] i:nth-child(1), .meter[data-l="2"] i:nth-child(-n+2), .meter[data-l="3"] i { background: var(--ink-2); }
+
+/* ---------- Roadmap ---------- */
+.gantt { list-style: none; margin: 22px 0 10px; padding: 0; display: grid; gap: 10px; }
+.g-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; align-items: center; }
+@media (min-width: 720px) { .g-row { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } }
+.g-label { font-size: .9375rem; line-height: 1.3; min-width: 0; }
+.g-label b { font-family: var(--font-label); font-weight: 600; color: var(--rose); margin-right: 6px; }
+.g-label span { color: var(--muted); font-size: .8125rem; margin-left: 6px; font-variant-numeric: tabular-nums; }
+.g-track {
+  position: relative; height: 22px; background-color: var(--surface);
+  background-image: linear-gradient(to right, var(--line) 1px, transparent 1px);
+  background-size: 20% 100%; border-right: 1px solid var(--line);
+}
+.g-bar {
+  position: absolute; top: 5px; height: 12px;
+  left: calc(var(--s) / 30 * 100%); width: calc((var(--e) - var(--s)) / 30 * 100%);
+  background: linear-gradient(90deg, var(--art-gold), var(--art-rose));
+}
+.g-bar::after { content: ""; position: absolute; right: -6px; top: 0; width: 12px; height: 12px; background: var(--ink); transform: rotate(45deg) scale(.8); }
+.g-bar.open::after { display: none; }
+.g-bar.open { clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%); }
+.g-scale { position: relative; height: 18px; font-family: var(--font-label); font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.g-scale span { position: absolute; left: calc(var(--m) / 30 * 100%); transform: translateX(-50%); white-space: nowrap; }
+.g-scale span:first-child { transform: none; }
+.g-scale span:last-child { transform: translateX(-100%); }
+.g-scale-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+@media (min-width: 720px) { .g-scale-row { grid-template-columns: 220px minmax(0, 1fr); gap: 16px; } }
+.g-legend { font-size: .8125rem; color: var(--muted); margin: 4px 0 0; }
+.g-legend .dia { display: inline-block; width: 9px; height: 9px; background: var(--ink); transform: rotate(45deg); margin: 0 6px 0 2px; }
+
+.phases { display: grid; gap: 14px; margin-top: 26px; position: relative; }
+.phase { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; background: var(--surface); border: 1px solid var(--line); padding: 18px 18px 8px; }
+.phase-id {
+  font-family: var(--font-label); font-weight: 600; font-size: .9375rem; color: var(--on-rose); background: var(--rose);
+  width: 44px; height: 30px; display: grid; place-items: center;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.phase h3 { margin: 0; font-size: 1.125rem; }
+.phase-when { font-family: var(--font-label); font-size: .8125rem; letter-spacing: .06em; color: var(--muted); margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+.phase dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+@media (min-width: 640px) { .phase dl { grid-template-columns: 104px minmax(0, 1fr); column-gap: 16px; } }
+.phase dt { font-family: var(--font-label); font-weight: 600; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); padding-top: 3px; }
+.phase dd { margin: 0 0 10px; font-size: .9375rem; line-height: 1.6; }
+.tracks { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); margin-top: 16px; }
+.track { border-top: 3px solid var(--ink); padding-top: 10px; }
+.track h4 { font-family: var(--font-label); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: .8125rem; }
+.track p { font-size: .875rem; color: var(--ink-2); margin: 0; }
+
+/* ---------- Art ---------- */
+.swatches { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); margin: 16px 0 8px; }
+.swatch { background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.swatch-chip { height: 64px; clip-path: polygon(0 0, 100% 0, 100% 72%, 0 100%); }
+.swatch-body { padding: 10px 12px 12px; }
+.swatch-name { font-weight: 700; font-size: .9375rem; }
+.swatch-hex { font-family: var(--font-label); font-size: .75rem; color: var(--muted); letter-spacing: .06em; }
+.swatch-use { font-size: .8125rem; color: var(--ink-2); line-height: 1.45; margin-top: 4px; }
+.rules { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 12px 0 8px; border-top: 1px solid var(--line); }
+.rules > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 640px) { .rules > div { grid-template-columns: 150px minmax(0, 1fr); gap: 16px; } }
+.rules dt { font-family: var(--font-label); font-weight: 600; font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase; color: var(--rose); padding-top: 2px; }
+.rules dd { margin: 0; font-size: .9375rem; }
+
+/* HUD specimen: an in-game screen, so it keeps one look in both themes */
+.hud-wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; margin-top: 16px; }
+@media (min-width: 760px) { .hud-wrap { grid-template-columns: 320px minmax(0, 1fr); } }
+.phone {
+  position: relative; width: 100%; max-width: 320px; aspect-ratio: 9 / 17; margin-inline: auto; overflow: hidden;
+  border: 6px solid var(--art-bezel); border-radius: 30px; background: var(--art-deep);
+  font-family: var(--font-label); color: var(--art-ink); font-size: 11px; line-height: 1.2;
+}
+.hud-sky { position: absolute; inset: 0; background: linear-gradient(180deg, #0E0B22 0%, #241C57 28%, #5B3592 43%, #D9467A 53%, var(--art-gold) 59%); }
+.hud-sun { position: absolute; width: 46px; height: 46px; border-radius: 50%; left: calc(78% - 23px); top: calc(56.8% - 23px); background: radial-gradient(circle, #FFF2C9 0 30%, var(--art-gold) 62%, #F08A3A 100%); box-shadow: 0 0 40px 14px rgba(242,180,58,.45); }
+.hud-ground { position: absolute; inset: 0; background: var(--art-deep); clip-path: polygon(0 63%, 100% 55%, 100% 100%, 0 100%); }
+.hud-horizon { position: absolute; left: -5%; width: 110%; top: 59%; height: 2px; background: var(--art-gold); transform: rotate(-8.6deg); }
+.hud-turns { position: absolute; top: 3.5%; left: 5%; right: 5%; display: flex; align-items: center; gap: 9px; }
+.hud-turns .lbl { font-size: 9px; letter-spacing: .16em; color: var(--art-soft); margin-right: 2px; }
+.dia { width: 24px; height: 24px; display: grid; place-items: center; transform: rotate(45deg); background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); flex: none; }
+.dia span { transform: rotate(-45deg); font-weight: 600; font-size: 10px; }
+.dia.now { background: var(--art-rose); border-color: var(--art-rose); width: 30px; height: 30px; }
+.dia.foe { background: rgba(10,8,24,.6); border-color: var(--art-fade); }
+.hud-foe { position: absolute; width: 40%; }
+.hud-foe.a { left: 6%; top: 15%; }
+.hud-foe.b { right: 6%; top: 17%; }
+.foe-bars { display: grid; gap: 3px; margin-bottom: 6px; }
+.foe-name { font-size: 9px; letter-spacing: .14em; color: var(--art-soft); }
+.bar { height: 5px; background: rgba(255,255,255,.18); position: relative; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; }
+.bar.shell i { background: #FFFFFF; }
+.bar.hp i { background: var(--art-rose); }
+.weak { display: flex; gap: 4px; margin-top: 3px; }
+.weak span { font-size: 8.5px; letter-spacing: .08em; padding: 1px 5px; border: 1px solid rgba(255,255,255,.6); }
+.weak span.hit { background: var(--art-gold); color: var(--art-deep); border-color: var(--art-gold); }
+.foe-shape { display: block; width: 100%; height: auto; }
+.hud-break {
+  position: absolute; left: 4%; top: 31%; font-family: var(--font-display); font-size: 34px; letter-spacing: .02em; color: var(--art-gold);
+  transform: rotate(-9deg); text-shadow: 3px 3px 0 var(--art-rose), -1px -1px 0 var(--art-bezel), 1px -1px 0 var(--art-bezel), -1px 1px 0 var(--art-bezel), 1px 1px 0 var(--art-bezel);
+}
+.hud-break small { display: block; font-family: var(--font-label); font-size: 10px; letter-spacing: .12em; color: var(--art-ink); text-shadow: none; margin-top: -2px; }
+.hud-encore {
+  position: absolute; left: 6%; right: 18%; top: 65.5%; background: var(--art-rose); color: var(--art-ink);
+  font-weight: 600; font-size: 10.5px; letter-spacing: .1em; padding: 6px 14px;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+.hud-party { position: absolute; left: 4%; right: 4%; top: 72.5%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.pc { background: rgba(30,24,70,.92); border: 1px solid rgba(255,255,255,.2); padding: 6px 6px 7px; transform: skewX(-8deg); }
+.pc > * { transform: skewX(8deg); }
+.pc.act { border-color: var(--art-gold); }
+.pc b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 18px; line-height: 1; }
+.pc em { display: block; font-style: normal; font-size: 8px; letter-spacing: .1em; color: var(--art-soft); margin: 2px 0 5px; }
+.pc .bar.hp i { background: var(--art-teal); }
+.ult { position: absolute; right: 5px; top: 5px; width: 13px; height: 13px; border-radius: 50%; background: conic-gradient(var(--art-gold) var(--u), rgba(255,255,255,.2) 0); }
+.ult.ready { box-shadow: 0 0 8px 2px rgba(242,180,58,.8); }
+.hud-actions { position: absolute; left: 4%; right: 4%; bottom: 3.5%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.btn { font-weight: 600; font-size: 11px; letter-spacing: .12em; text-align: center; padding: 10px 0; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.35); }
+.btn.main { background: var(--art-gold); color: var(--art-deep); border-color: var(--art-gold); }
+.hud-toggles { position: absolute; right: 4%; top: 65.5%; display: grid; gap: 4px; }
+.hud-toggles span { font-size: 9px; letter-spacing: .1em; padding: 3px 6px; border: 1px solid rgba(255,255,255,.4); text-align: center; background: rgba(10,8,24,.5); }
+.hud-notes { margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.hud-notes > div { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.hud-notes dt { font-weight: 700; font-size: .9375rem; }
+.hud-notes dd { margin: 2px 0 0; font-size: .9375rem; color: var(--ink-2); }
+
+/* ---------- Lore ---------- */
+.logline { font-size: clamp(1.125rem, 2.4vw, 1.375rem); line-height: 1.55; max-width: 60ch; margin: 8px 0 22px; padding-left: 18px; position: relative; }
+.logline::before { content: ""; position: absolute; left: 0; top: .3em; bottom: .3em; width: 4px; background: linear-gradient(180deg, var(--art-gold), var(--art-rose), var(--art-violet)); transform: skewY(-12deg); }
+.zones { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); margin: 12px 0; }
+.zone { background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.zone-band { height: 10px; }
+.zone-body { padding: 14px 16px 16px; }
+.zone-body p { margin: 0; font-size: .9375rem; color: var(--ink-2); }
+.zone-body .small { margin-top: 8px; }
+
+/* ---------- Design ---------- */
+.chain { list-style: none; margin: 18px 0 10px; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); counter-reset: step; }
+.chain li { position: relative; background: var(--surface); border: 1px solid var(--line); padding: 38px 14px 14px; min-width: 0; counter-increment: step; }
+.chain li::before {
+  content: counter(step); position: absolute; left: 14px; top: 10px; font-family: var(--font-label); font-weight: 600; font-size: .75rem;
+  color: var(--on-rose); background: var(--rose); padding: 1px 10px; clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+.chain li.burst { background: var(--rose-wash); border-color: var(--rose); }
+.chain h4 { font-size: .9375rem; margin-bottom: 4px; }
+.chain p { font-size: .875rem; color: var(--ink-2); margin: 0 0 8px; }
+.chain .from { font-family: var(--font-label); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.leaveout { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 12px 0 0; }
+.leaveout li { font-size: .875rem; padding: 5px 12px; border: 1px solid var(--line); background: var(--surface); text-decoration: line-through; text-decoration-color: var(--rose); color: var(--ink-2); }
+
+/* ---------- Odds lab ---------- */
+.lab { background: var(--surface); border: 1px solid var(--line); padding: 18px; margin: 16px 0 10px; display: grid; gap: 18px; }
+.lab-top { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.lab-top label { display: grid; gap: 4px; font-size: .8125rem; color: var(--ink-2); font-weight: 500; min-width: min(100%, 260px); }
+.lab-controls { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
+.lab-controls label { display: grid; grid-template-rows: 1fr auto; gap: 4px; font-size: .8125rem; color: var(--ink-2); font-weight: 500; line-height: 1.3; }
+.lab-controls label.check { grid-template-rows: auto; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-self: end; gap: 8px; padding-bottom: 8px; }
+input[type="number"], select {
+  font: inherit; font-size: .9375rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  padding: 7px 9px; width: 100%; border-radius: 0; font-variant-numeric: tabular-nums;
+}
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--rose); margin: 0; }
+.tiles { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+.tile { background: var(--paper); border: 1px solid var(--line); padding: 12px 14px; min-width: 0; }
+.t-label { font-size: .8125rem; color: var(--ink-2); line-height: 1.35; }
+.t-value { font-size: 1.75rem; font-weight: 700; line-height: 1.15; margin-top: 6px; }
+.t-sub { font-size: .8125rem; color: var(--muted); line-height: 1.35; margin-top: 2px; }
+.chart-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-bottom: 8px; }
+.chart-title { font-weight: 700; font-size: .9375rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .8125rem; color: var(--ink-2); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.key { width: 18px; height: 2px; display: inline-block; }
+.key.feature { background: var(--viz-feature); }
+.key.context { background: var(--viz-context); }
+.linkbtn { font: inherit; font-size: .8125rem; font-weight: 500; color: var(--rose); background: none; border: 1px solid var(--line); padding: 4px 10px; cursor: pointer; }
+.linkbtn:hover { border-color: var(--rose); }
+.chart-box { position: relative; min-width: 0; }
+.chart-box:focus-visible { outline-offset: 4px; }
+#odds-chart { display: block; width: 100%; height: 300px; touch-action: pan-y; }
+#odds-chart .grid { stroke: var(--viz-grid); stroke-width: 1; }
+#odds-chart .axis { stroke: var(--viz-axis); stroke-width: 1; }
+#odds-chart .tick { fill: var(--muted); font-size: 11px; font-family: var(--font-label); font-variant-numeric: tabular-nums; }
+#odds-chart .axis-title { fill: var(--muted); font-size: 11px; font-family: var(--font-label); letter-spacing: .08em; }
+#odds-chart .line-feature { fill: none; stroke: var(--viz-feature); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+#odds-chart .line-context { fill: none; stroke: var(--viz-context); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+#odds-chart .dot { fill: var(--viz-feature); stroke: var(--surface); stroke-width: 2; }
+#odds-chart .dot-context { fill: var(--viz-context); stroke: var(--surface); stroke-width: 2; }
+#odds-chart .mark-label { fill: var(--ink); font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+#odds-chart .spark-label { fill: var(--muted); font-size: 11px; font-family: var(--font-label); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+#odds-chart .cross { stroke: var(--ink-2); stroke-width: 1; }
+.tooltip {
+  position: absolute; top: 10px; pointer-events: none; background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 6px 18px -8px rgba(15,10,40,.35); padding: 8px 10px; font-size: .8125rem; min-width: 150px; z-index: 2;
+}
+.tooltip .tt-head { font-family: var(--font-label); color: var(--muted); letter-spacing: .06em; margin-bottom: 4px; }
+.tooltip .tt-row { display: flex; align-items: center; gap: 8px; }
+.tooltip .tt-row b { font-size: .9375rem; min-width: 3.2em; font-variant-numeric: tabular-nums; }
+.tooltip .tt-row span.lbl { color: var(--ink-2); }
+
+/* ---------- Tech ---------- */
+.arch { display: grid; gap: 10px; margin: 18px 0 8px; }
+.tier { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (min-width: 720px) { .tier { grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: stretch; } }
+.tier-name { font-family: var(--font-label); font-weight: 600; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 10px; }
+.boxes { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); }
+.box { background: var(--surface); border: 1px solid var(--line); padding: 10px 12px; font-size: .875rem; line-height: 1.45; min-width: 0; }
+.box b { display: block; font-size: .9375rem; margin-bottom: 2px; }
+.box span { color: var(--ink-2); }
+.box.key-box { border-color: var(--rose); box-shadow: inset 3px 0 0 var(--rose); }
+.tier-arrow { text-align: center; color: var(--muted); font-size: .8125rem; line-height: 1; }
+@media (min-width: 720px) { .tier-arrow { padding-left: 164px; text-align: left; } }
+.budgets { display: grid; gap: 0; margin: 10px 0 8px; border-top: 1px solid var(--line); }
+.budgets > div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 640px) { .budgets > div { grid-template-columns: 200px minmax(0, 1fr); gap: 16px; } }
+.budgets dt { font-weight: 700; font-size: .9375rem; }
+.budgets dd { margin: 0; font-size: .9375rem; color: var(--ink-2); }
+
+/* ---------- Sources ---------- */
+.sources { display: grid; gap: 8px 36px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.sources h3 { margin-top: 18px; font-size: 1rem; font-family: var(--font-label); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+.sources ul { margin: 0; padding-left: 1.1em; font-size: .875rem; line-height: 1.5; }
+.sources li { margin-bottom: 6px; overflow-wrap: anywhere; }
+footer.end { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--muted); }
+</style>
+
+<div class="page">
+  <header class="hero">
+    <svg class="hero-horizon" viewBox="0 0 1200 184" preserveAspectRatio="xMaxYMax slice" aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id="hz-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#FFE7A8" stop-opacity=".95"/>
+          <stop offset=".45" stop-color="#F2B43A" stop-opacity=".45"/>
+          <stop offset="1" stop-color="#E0457B" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="hz-sun" cx="50%" cy="45%" r="55%">
+          <stop offset="0" stop-color="#FFF4D2"/>
+          <stop offset=".55" stop-color="#F7C65A"/>
+          <stop offset="1" stop-color="#F08A3A"/>
+        </radialGradient>
+        <linearGradient id="hz-pillar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#110E26" stop-opacity="0"/>
+          <stop offset="1" stop-color="#110E26" stop-opacity=".75"/>
+        </linearGradient>
+      </defs>
+      <ellipse cx="1010" cy="78" rx="300" ry="112" fill="url(#hz-glow)"/>
+      <circle class="hero-sun" cx="1010" cy="75" r="44" fill="url(#hz-sun)"/>
+      <rect x="158" y="0" width="5" height="128" fill="url(#hz-pillar)"/>
+      <g fill="#110E26" stroke="#110E26">
+        <polygon points="630,56 780,50 770,68 640,72" stroke="none"/>
+        <rect x="650" y="34" width="12" height="22" stroke="none"/>
+        <rect x="690" y="16" width="8" height="38" stroke="none"/>
+        <polygon points="690,16 694,6 698,16" stroke="none"/>
+        <rect x="720" y="32" width="20" height="21" stroke="none"/>
+        <rect x="752" y="40" width="8" height="12" stroke="none"/>
+        <line x1="642" y1="70" x2="628" y2="98" stroke-width="5" stroke-linecap="round"/>
+        <line x1="675" y1="70" x2="668" y2="96" stroke-width="5" stroke-linecap="round"/>
+        <line x1="735" y1="68" x2="742" y2="91" stroke-width="5" stroke-linecap="round"/>
+        <line x1="766" y1="66" x2="782" y2="89" stroke-width="5" stroke-linecap="round"/>
+      </g>
+      <g fill="#FFD27A">
+        <circle cx="660" cy="62" r="2"/><circle cx="700" cy="60" r="2"/><circle cx="742" cy="58" r="2"/><circle cx="694" cy="26" r="1.6"/>
+      </g>
+      <polygon points="0,136 1200,64 1200,184 0,184" fill="#110E26"/>
+      <line x1="0" y1="136" x2="1200" y2="64" stroke="#F2B43A" stroke-width="2"/>
+    </svg>
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Game research &amp; roadmap · working title</p>
+      <p class="hero-kana" lang="ja">ダスクライン</p>
+      <h1>Duskline</h1>
+      <p class="hero-lede">An original anime JRPG in the spirit of Final Fantasy, Xenoblade and Persona. Turn-based battles you can play with one thumb, ten-minute roguelite runs, and a gacha that belongs to the story. Built by one developer in TypeScript, for the web first and then iOS and Android.</p>
+    </div>
+  </header>
+
+  <div class="glance">
+    <ul class="chips" aria-label="At a glance">
+      <li class="chip">Solo developer</li>
+      <li class="chip">TypeScript · PixiJS · Spine</li>
+      <li class="chip">Web → iOS / Android</li>
+      <li class="chip">Turn-based, portrait-first</li>
+      <li class="chip">10–15 min runs</li>
+      <li class="chip">Earned-currency gacha first</li>
+    </ul>
+    <p class="glance-meta">Research current to September 2026. Prices, laws and platform rules change, so re-check the linked sources before you spend money.</p>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Contents">
+      <p class="toc-title">Contents</p>
+      <ol>
+        <li><a href="#short">The short version</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#borrow">What to borrow</a></li>
+        <li><a href="#art">Art direction</a></li>
+        <li><a href="#lore">World and lore</a></li>
+        <li><a href="#design">Game design</a></li>
+        <li><a href="#gacha">Gacha and business</a></li>
+        <li><a href="#tech">Tech stack</a></li>
+        <li><a href="#production">Production</a></li>
+        <li><a href="#risks">Risks and metrics</a></li>
+        <li><a href="#sources">Sources</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <!-- ============ SHORT VERSION ============ -->
+      <section id="short" aria-labelledby="h-short">
+        <p class="eyebrow">Summary</p>
+        <h2 id="h-short">The short version</h2>
+        <p class="lead">You're one developer who knows TypeScript, so the plan is built around that. It uses a small, reusable art pipeline and systems that create replay without constant new story. The gacha starts on earned currency, so you can learn what works before money or regulation is involved.</p>
+        <div class="grid">
+          <div class="card"><h3>Go 2D, illustrated and rigged</h3><p>Painted splash art, Spine-rigged battle sprites and a crisp HTML/SVG interface give a sharp anime look for far less than 3D costs, and they fit a phone browser's memory.</p></div>
+          <div class="card"><h3>One-thumb combat with real depth</h3><p>Turn-based with the turn order always visible. Hit weaknesses to Break enemies, chain follow-ups, then finish with a party-wide Horizon Burst. Tap a skill, then a target.</p></div>
+          <div class="card"><h3>Replay from ten-minute Descents</h3><p>A roguelite run on a daily seed shared by all players gives short, varied sessions without needing a new story chapter every week.</p></div>
+          <div class="card"><h3>Earned-currency gacha first</h3><p>Real-money gacha brings odds rules, age checks and a content treadmill. Launch with earned pulls and direct sales, and decide on paid pulls using beta data.</p></div>
+          <div class="card"><h3>Web first, stores second</h3><p>A link is the easiest playtest there is. The same TypeScript build becomes iOS and Android apps through Capacitor once the game proves itself.</p></div>
+          <div class="card"><h3>About 28 months to 1.0</h3><p>That assumes roughly 15 hours a week. Each phase ends with a gate you can measure and has a list of what to cut if it runs late.</p></div>
+        </div>
+      </section>
+
+      <!-- ============ ROADMAP ============ -->
+      <section id="roadmap" aria-labelledby="h-roadmap">
+        <p class="eyebrow">Plan</p>
+        <h2 id="h-roadmap">Roadmap from first prototype to live game</h2>
+        <p>The schedule assumes about 15 hours a week of your own time plus commissioned splash art and music. Months count from the day you start. Every phase ends at a gate. If you miss one, fix the cause or cut scope before moving on.</p>
+
+        <div class="g-scale-row" aria-hidden="true">
+          <div></div>
+          <div class="g-scale"><span style="--m:0">0</span><span style="--m:6">6</span><span style="--m:12">12</span><span style="--m:18">18</span><span style="--m:24">24</span><span style="--m:30">30 months</span></div>
+        </div>
+        <ol class="gantt">
+          <li class="g-row"><div class="g-label"><b>P0</b>Foundations<span>0–1</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:0;--e:1"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P1</b>Combat prototype<span>1–4</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:1;--e:4"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P2</b>Descent &amp; Kindling<span>4–7</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:4;--e:7"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P3</b>Vertical slice<span>7–12</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:7;--e:12"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P4</b>Production<span>12–21</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:12;--e:21"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P5</b>Open web beta<span>21–25</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:21;--e:25"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P6</b>1.0 launch<span>25–28</span></div><div class="g-track" aria-hidden="true"><div class="g-bar" style="--s:25;--e:28"></div></div></li>
+          <li class="g-row"><div class="g-label"><b>P7</b>Live cycles<span>28 onward</span></div><div class="g-track" aria-hidden="true"><div class="g-bar open" style="--s:28;--e:30"></div></div></li>
+        </ol>
+        <p class="g-legend"><span class="dia" aria-hidden="true"></span>Each diamond is a gate that must pass before the next phase starts.</p>
+
+        <div class="phases">
+          <article class="phase" aria-labelledby="h-p0">
+            <div class="phase-id">P0</div>
+            <div>
+              <h3 id="h-p0">Foundations</h3>
+              <p class="phase-when">Months 0–1</p>
+              <dl>
+                <dt>Build</dt><dd>A one-page pitch and the four pillars. Style tiles with the palette, a UI sample and one character sketch. A tech spike with a Spine test rig in PixiJS, running in Safari and Chrome on a real phone. A monorepo with CI, and a public devlog.</dd>
+                <dt>Gate</dt><dd>A rigged character animates at 60 fps in a mobile browser, and you can explain the game in two sentences.</dd>
+                <dt>Cut if late</dt><dd>Devlog polish.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p1">
+            <div class="phase-id">P1</div>
+            <div>
+              <h3 id="h-p1">Combat prototype</h3>
+              <p class="phase-when">Months 1–4</p>
+              <dl>
+                <dt>Build</dt><dd>The battle core as a pure TypeScript package: turn order, Shell, Break, Encore and Pass, Horizon Burst. A grey-box battle screen in HTML. Four heroes and eight enemies with placeholder art, auto-battle, and a simulator that plays thousands of battles with no graphics.</dd>
+                <dt>Gate</dt><dd>15–20 playtesters finish several battles and ask for more. The median battle takes 2–4 minutes. 10,000 simulated battles run without a rules error.</dd>
+                <dt>Cut if late</dt><dd>The Topple and Launch chain (ship Break alone) and the optional guard tap.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p2">
+            <div class="phase-id">P2</div>
+            <div>
+              <h3 id="h-p2">Descent and Kindling prototype</h3>
+              <p class="phase-when">Months 4–7</p>
+              <dl>
+                <dt>Build</dt><dd>A Descent run of three floors with four nodes each, Glimmer boons and a daily seed. Kindling pulls with pity and spark, run as a server function with an audit log. Saves, plus guest accounts that can be upgraded later.</dd>
+                <dt>Gate</dt><dd>The median run takes 10–15 minutes, and at least half of testers start a second run without being asked. One million simulated pulls match the published odds.</dd>
+                <dt>Cut if late</dt><dd>Shop and event nodes, leaderboards.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p3">
+            <div class="phase-id">P3</div>
+            <div>
+              <h3 id="h-p3">Vertical slice</h3>
+              <p class="phase-when">Months 7–12</p>
+              <dl>
+                <dt>Build</dt><dd>The final art style on four characters and one region. Chapter 1, about an hour long. The Duskline battle HUD and menus. The Kindling reveal animation. Two bond arcs. Commissioned main and battle themes. Onboarding and basic accessibility settings.</dd>
+                <dt>Gate</dt><dd>A public web playtest where at least 40% of players come back for a second session within a week, and 200 or more people join the mailing list or Discord.</dd>
+                <dt>Cut if late</dt><dd>A second Descent biome and voiced battle lines.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p4">
+            <div class="phase-id">P4</div>
+            <div>
+              <h3 id="h-p4">Production</h3>
+              <p class="phase-when">Months 12–21</p>
+              <dl>
+                <dt>Build</dt><dd>The launch roster of 12: six story characters and six Afterlights. Chapters 2 and 3, a second Descent biome, a weekly boss, an events framework with remote config, cloud saves, analytics, text ready for translation, and a performance pass on low-end phones.</dd>
+                <dt>Gate</dt><dd>Content is complete for launch, and the performance budgets hold on three reference phones.</dd>
+                <dt>Cut if late</dt><dd>Chapter 3 (ship it as the first update) and part of the Memory Card set.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p5">
+            <div class="phase-id">P5</div>
+            <div>
+              <h3 id="h-p5">Open web beta</h3>
+              <p class="phase-when">Months 21–25</p>
+              <dl>
+                <dt>Build</dt><dd>A public beta on the web, telemetry dashboards, economy tuning, and server checks that replay Descent seeds to verify scores. A crash and bug burn-down, and community channels.</dd>
+                <dt>Gate</dt><dd>Day-1 retention of 30% or more and day-7 of 8% or more, which is the top-quartile range in GameAnalytics' 2025 benchmarks, with at least 99.5% crash-free sessions. Choose the business model using this data.</dd>
+                <dt>Cut if late</dt><dd>Leaderboards and social features.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p6">
+            <div class="phase-id">P6</div>
+            <div>
+              <h3 id="h-p6">1.0 launch</h3>
+              <p class="phase-when">Months 25–28</p>
+              <dl>
+                <dt>Build</dt><dd>Capacitor builds for iOS and Android, store listings, IARC age ratings, privacy labels, purchase flows and odds pages if you monetize, a launch trailer and key art.</dd>
+                <dt>Gate</dt><dd>Both stores approve the app, web 1.0 is live, and a 72-hour hot-fix plan is ready.</dd>
+                <dt>Cut if late</dt><dd>Launch on web and Android first, then follow with iOS.</dd>
+              </dl>
+            </div>
+          </article>
+          <article class="phase" aria-labelledby="h-p7">
+            <div class="phase-id">P7</div>
+            <div>
+              <h3 id="h-p7">Live cycles</h3>
+              <p class="phase-when">Month 28 onward</p>
+              <dl>
+                <dt>Build</dt><dd>Repeating 6–8-week cycles. Each has one story chapter or event, one new Afterlight or alternate memory, one or two banners including a rerun, and a new set of Descent modifiers.</dd>
+                <dt>Gate</dt><dd>You finish each cycle without crunch. If a cycle slips, ship a rerun and a modifier set and skip the new unit.</dd>
+              </dl>
+            </div>
+          </article>
+        </div>
+
+        <h3>Tracks that run alongside the phases</h3>
+        <div class="tracks">
+          <div class="track"><h4>Art</h4><p>Style tiles in P0, a proven character pipeline by the end of P3, and the launch roster through P4.</p></div>
+          <div class="track"><h4>Audio</h4><p>Temp tracks in P1–P2, main and battle themes commissioned in P3, the rest of the soundtrack in P4.</p></div>
+          <div class="track"><h4>Community</h4><p>A devlog from P0, a Discord at P3, and the open beta in P5.</p></div>
+          <div class="track"><h4>Business</h4><p>The model comparison now, a decision gate at the end of P5, and store setup in P6.</p></div>
+        </div>
+      </section>
+
+      <!-- ============ BORROW ============ -->
+      <section id="borrow" aria-labelledby="h-borrow">
+        <p class="eyebrow">Research</p>
+        <h2 id="h-borrow">What to borrow from Final Fantasy, Xenoblade and Persona</h2>
+        <p>Each series is loved for different things. The table keeps the parts that suit a small, touch-friendly game and names what to leave behind because it would sink a one-person project.</p>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Series</th><th scope="col">Known for</th><th scope="col">Borrow</th><th scope="col">Leave behind</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Final Fantasy</th><td>Spectacle, summons, job identities, crystals and empires, iconic painted logos</td><td>Readable class silhouettes. A visible turn order like Final Fantasy X's CTB. A stagger layer like Final Fantasy VII Remake's. A big finishing move.</td><td>Cinematic budgets and real-time action combat</td></tr>
+              <tr><th scope="row">Xenoblade Chronicles</th><td>Vast scale, cosmic mysteries, combo chains, guest-designed Blades</td><td>The Break → Topple → Launch chain and a Chain Attack-style finisher. Landmarks on the horizon for scale. Summoning that makes sense in the story, as Core Crystals do.</td><td>Open-world maps and MMO-style real-time combat</td></tr>
+              <tr><th scope="row">Persona</th><td>Style, UI, social links, calendar pacing, weakness play</td><td>A weakness hit earns an extra turn (One More), which can be handed to an ally (Baton Pass). An all-party finisher. One signature UI color. Bond scenes.</td><td>The full calendar life-sim, which multiplies content and branching</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Proof that the pieces work on phones and the web</h3>
+        <div class="grid">
+          <div class="card"><h4><a href="https://honkai-star-rail.fandom.com/wiki/Toughness">Honkai: Star Rail</a></h4><p>A turn-based gacha JRPG built for phones. Enemies carry a Toughness bar that only weakness hits deplete, and its <a href="https://www.prydwen.gg/star-rail/guides/simulated-universe">Simulated Universe</a> is a roguelike mode where you pick one of three blessings after each fight.</p></div>
+          <div class="card"><h4><a href="https://en.wikipedia.org/wiki/Persona_5:_The_Phantom_X">Persona 5: The Phantom X</a></h4><p>Persona-style combat and menus as a free-to-play gacha on iOS, Android and PC. Built in Unity, it launched worldwide on June 26, 2025.</p></div>
+          <div class="card"><h4><a href="https://en.wikipedia.org/wiki/Granblue_Fantasy">Granblue Fantasy</a></h4><p>A gacha JRPG that has run in web browsers and on phones since 2014. It reunited art director Hideo Minaba and composer Nobuo Uematsu from Final Fantasy V, VI and IX.</p></div>
+          <div class="card"><h4><a href="https://en.wikipedia.org/wiki/Another_Eden">Another Eden</a></h4><p>A long-running gacha JRPG with no stamina system, written by Masato Kato with music by Yasunori Mitsuda. In September 2026 it was <a href="https://automaton-media.com/en/interviews/another-eden-begins-was-rebuilt-from-scratch-in-a-new-engine-so-the-10-year-old-rpg-could-live-on-beyond-its-service-we-want-gamers-who-hate-gacha-to-try-it-devs-say/">rebuilt as Another Eden Begins</a>, a gacha-free premium game.</p></div>
+          <div class="card"><h4><a href="https://en.wikipedia.org/wiki/The_Game_Awards_2025">Clair Obscur: Expedition 33</a></h4><p>A turn-based RPG with timed parries that won Game of the Year at The Game Awards 2025. Turn-based combat is firmly back in the mainstream.</p></div>
+          <div class="card"><h4><a href="https://www.gamerbraves.com/arknights-integrated-strategies-gets-players-playing-longer-on-average/">Arknights</a></h4><p>Adding the Integrated Strategies roguelike mode raised average playtime and made long-retired units worth using again.</p></div>
+        </div>
+        <div class="note rose">
+          <span class="tag">Warning</span>
+          <p>Square Enix has closed a string of Final Fantasy gacha games. Record Keeper closed globally in 2022, Dissidia Opera Omnia in 2024 and War of the Visions in 2025–26, and <a href="https://collider.com/final-fantasy-vii-spin-off-ever-crisis-ending-service-october-6-2026/">Final Fantasy VII Ever Crisis ends service on October 6, 2026</a>. Its producer pointed to the cost of producing enough new weapons and costumes to keep the gacha economy going. A one-person game has to be designed so it never depends on that pace.</p>
+        </div>
+      </section>
+
+      <!-- ============ ART ============ -->
+      <section id="art" aria-labelledby="h-art">
+        <p class="eyebrow">Art</p>
+        <h2 id="h-art">Art direction</h2>
+        <p>Across Xenoblade, Persona, Final Fantasy and newer anime games, the sharp look comes more from strong illustration and graphic design than from rendering power. That suits a solo web game.</p>
+
+        <div class="grid">
+          <div class="card"><h3>Xenoblade Chronicles 2 and 3</h3><p><a href="https://xenoblade.fandom.com/wiki/Masatsugu_Saito">Masatsugu Saito</a> led character design on XC2, Torna, XC3 and Future Redeemed. For XC3, <a href="https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-6-xenoblade-chronicles-3-part-2/">the team made the cast taller and more mature</a> with quieter costumes to suit a serious story, and kept his illustrations intact without a figurine-like or CG look. XC2's rare Blades came from a long list of guest artists, including Tetsuya Nomura and Kunihiko Tanaka.</p><p class="take"><b>Take</b>The illustration is the source of truth. Guest-designed units are a proven gacha hook.</p></div>
+          <div class="card"><h3>Persona 3, 4 and 5</h3><p><a href="https://en.wikipedia.org/wiki/Persona_5">Masayoshi Suto</a> designed Atlus's interfaces from Nocturne through Persona 5. Each game has one main color: teal, then a vivid yellow, then crimson red with only black and white. Persona 5 uses ransom-note lettering to fit its rebel theme, and Shigenori Soejima dresses the cast in contemporary fashion.</p><p class="take"><b>Take</b>One signature color and kinetic type give an instant identity at low cost.</p></div>
+          <div class="card"><h3>Metaphor: ReFantazio</h3><p>Lead UI designer Koji Ise <a href="https://www.gamesradar.com/games/jrpg/the-lead-ui-designer-on-metaphor-refantazio-had-never-designed-for-a-game-before-he-just-rolled-up-and-made-some-of-the-best-ui-ive-ever-seen-in-a-jrpg/">came to Atlus from website design</a>, and Metaphor was his first game. The UI team was asked to help set the game's whole art direction.</p><p class="take"><b>Take</b>Your web skills carry over. Build the menus in HTML, CSS and SVG.</p></div>
+          <div class="card"><h3>Final Fantasy</h3><p>Yoshitaka Amano's watercolor, ukiyo-e-influenced art shaped the logos and early casts. Tetsuya Nomura's stylized Final Fantasy VII designs followed, and <a href="https://en.wikipedia.org/wiki/Akihiko_Yoshida">Akihiko Yoshida</a> keeps character colors consistent with their environments.</p><p class="take"><b>Take</b>A painted logo and key art carry the brand. Tie every character's colors to the world's light.</p></div>
+          <div class="card"><h3>Guilty Gear Xrd</h3><p>Arc System Works' <a href="https://www.gdcvault.com/play/1022031/GuiltyGearXrd-s-Art-Style-The">GDC 2015 talk</a> shows 3D characters built to read as 2D anime, with hand-tuned shading and animation that holds poses on limited frames.</p><p class="take"><b>Take</b>Held poses, smears and impact frames make attacks feel like anime in any renderer.</p></div>
+          <div class="card"><h3>Granblue Fantasy</h3><p>Hideo Minaba's illustrated 2D art has carried a browser and mobile gacha JRPG since 2014.</p><p class="take"><b>Take</b>Illustration-led 2D works on the web at gacha scale.</p></div>
+          <div class="card"><h3>Zenless Zone Zero</h3><p>Its lead designer <a href="https://zenless-zone-zero.fandom.com/wiki/Zenless_Zone_Zero/Background">comes from packaging and graphic design</a>, and the city is built from signage, brands and graffiti.</p><p class="take"><b>Take</b>Graphic design is cheap, distinctive world-building.</p></div>
+          <div class="card"><h3>Octopath Traveler</h3><p><a href="https://en.wikipedia.org/wiki/HD-2D">HD-2D</a> puts pixel characters in 3D dioramas with dynamic light, depth of field and tilt-shift.</p><p class="take"><b>Take</b>A solid option for one developer, though it reads as retro rather than sharp anime.</p></div>
+        </div>
+
+        <h3>Three ways to render it</h3>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Option</th><th scope="col">Look</th><th scope="col">Cost for one developer</th><th scope="col">Fit for web and phones</th></tr></thead>
+            <tbody>
+              <tr><th scope="row"><span class="rec">2D illustrated + Spine</span><br><span class="small">Recommended</span></th><td>Crisp at any screen density and closest to the key art</td><td>One illustration and one rig per character. Rigs are reused for alternate outfits.</td><td>Excellent. PixiJS v8 with the official <a href="https://esotericsoftware.com/blog/spine-pixi-v8-runtime-released">spine-pixi-v8 runtime</a> renders through WebGPU, WebGL or Canvas.</td></tr>
+              <tr><th scope="row">3D toon with VRoid and three-vrm</th><td>Real camera moves with MToon toon shading</td><td>Base models come fast from VRoid Studio, but they look generic unless heavily customized. Check each model's <a href="https://news.viverse.com/post/vrm-models-explained">license fields</a>.</td><td>Fine for a few characters. <a href="https://pixiv.github.io/three-vrm/docs/modules/three-vrm-materials-mtoon.html">three-vrm</a> supports the WebGPU renderer, but 3D is heavier on phones.</td></tr>
+              <tr><th scope="row">HD-2D</th><td>A retro-premium diorama look</td><td>Pixel animation is slow to produce, frame by frame.</td><td>Good in Three.js, though the post-processing drains phone batteries.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The Duskline style: Twilight Graphic</h3>
+        <p>Every scene in Hesper is lit by a sun stuck on the horizon, so the palette is built from sunset. One signature color, Dusk Rose, carries the interface the way crimson carries Persona 5.</p>
+        <div class="swatches">
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-gold)"></div><div class="swatch-body"><div class="swatch-name">Noon Gold</div><div class="swatch-hex">#F2B43A</div><div class="swatch-use">Sunlight, the Dominion, rare-pull glow</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-rose)"></div><div class="swatch-body"><div class="swatch-name">Dusk Rose</div><div class="swatch-hex">#E0457B</div><div class="swatch-use">Signature UI color, the Strider cities</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-violet)"></div><div class="swatch-body"><div class="swatch-name">Ember Violet</div><div class="swatch-hex">#6A3A9E</div><div class="swatch-use">The upper sky, magic effects</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-night)"></div><div class="swatch-body"><div class="swatch-name">Night Indigo</div><div class="swatch-hex">#1E1846</div><div class="swatch-use">The Hush, shadows, dark UI panels</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-teal)"></div><div class="swatch-body"><div class="swatch-name">Aurora Teal</div><div class="swatch-hex">#2BB5A6</div><div class="swatch-use">Hushborn light, healing, HP</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-paper);box-shadow:inset 0 0 0 1px var(--line)"></div><div class="swatch-body"><div class="swatch-name">Ash Paper</div><div class="swatch-hex">#F4F1F8</div><div class="swatch-use">Dialogue boxes, light UI panels</div></div></div>
+          <div class="swatch"><div class="swatch-chip" style="background:var(--art-fade)"></div><div class="swatch-body"><div class="swatch-name">Fade Static</div><div class="swatch-hex">#8A86A0</div><div class="swatch-use">Enemies, drained of color</div></div></div>
+        </div>
+        <dl class="rules">
+          <div><dt>Proportions</dt><dd>Seven to seven and a half heads tall for story art, like Xenoblade 3's matured cast. Battle sprites use the same design. Chibi tokens appear only on the world map.</dd></div>
+          <div><dt>Line and shade</dt><dd>Clean tapered line art, colored a darker shade of the fill instead of pure black. Two-tone cel shading plus one hard highlight, with no airbrush.</dd></div>
+          <div><dt>Light</dt><dd>Rim light takes the sky color of the scene: gold on the Blaze side, rose on the Duskline, teal in the Hush. Characters always sit in the world's light.</dd></div>
+          <div><dt>Silhouette</dt><dd>Each character has one shape that reads at 48 pixels, such as hair, a hat or a weapon. Test it by filling the sprite solid black.</dd></div>
+          <div><dt>Color</dt><dd>Three main colors and one accent per character, with faction coding: white and gold for the Dominion, rose and amber for the Strider cities, indigo and teal for the Hushborn.</dd></div>
+          <div><dt>Motion</dt><dd>Anime timing for attacks: held key poses, two- or three-frame smears and one-frame impact flashes. Smooth 60 fps only for idle breathing and the interface.</dd></div>
+          <div><dt>Interface</dt><dd>A 12-degree horizon diagonal cuts every panel. Dusk Rose, ink and paper only. Heavy display type for battle callouts. Menus in HTML, CSS and SVG.</dd></div>
+          <div><dt>Backgrounds</dt><dd>Painted scenes in four to six parallax layers under a live gradient sky, with giant silhouettes such as walking cities and the Anchor on the horizon for scale.</dd></div>
+          <div><dt>Sharpness</dt><dd>Render at the device's pixel ratio, capped at 2×. Pack textures at twice their display size, use SVG icons and DOM or MSDF text, and never scale bitmap UI.</dd></div>
+        </dl>
+
+        <h3>Battle screen specimen</h3>
+        <p>A mock of the portrait battle screen in the Twilight Graphic style, made with the same HTML and CSS techniques the game's HUD would use.</p>
+        <div class="hud-wrap">
+          <div class="phone" role="img" aria-label="Mock battle screen with the turn order along the top, two enemies with Shell and HP bars, a Break callout, an Encore prompt, four party cards and three action buttons.">
+            <div class="hud-sky"></div>
+            <div class="hud-sun"></div>
+            <div class="hud-ground"></div>
+            <div class="hud-horizon"></div>
+            <div class="hud-turns">
+              <span class="lbl">TURN</span>
+              <span class="dia now"><span>W</span></span>
+              <span class="dia foe"><span>F</span></span>
+              <span class="dia"><span>I</span></span>
+              <span class="dia"><span>M</span></span>
+              <span class="dia foe"><span>F</span></span>
+              <span class="dia"><span>T</span></span>
+            </div>
+            <div class="hud-foe a">
+              <div class="foe-bars">
+                <span class="foe-name">FADE · WRAITH</span>
+                <span class="bar shell"><i style="width:0%"></i></span>
+                <span class="bar hp"><i style="width:58%"></i></span>
+                <span class="weak"><span class="hit">SUN</span><span>FROST</span></span>
+              </div>
+              <svg class="foe-shape" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <polygon points="50,0 62,18 58,30 76,40 68,52 80,70 70,100 30,100 20,72 32,52 22,40 40,30 36,16" fill="#0B0918" stroke="#E0457B" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <circle cx="45" cy="22" r="2.4" fill="#F2B43A"/><circle cx="55" cy="22" r="2.4" fill="#F2B43A"/>
+              </svg>
+            </div>
+            <div class="hud-foe b">
+              <div class="foe-bars">
+                <span class="foe-name">FADE · HOUND</span>
+                <span class="bar shell"><i style="width:70%"></i></span>
+                <span class="bar hp"><i style="width:90%"></i></span>
+                <span class="weak"><span>GALE</span><span>VOLT</span></span>
+              </div>
+              <svg class="foe-shape" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <polygon points="10,60 22,40 38,36 46,20 58,30 74,26 90,44 86,64 94,100 66,100 58,78 42,78 34,100 8,100" fill="#0B0918" stroke="#E0457B" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <circle cx="80" cy="42" r="2.4" fill="#F2B43A"/>
+              </svg>
+            </div>
+            <div class="hud-break">BREAK!<small>+50% DAMAGE</small></div>
+            <div class="hud-encore">ENCORE · ACT AGAIN OR PASS</div>
+            <div class="hud-toggles"><span>AUTO</span><span>2×</span></div>
+            <div class="hud-party">
+              <div class="pc act"><span class="ult" style="--u:70%"></span><b>W</b><em>WREN</em><span class="bar hp"><i style="width:82%"></i></span></div>
+              <div class="pc"><span class="ult ready" style="--u:100%"></span><b>I</b><em>IO</em><span class="bar hp"><i style="width:64%"></i></span></div>
+              <div class="pc"><span class="ult" style="--u:35%"></span><b>M</b><em>MARISOL</em><span class="bar hp"><i style="width:91%"></i></span></div>
+              <div class="pc"><span class="ult" style="--u:50%"></span><b>T</b><em>TAMSIN</em><span class="bar hp"><i style="width:47%"></i></span></div>
+            </div>
+            <div class="hud-actions"><span class="btn">ATTACK</span><span class="btn main">SKILL</span><span class="btn">PASS</span></div>
+          </div>
+          <dl class="hud-notes">
+            <div><dt>Turn order</dt><dd>Always visible along the top. The large diamond acts now, and previewing a skill shows how the order shifts.</dd></div>
+            <div><dt>Shell and HP</dt><dd>The white Shell bar sits above HP. Only weakness hits crack it.</dd></div>
+            <div><dt>Weakness tags</dt><dd>Words and shapes, so they never rely on color alone. A lit tag marks the weakness just hit.</dd></div>
+            <div><dt>Break callout</dt><dd>Heavy slanted type and a one-frame flash mark the moment a Shell shatters.</dd></div>
+            <div><dt>Encore prompt</dt><dd>Act again, or tap Pass to hand the extra action to an ally.</dd></div>
+            <div><dt>Party cards</dt><dd>Tap a portrait to fire its ultimate once the ring is full, even between turns.</dd></div>
+            <div><dt>Auto and 2×</dt><dd>Unlock after a stage is cleared once.</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ============ LORE ============ -->
+      <section id="lore" aria-labelledby="h-lore">
+        <p class="eyebrow">Lore</p>
+        <h2 id="h-lore">World and lore starter</h2>
+        <p class="logline">A thousand years ago the world of Hesper stopped turning. One half burns under a noon that never ends and the other freezes under endless night. People survive on the Duskline, a ring of permanent sunset where cities on colossal legs keep walking to stay in the light.</p>
+
+        <div class="zones">
+          <div class="zone"><div class="zone-band" style="background:linear-gradient(90deg,var(--art-paper),var(--art-gold))"></div><div class="zone-body"><h4>The Blaze (noonward)</h4><p>Bleached deserts and mirrored glass cities under a sun that never moves. Home of the Meridian Dominion.</p><p class="small">White, gold, hard shadows</p></div></div>
+          <div class="zone"><div class="zone-band" style="background:linear-gradient(90deg,var(--art-gold),var(--art-rose),var(--art-violet))"></div><div class="zone-body"><h4>The Duskline</h4><p>The inhabited ring. Walking cities called Striders, lantern markets, wind farms and caravans. Your home is Vesper, the oldest and smallest Strider.</p><p class="small">Rose, amber, violet</p></div></div>
+          <div class="zone"><div class="zone-band" style="background:linear-gradient(90deg,var(--art-night),var(--art-teal))"></div><div class="zone-body"><h4>The Hush (nightward)</h4><p>Frozen seas under auroras, glowing forests, and the Umbral Reach, where memory storms remake the land every night.</p><p class="small">Indigo, teal, starlight</p></div></div>
+        </div>
+
+        <h3>Factions</h3>
+        <div class="grid">
+          <div class="card"><h4>The Meridian Dominion</h4><p>Holds the Anchor, a pillar at the noon pole said to keep the world still. It teaches that the Stillness was a mercy, and mines Gloamstones to run its sun-engines.</p></div>
+          <div class="card"><h4>The Strider Compact</h4><p>A loose alliance of walking cities: traders, salvagers, and the Lamplighters who can kindle Gloamstones.</p></div>
+          <div class="card"><h4>The Hushborn</h4><p>People of the night side. They keep the old calendars and treat Gloamstones as graves.</p></div>
+          <div class="card"><h4>The Fades</h4><p>The enemies. Memories that lost their person, pouring out of the Hush during memory storms as paper-cut silhouettes with static at the edges.</p></div>
+        </div>
+
+        <h3>The mystery</h3>
+        <p>Gloamstones hold people from earlier Turnings, ages of the world that each ended when Hesper completed a rotation. The Dominion's founders stopped the rotation to end the cycle of erasure. The Stillness is slowly killing the world anyway, because the Duskline narrows every year. Io, the first Afterlight you kindle, remembers the very first Turning, and remembers the world moving. The story asks whether to restart the Turning, keep the Stillness, or find a third way.</p>
+        <p>The themes are memory and letting go, the cost of standing still, and a found family choosing its own future. They echo Xenoblade's cycles, Final Fantasy's rebels against an empire, and Persona's question of who you are underneath.</p>
+
+        <h3>Why the systems exist in the world</h3>
+        <div class="table-wrap">
+          <table class="mid">
+            <thead><tr><th scope="col">System</th><th scope="col">In the world</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Gacha (Kindling)</th><td>Lamplighters kindle Gloamstones, and which memory answers is left to chance.</td></tr>
+              <tr><th scope="row">Duplicates</th><td>Kindling the same memory again makes it clearer, raising its Resonance from rank 1 to 5.</td></tr>
+              <tr><th scope="row">Alternate versions</th><td>The same soul remembered from a different Turning, so seasonal variants are canon.</td></tr>
+              <tr><th scope="row">Roguelite runs</th><td>Descents into the Umbral Reach, which memory storms reshape every night. That's the daily seed.</td></tr>
+              <tr><th scope="row">Bonds</th><td>Lantern Hours, the quiet evenings aboard Vesper spent with the crew and Afterlights.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Launch cast</h3>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Character</th><th scope="col">Who they are</th><th scope="col">Battle role</th><th scope="col">Affinity</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Wren</th><td>Apprentice Lamplighter on Vesper, stubborn and kind. The protagonist.</td><td>Support, breaker</td><td>Sun</td></tr>
+              <tr><th scope="row">Io</th><td>The first Afterlight. Curious, blunt, and a stranger to the present.</td><td>Striker</td><td>Moon</td></tr>
+              <tr><th scope="row">Marisol Vey</th><td>Vesper's captain and everyone's big sister.</td><td>Defender, breaker</td><td>Volt</td></tr>
+              <tr><th scope="row">Tamsin</th><td>Hushborn scout whose glowing tattoos map the stars.</td><td>Debuffer</td><td>Frost</td></tr>
+              <tr><th scope="row">Aurelian</th><td>A Dominion knight who defects, formal to a fault.</td><td>Burst damage</td><td>Flame</td></tr>
+              <tr><th scope="row">Pip</th><td>A salvager kid with a clockwork kite.</td><td>Healer</td><td>Gale</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The six story characters join for free. Afterlights from the gacha are people from earlier Turnings, including other-Turning versions of the crew.</p>
+
+        <h3>Story shape</h3>
+        <p>Launch with a prologue and three chapters, about 6–8 hours with side content. Each chapter is 60–90 minutes of story in one region, with one Descent biome, two bond arcs and a boss. After launch, add a chapter or story event every 6–8 weeks.</p>
+
+        <h3>Two other directions, if Hesper isn't the one</h3>
+        <div class="grid">
+          <div class="card"><h4>Midnight Transit</h4><p>Leans toward Persona. The last train of the night never stops at the terminal. It runs on into the Undercity, a subway network built from the city's unfinished dreams. The gacha is the passengers whose dreams you rescue, and each night's route is different.</p></div>
+          <div class="card"><h4>Crownless Sky</h4><p>Leans toward Final Fantasy. Seven moons hold up a cracked sky. When one fell, its shards became the Starbound, people reborn with a god's fragment, and an empire now hunts them to rebuild the Crown. Moon dungeons reshape with the lunar phase.</p></div>
+        </div>
+        <div class="note">
+          <span class="tag">Before you announce</span>
+          <p>Run a trademark search on the working title. Avoid series-owned terms such as Monado, Blade, Persona, Materia and Aeon, and keep character designs clear of famous look-alikes.</p>
+        </div>
+      </section>
+
+      <!-- ============ DESIGN ============ -->
+      <section id="design" aria-labelledby="h-design">
+        <p class="eyebrow">Design</p>
+        <h2 id="h-design">Game design</h2>
+        <h3>Pillars</h3>
+        <div class="grid">
+          <div class="card"><h4>One thumb, real decisions</h4><p>Battles and menus work one-handed in portrait. The depth comes from choices, not from complicated inputs.</p></div>
+          <div class="card"><h4>Ten minutes is a full session</h4><p>Every mode has a satisfying place to stop within 10–15 minutes.</p></div>
+          <div class="card"><h4>Bonds make pulls matter</h4><p>Every Afterlight has scenes and a reason to exist in the story, so a pull is about a person as much as their stats.</p></div>
+          <div class="card"><h4>Every screen is sunset</h4><p>The twilight palette, the horizon diagonal and giant silhouettes appear on every screen.</p></div>
+        </div>
+
+        <h3>Combat: Break and Link</h3>
+        <p>One chain of five steps. Each step borrows from a game that proved it works.</p>
+        <ol class="chain">
+          <li><h4>Hit a weakness</h4><p>Weakness hits crack the enemy's Shell and earn an Encore.</p><p class="from">Persona 5 · Honkai: Star Rail</p></li>
+          <li><h4>Encore or Pass</h4><p>Take one extra action, or pass it to an ally who hasn't acted. Each pass adds a little damage.</p><p class="from">Persona 5's One More and Baton Pass</p></li>
+          <li><h4>Break</h4><p>At zero Shell the enemy loses its next turn and takes 50% more damage.</p><p class="from">FFVII Remake's stagger · Star Rail's Weakness Break</p></li>
+          <li><h4>Topple, then Launch</h4><p>Follow-up skills extend the chain for more delay and a guaranteed critical hit.</p><p class="from">Xenoblade 3's combos</p></li>
+          <li class="burst"><h4>Horizon Burst</h4><p>When every enemy is Broken, the whole party strikes in one cut-in.</p><p class="from">Persona's All-Out Attack · Xenoblade's Chain Attack</p></li>
+        </ol>
+        <ul class="plain">
+          <li>A party of four. The turn order is always on screen, and previewing a skill shows how it shifts, as in <a href="https://en.wikipedia.org/wiki/Final_Fantasy_X">Final Fantasy X's CTB</a>.</li>
+          <li>Six affinities: Sun, Moon, Flame, Frost, Gale and Volt. Each has its own icon shape and label, so weakness never depends on color alone.</li>
+          <li>Ultimates charge as you act and take hits. Tap a portrait to fire one between turns, as in Honkai: Star Rail.</li>
+          <li>An optional guard tap as a hit lands cuts its damage by 30%. It's off in auto mode and never required. Clair Obscur made timing inputs popular again, and here they stay a bonus.</li>
+          <li>Auto-battle and 2× speed unlock once a stage is cleared, and cleared stages can be swept.</li>
+        </ul>
+
+        <h3>Session loops</h3>
+        <div class="table-wrap">
+          <table class="mid">
+            <thead><tr><th scope="col">Loop</th><th scope="col">Length</th><th scope="col">What happens</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Turn</th><td>About 5 seconds</td><td>Pick a skill, then a target.</td></tr>
+              <tr><th scope="row">Battle</th><td>2–4 minutes</td><td>Break, chain, burst.</td></tr>
+              <tr><th scope="row">Descent run</th><td>10–15 minutes</td><td>Three floors, pick boons, beat the floor boss.</td></tr>
+              <tr><th scope="row">Daily</th><td>15–20 minutes</td><td>The daily-seed Descent, one bond scene and daily tasks. Worth about 2 pulls of Gloam.</td></tr>
+              <tr><th scope="row">Weekly</th><td>Across the week</td><td>A weekly boss, a new Descent modifier and a leaderboard reset. About 6 more pulls, for roughly 20 a week.</td></tr>
+              <tr><th scope="row">Cycle</th><td>6–8 weeks</td><td>A new chapter or event, banners, and a Descent biome or modifier set.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>The Descent</h3>
+        <ul class="plain">
+          <li>Three floors of four nodes each, ending in a floor boss. Nodes are battles, elites, events, rests, shops and Echoes.</li>
+          <li>After each battle, pick one of three Glimmers (boons). Glimmers belong to Paths, so each run builds toward a style, like Honkai: Star Rail's Simulated Universe.</li>
+          <li>Echo nodes lend you an Afterlight you don't own for the rest of the run. Players try units before pulling, and old units stay useful, as in <a href="https://kotaku.com/arknights-roguelike-integrated-strategy-gacha-1849197379">Arknights' Integrated Strategies</a>.</li>
+          <li>Everyone plays the same daily seed. Because the battle core is deterministic, the server can replay a submitted run to check its score.</li>
+          <li>A failed run still pays part of its rewards. Permanent upgrades are small and capped, so skill matters more than grinding.</li>
+          <li>Gloam from Descents has a weekly cap, which prevents burnout.</li>
+        </ul>
+
+        <h3>Bonds</h3>
+        <p>Each character has five bond ranks. A rank is a 1–3 minute scene written in ink that reuses existing portraits and backgrounds. Ranks unlock a small passive, a lore entry and, at rank 5, a new outfit color. Bond scenes are the cheapest content you can make per minute of play, and they carry much of the emotional weight.</p>
+
+        <h3>World map</h3>
+        <p>Each region is a node map over a painted vista, with one hero illustration reused as its chapter title card. It gives Xenoblade's sense of scale without an open world.</p>
+
+        <h3>Leave out</h3>
+        <ul class="leaveout">
+          <li>Open world</li><li>Real-time action combat</li><li>Calendar life-sim</li><li>PvP</li><li>Full voice acting</li><li>Crafting and housing</li><li>Guilds and co-op</li><li>Several premium currencies</li>
+        </ul>
+      </section>
+
+      <!-- ============ GACHA ============ -->
+      <section id="gacha" aria-labelledby="h-gacha">
+        <p class="eyebrow">Gacha</p>
+        <h2 id="h-gacha">Gacha design and business model</h2>
+        <p>The gacha is called Kindling. You spend Gloam, a currency earned in play, to kindle Gloamstones and call Afterlights. The business model is still open, so this section recommends a fair default, lets you test the numbers, and compares four ways to make money.</p>
+
+        <h3>What's in the pool</h3>
+        <ul class="plain">
+          <li><strong>Afterlights (★5 and ★4).</strong> Playable characters. They cost the most to make, so there are few of them.</li>
+          <li><strong>Memory Cards (★5, ★4, ★3).</strong> Equippable illustrations with a passive effect, like Fate/Grand Order's Craft Essences. Each is a single illustration, so they're cheap to add.</li>
+          <li><strong>Alternate memories.</strong> Other-Turning versions of existing characters, with a new outfit, palette and kit on an existing rig.</li>
+        </ul>
+
+        <h3>Recommended starting rules</h3>
+        <ul class="plain">
+          <li>★5 base rate of 2%. Soft pity starts at pull 45 and adds 6.5% per pull, and pull 60 is guaranteed.</li>
+          <li>★4 rate of 12%, with at least one ★4 in every 10 pulls.</li>
+          <li>60% of ★5 results are the featured Afterlight. After a miss, the next ★5 is guaranteed to be featured.</li>
+          <li>A spark at 120 pulls on a banner lets you pick the featured unit. At about 20 free pulls a week that's six weeks, one full cycle.</li>
+          <li>Pity carries over between banners. Unused spark points turn into Gloam when a banner ends.</li>
+          <li>Duplicates raise Resonance from rank 1 to 5, then convert to Gloam.</li>
+          <li>Odds and each player's pull history are always visible in the game.</li>
+          <li>No limited-only units in the first year. Every featured unit reruns within about three months.</li>
+          <li>No rewards for completing a set of random items. Japan banned that mechanic, kompu gacha, in 2012.</li>
+        </ul>
+
+        <h3 id="h-lab">Kindling odds lab</h3>
+        <p>Change the banner rules to see how many pulls players need. The chart shows the chance of having the unit by each pull. Presets use published or community-measured rates.</p>
+        <div class="lab" aria-labelledby="h-lab">
+          <div class="lab-top">
+            <label for="lab-preset">Preset
+              <select id="lab-preset">
+                <option value="duskline">Duskline starting rules</option>
+                <option value="genshin">Genshin Impact-style (community-measured)</option>
+                <option value="bluearchive">Blue Archive-style (Global)</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+          </div>
+          <div class="lab-controls">
+            <label for="lab-base">★5 base rate (%)<input id="lab-base" type="number" min="0.1" max="100" step="0.1" value="2"></label>
+            <label for="lab-soft">Soft pity starts at pull (0 = off)<input id="lab-soft" type="number" min="0" max="1000" step="1" value="45"></label>
+            <label for="lab-step">Soft pity increase per pull (%)<input id="lab-step" type="number" min="0" max="100" step="0.5" value="6.5"></label>
+            <label for="lab-hard">Guaranteed ★5 at pull (0 = off)<input id="lab-hard" type="number" min="0" max="2000" step="1" value="60"></label>
+            <label for="lab-feat">Share of ★5s that are featured (%)<input id="lab-feat" type="number" min="1" max="100" step="0.1" value="60"></label>
+            <label for="lab-spark">Spark at pull (0 = off)<input id="lab-spark" type="number" min="0" max="2000" step="1" value="120"></label>
+            <label for="lab-week">Free pulls per week<input id="lab-week" type="number" min="1" max="1000" step="1" value="20"></label>
+            <label for="lab-guar" class="check"><input id="lab-guar" type="checkbox" checked>Featured is guaranteed after a miss</label>
+          </div>
+          <div class="tiles" aria-live="polite">
+            <div class="tile"><div class="t-label">Pulls per ★5, on average</div><div class="t-value" id="t-avg">31.2</div><div class="t-sub" id="t-avg-sub">Any ★5, over the long run</div></div>
+            <div class="tile"><div class="t-label">Featured unit, half of players</div><div class="t-value" id="t-med">46 pulls</div><div class="t-sub" id="t-med-sub">About 2.3 weeks of free pulls</div></div>
+            <div class="tile"><div class="t-label">Featured unit, 90% of players</div><div class="t-value" id="t-p90">82 pulls</div><div class="t-sub" id="t-p90-sub">About 4.1 weeks of free pulls</div></div>
+            <div class="tile"><div class="t-label">Featured unit, worst case</div><div class="t-value" id="t-worst">120 pulls</div><div class="t-sub" id="t-worst-sub">Guaranteed by the spark</div></div>
+          </div>
+          <figure style="margin:0">
+            <div class="chart-head">
+              <span class="chart-title" id="chart-title">Chance you have the unit by each pull</span>
+              <span class="legend"><span><i class="key feature"></i>Featured unit</span><span><i class="key context"></i>Any ★5</span></span>
+              <button type="button" class="linkbtn" id="lab-table-toggle" aria-expanded="false" aria-controls="lab-table">Show as table</button>
+            </div>
+            <div class="chart-box" id="chart-box" tabindex="0" aria-describedby="chart-help">
+              <svg id="odds-chart" role="img" aria-label="Chart of the chance of having the featured unit and any ★5 by pull count"></svg>
+              <div class="tooltip" id="chart-tip" hidden></div>
+            </div>
+            <p class="sr-only" id="chart-help">Use the left and right arrow keys to move through pull counts.</p>
+            <div id="lab-table" hidden>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th scope="col">Share of players</th><th scope="col" class="num">Featured unit by pull</th><th scope="col" class="num">Weeks of free pulls</th><th scope="col" class="num">Any ★5 by pull</th></tr></thead>
+                  <tbody id="lab-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </figure>
+          <p class="small" style="margin:0">Genshin-style values use the community-measured soft pity: 0.6% rising 6% per pull from pull 74, guaranteed at 90. They leave out Capturing Radiance, which since version 5.0 slightly improves the 50/50. Blue Archive-style values use a 3% ★3 rate, 0.7% for the featured student and the 200-pull spark on the Global server.</p>
+        </div>
+
+        <h3>Four business models compared</h3>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col"></th><th scope="col">Real-money gacha</th><th scope="col" class="rec">Earned pulls + direct sales</th><th scope="col">Premium + earned pulls</th><th scope="col">Ads + earned pulls</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">How it earns</th><td>Players buy the currency that buys pulls, plus passes and packs</td><td>A supporter pack, outfits and a season pass with fixed rewards, all sold directly with no randomness</td><td>One up-front price, then expansions</td><td>Rewarded ads pay out Gloam</td></tr>
+              <tr><th scope="row">Revenue ceiling</th><td><span class="meter" data-l="3" aria-hidden="true"><i></i><i></i><i></i></span>High</td><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Low to medium</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Medium. Strong on Steam and Switch, weak on phones and the web</td><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Low</td></tr>
+              <tr><th scope="row">Legal and compliance load</th><td><span class="meter" data-l="3" aria-hidden="true"><i></i><i></i><i></i></span>High</td><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Low</td><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Low</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Medium, for ad consent and children's privacy</td></tr>
+              <tr><th scope="row">Backend and operations</th><td>Payments, refunds, fraud, age checks, live-ops</td><td>Accounts, saves, server-side pulls</td><td>Minimal, and it can run offline</td><td>Ad SDKs and consent</td></tr>
+              <tr><th scope="row">Pressure for new content</th><td><span class="meter" data-l="3" aria-hidden="true"><i></i><i></i><i></i></span>Very high</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Medium</td><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Low</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Medium</td></tr>
+              <tr><th scope="row">Player trust</th><td>Mixed</td><td>High</td><td>High</td><td>Mixed, since ads interrupt play</td></tr>
+              <tr><th scope="row">Fit for one developer</th><td><span class="meter" data-l="1" aria-hidden="true"><i></i><i></i><i></i></span>Poor until the game is proven</td><td><span class="meter" data-l="3" aria-hidden="true"><i></i><i></i><i></i></span>Best</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Good if you add Steam</td><td><span class="meter" data-l="2" aria-hidden="true"><i></i><i></i><i></i></span>Fair</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Recommendation.</strong> Launch free with earned-only pulls and sell things directly: a supporter pack, outfits, and a season pass with fixed rewards. With no paid randomness, the loot-box rules below don't apply, and players keep trusting you while you learn. Build the pull service on the server with odds tables and an audit log from day one, so paid pulls can be added later without a rebuild.</p>
+        <p>Revisit the choice at the end of the open beta. Paid pulls only make sense if day-7 retention is 8% or higher, you can pay for a legal review, and you can ship a new unit every cycle or have a publisher who can. Another Eden shows both paths are real: it ran for years as a gacha, then came back as a <a href="https://www.notebookcheck.net/Another-Eden-Begins-removes-gacha-for-Sept-17-single-player-launch.1393239.0.html">gacha-free premium release</a> for players who dislike gacha.</p>
+
+        <h3>If you ever sell pulls</h3>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Where</th><th scope="col">Rule</th><th scope="col">What you'd need</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">App Store and Google Play</th><td>Odds must be shown before purchase: <a href="https://www.fenwick.com/insights/publications/apple-now-requires-disclosure-of-loot-box-odds">Apple since 2017</a>, <a href="https://www.fenwick.com/insights/publications/google-play-now-requires-disclosure-of-loot-box-odds">Google since 2019</a>.</td><td>An odds page for every banner, reachable before buying</td></tr>
+              <tr><th scope="row">United States</th><td>The <a href="https://www.ftc.gov/news-events/news/press-releases/2025/01/genshin-impact-game-developer-will-be-banned-selling-lootboxes-teens-under-16-without-parental">FTC's 2025 settlement</a> with Genshin Impact's developer: a $20 million penalty, no loot-box sales to under-16s without parental consent, and odds and real-money prices disclosed.</td><td>An age gate, a parental consent flow, and the real-money price per pull</td></tr>
+              <tr><th scope="row">European Union</th><td>Consumer authorities' <a href="https://techinsights.linklaters.com/post/102k6t4/game-changer-eu-introduces-consumer-protection-guidance-for-in-game-virtual-curr">2025 principles</a> treat in-game currency purchases like real-money ones. The <a href="https://www.freshfields.com/en/our-thinking/blogs/technology-quotient/the-eus-proposed-digital-fairness-act-a-game-developers-guide-to-potential-imp-102ltio">Digital Fairness Act</a> proposal is expected in late 2026.</td><td>Real-money prices beside virtual ones, and a close watch on the DFA</td></tr>
+              <tr><th scope="row">United Kingdom</th><td><a href="https://www.gov.uk/guidance/loot-boxes-in-video-games-update-on-improvements-to-industry-led-protections">2023 industry principles</a> call for parental controls on under-18 purchases and clear odds.</td><td>Parental controls and odds</td></tr>
+              <tr><th scope="row">Belgium</th><td>Paid loot boxes have been treated as illegal gambling since 2018, though <a href="https://online.ucpress.edu/collabra/article/9/1/57641/195100/Breaking-Ban-Belgium-s-Ineffective-Gambling-Law">enforcement has been weak</a>.</td><td>Paid pulls switched off for Belgian players</td></tr>
+              <tr><th scope="row">Netherlands</th><td>A 2022 court ruling overturned the regulator's fine against EA. Stricter rules are being pushed at EU level.</td><td>Keep watching</td></tr>
+              <tr><th scope="row">Brazil</th><td><a href="https://www.pcgamer.com/gaming-industry/brazils-president-has-signed-a-ban-on-selling-loot-boxes-to-minors-as-part-of-a-larger-online-child-safety-law/">Law 15.211/2025</a> (ECA Digital), enforceable since March 17, 2026, bans loot boxes in games aimed at or likely to reach minors.</td><td>Age assurance, or no paid pulls in Brazil</td></tr>
+              <tr><th scope="row">Australia</th><td>Since <a href="https://www.classification.gov.au/about-us/media-and-news/news/new-classifications-for-gambling-content-video-games">September 22, 2024</a>, games with paid loot boxes are rated M at minimum.</td><td>Accept an M rating</td></tr>
+              <tr><th scope="row">South Korea</th><td>Odds disclosure has been law <a href="https://www.sciencedirect.com/science/article/pii/S0001691825008030">since March 22, 2024</a>, in the game, on the website and in ads. A 2025 amendment added rules for damages claims.</td><td>Exact odds everywhere, and possibly a local representative</td></tr>
+              <tr><th scope="row">Japan</th><td><a href="https://www.gamedeveloper.com/business/why-quot-kompu-gacha-quot-was-banned">Kompu gacha banned since 2012</a>. Industry guidelines cover how odds are displayed.</td><td>Odds display and no set-completion rewards</td></tr>
+              <tr><th scope="row">China</th><td>Odds and draw records <a href="https://www.cambridge.org/core/journals/behavioural-public-policy/article/gaming-the-system-suboptimal-compliance-with-loot-box-probability-disclosure-regulations-in-china/B2642E2F8B7164236E5477D58D2B26DE">required since 2017</a>, and a 2023 draft would ban draws for minors. Publishing there also needs a license.</td><td>Out of scope for now</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note">
+          <span class="tag">Paying on the web</span>
+          <p>In the US, apps can now link to web checkout. Apple has charged no commission on linked purchases since a 2025 contempt ruling, and <a href="https://macdailynews.com/2026/08/14/u-s-supreme-court-clears-path-for-app-store-commission-showdown-as-apple-must-defend-its-rates-in-lower-court/">the Supreme Court takes up the fight in its October 2026 term</a>. Google Play has let US developers <a href="https://support.google.com/googleplay/android-developer/answer/15582165?hl=en">link out and use other billing</a> since late 2025. Check the current terms before launch.</p>
+        </div>
+      </section>
+
+      <!-- ============ TECH ============ -->
+      <section id="tech" aria-labelledby="h-tech">
+        <p class="eyebrow">Build</p>
+        <h2 id="h-tech">Tech stack</h2>
+        <p>Everything is TypeScript, so one language covers the client, the server and the tools. PixiJS draws the scenes, the DOM draws the menus, and a small deterministic battle core is shared by all of them.</p>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Layer</th><th scope="col">Pick</th><th scope="col">Why</th><th scope="col">Alternative</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Language and build</th><td>TypeScript, Vite, pnpm workspaces</td><td>You already know it, the dev loop is fast, and code is shared between client and server.</td><td>None needed</td></tr>
+              <tr><th scope="row">Rendering</th><td>PixiJS v8, WebGPU with WebGL fallback</td><td>A fast 2D renderer under active development (<a href="https://pixijs.com/blog/june-2026">v8.19 in June 2026</a>) with an official Spine runtime. <a href="https://web.dev/blog/webgpu-supported-major-browsers">WebGPU now ships</a> in Chrome, Edge, Firefox and Safari 26.</td><td><a href="https://phaser.io/news/2026/05/phaser-3-vs-phaser-4">Phaser 4</a> (April 2026) if you want scenes, input and tweens included</td></tr>
+              <tr><th scope="row">Character animation</th><td>Spine with spine-pixi-v8</td><td>Skeletal 2D with meshes for anime hair and cloth motion. <a href="https://esotericsoftware.com/spine-purchase">Essential is $69 and Professional $299</a>, one-time. Meshes need Professional. Both require under $500k in revenue or funding.</td><td>Live2D Cubism. <a href="https://www.live2d.com/en/sdk/license/">Free to publish</a> for individuals and businesses under ¥10M in yearly sales, with a license once a title passes ¥20M a year.</td></tr>
+              <tr><th scope="row">Menus and HUD</th><td>HTML, CSS and SVG over the canvas, with Preact, Svelte or Solid</td><td>Crisp text at any density, accessibility, and fast iteration. Persona-style motion comes from CSS and the Web Animations API.</td><td>An all-canvas UI in PixiJS</td></tr>
+              <tr><th scope="row">Story and bonds</th><td>ink with <a href="https://github.com/y-lohse/inkjs">inkjs</a></td><td>Proven narrative scripting that runs in any browser and in Node.</td><td>Yarn Spinner</td></tr>
+              <tr><th scope="row">Battle core</th><td>A pure TypeScript package with seeded RNG and no rendering</td><td>The same code runs in the client, on the server and in CI simulations.</td><td>None needed</td></tr>
+              <tr><th scope="row">Backend</th><td><a href="https://supabase.com/docs/guides/functions">Supabase</a>: auth, Postgres, Edge Functions in TypeScript, row-level security</td><td>Pulls, saves and daily seeds on the server with very little operations work.</td><td><a href="https://heroiclabs.com/docs/hiro/guides/gameplay-mechanics/gacha/index.html">Nakama with Hiro</a>, an open-source game server with a TypeScript runtime and ready-made gacha, economy and leaderboards</td></tr>
+              <tr><th scope="row">Mobile apps</th><td><a href="https://ionic.io/blog/announcing-capacitor-8">Capacitor 8</a></td><td>Wraps the same web build for iOS and Android with native plugins.</td><td>A PWA only, with no store presence</td></tr>
+              <tr><th scope="row">Payments, if you monetize</th><td><a href="https://github.com/RevenueCat/purchases-capacitor">RevenueCat</a> Capacitor plugin and Web Billing through Stripe</td><td>One set of entitlements across the App Store, Google Play and the web.</td><td>StoreKit and Play Billing directly, plus Stripe</td></tr>
+              <tr><th scope="row">Desktop, optional</th><td>Electron or Tauri, then Steam</td><td><a href="https://en.wikipedia.org/wiki/Vampire_Survivors">Vampire Survivors</a> shipped as a Phaser web game before it moved to Unity.</td><td>None needed</td></tr>
+              <tr><th scope="row">Quality</th><td>Vitest, Playwright, Sentry</td><td>Unit tests on the battle core, UI smoke tests at phone sizes, and error reports from real devices.</td><td>None needed</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>How the pieces fit</h3>
+        <div class="arch" role="group" aria-label="Architecture overview">
+          <div class="tier"><div class="tier-name">Players</div><div class="boxes">
+            <div class="box"><b>Web and PWA</b><span>Instant play from a link</span></div>
+            <div class="box"><b>iOS and Android</b><span>The same build wrapped in Capacitor</span></div>
+            <div class="box"><b>Steam</b><span>Optional, via Electron or Tauri</span></div>
+          </div></div>
+          <div class="tier-arrow" aria-hidden="true">↓ one shared codebase</div>
+          <div class="tier"><div class="tier-name">Shared TypeScript</div><div class="boxes">
+            <div class="box"><b>battle-core</b><span>Deterministic rules and seeded RNG</span></div>
+            <div class="box"><b>content</b><span>Characters, skills and enemies as schema-checked data</span></div>
+            <div class="box"><b>client</b><span>PixiJS scenes and DOM menus</span></div>
+          </div></div>
+          <div class="tier-arrow" aria-hidden="true">↓ small HTTPS API</div>
+          <div class="tier"><div class="tier-name">Server</div><div class="boxes">
+            <div class="box"><b>Accounts and saves</b><span>Guest accounts, cloud sync</span></div>
+            <div class="box key-box"><b>Kindling service</b><span>Server-side RNG, odds tables, pity state, audit log</span></div>
+            <div class="box"><b>Descent seeds</b><span>Daily seed, score checks by replay</span></div>
+            <div class="box"><b>Live config</b><span>Banners, events, feature flags</span></div>
+          </div></div>
+          <div class="tier-arrow" aria-hidden="true">↓</div>
+          <div class="tier"><div class="tier-name">Operations</div><div class="boxes">
+            <div class="box"><b>CDN</b><span>Art and audio streamed per region</span></div>
+            <div class="box"><b>Analytics</b><span>Retention, funnels, economy</span></div>
+            <div class="box"><b>Error tracking</b><span>Crashes by device and browser</span></div>
+          </div></div>
+        </div>
+
+        <h3>Performance budgets for phones</h3>
+        <dl class="budgets">
+          <div><dt>First load</dt><dd>Title screen interactive within 3 seconds on 4G, with 5 MB or less downloaded.</dd></div>
+          <div><dt>First battle</dt><dd>25 MB or less in total. Stream everything else by region.</dd></div>
+          <div><dt>Frame rate</dt><dd>60 fps on a three- to four-year-old mid-range Android phone, and never below 30. Cap rendering at 2× device pixels.</dd></div>
+          <div><dt>Memory</dt><dd>Keep texture memory around 300 MB or less, pack atlases at 2048 px, and unload regions the player leaves.</dd></div>
+          <div><dt>Battle scene</dt><dd>At most eight skeletons on screen, with one or two atlas pages per character.</dd></div>
+          <div><dt>Saves</dt><dd>Local first in IndexedDB, synced to the cloud, with a versioned save format.</dd></div>
+        </dl>
+
+        <h3>Engineering habits</h3>
+        <ul class="plain">
+          <li>Keep the battle core deterministic: the same seed and inputs always give the same result. The server can then verify Descent scores, and the simulator can balance units.</li>
+          <li>Keep content in data files checked by schemas such as zod, never in code.</li>
+          <li>Run 10,000 simulated battles in CI for every balance change.</li>
+          <li>Version the save format from day one and write migrations.</li>
+          <li>Keep pulls, currency and rewards on the server. The client only asks.</li>
+          <li>Ship accessibility options: text size, reduced motion, affinity icons that don't depend on color, and hold-to-confirm for spending.</li>
+        </ul>
+      </section>
+
+      <!-- ============ PRODUCTION ============ -->
+      <section id="production" aria-labelledby="h-production">
+        <p class="eyebrow">Make</p>
+        <h2 id="h-production">Production pipeline for one person</h2>
+        <h3>What one new Afterlight costs</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Step</th><th scope="col" class="num">Hours, estimated</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Concept sheet and silhouette test</th><td class="num">6–10</td></tr>
+              <tr><th scope="row">Splash illustration (or commission it)</th><td class="num">20–35</td></tr>
+              <tr><th scope="row">Spine prep and rig</th><td class="num">10–20</td></tr>
+              <tr><th scope="row">Animations: idle, attack, skill, ultimate, hit, knockout, victory</th><td class="num">15–25</td></tr>
+              <tr><th scope="row">Effects and sound hookup</th><td class="num">6–12</td></tr>
+              <tr><th scope="row">Kit design and balance simulations</th><td class="num">6–10</td></tr>
+              <tr><th scope="row">Five bond scenes in ink</th><td class="num">8–12</td></tr>
+              <tr><th scope="row">Testing and polish</th><td class="num">4–6</td></tr>
+              <tr class="total"><th scope="row">Total</th><td class="num">75–130</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>With a commissioned splash, it's about 55–95 hours. At 15 hours a week, one new Afterlight takes 4–8 weeks of all your time. So plan on a launch roster of 12, then at most one new Afterlight per 6–8-week cycle. Fill banners with alternate memories, Memory Cards and reruns.</p>
+
+        <h3>Art sourcing and AI</h3>
+        <p>Commission character art from human artists under contracts that grant full commercial rights. The reasons are practical.</p>
+        <ul class="plain">
+          <li>The US Copyright Office's <a href="https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf">January 2025 report</a> says prompts alone don't make you the author, so purely AI-generated art may not be protected. In a game whose product is its characters, that's a serious gap.</li>
+          <li>Steam requires disclosure of AI-generated content that players see, under <a href="https://www.videogameschronicle.com/news/valve-has-significantly-rewritten-steams-rules-for-how-developers-much-disclose-ai-use/">rules rewritten in January 2026</a>.</li>
+          <li>Anime gacha players study splash art closely, and finding AI art in a reveal can sink trust overnight.</li>
+        </ul>
+
+        <h3>Music and tools</h3>
+        <p>Commission the main theme and battle theme during the vertical slice, because they define the game as much as the art. Make sure the license covers streaming and soundtrack sales. For tools, use Clip Studio Paint or Krita for illustration, Spine for rigs, Figma for UI, Inky for writing and Blender for background blockouts.</p>
+      </section>
+
+      <!-- ============ RISKS ============ -->
+      <section id="risks" aria-labelledby="h-risks">
+        <p class="eyebrow">Risk</p>
+        <h2 id="h-risks">Risks, and how you'll know it's working</h2>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Risk</th><th scope="col">Why it bites</th><th scope="col">What to do</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Scope</th><td>A JRPG, a gacha and a roguelite are three games.</td><td>Hold to the pillars and cut lists. Prove a vertical slice before production, and add no new systems after P3.</td></tr>
+              <tr><th scope="row">Content treadmill</th><td>Gacha players expect constant new units, and Square Enix is closing FFVII Ever Crisis partly over that load.</td><td>Earned-only pulls, reruns, alternate memories and Memory Cards on 6–8-week cycles.</td></tr>
+              <tr><th scope="row">Art cost and consistency</th><td>Characters are the most expensive asset and the easiest to get wrong.</td><td>Style tiles, silhouette tests and character sheet templates. Commission splashes and reuse rigs.</td></tr>
+              <tr><th scope="row">Phone browser limits</th><td>Memory caps, and WebGPU gaps on some Android and Linux devices.</td><td>Keep a WebGL fallback and texture budgets, and test on real phones every month.</td></tr>
+              <tr><th scope="row">Store and legal changes</th><td>Loot-box rules and link-out fees are moving targets.</td><td>Keep paid randomness out until the beta decision, and review the compliance map before launch.</td></tr>
+              <tr><th scope="row">Cheating and exploits</th><td>Anything on the client can be edited.</td><td>Server-side pulls and currency, and replays of deterministic seeds to check scores.</td></tr>
+              <tr><th scope="row">Burnout</th><td>One person carries every role for years.</td><td>Plan for 15 hours a week with buffer, hold a polish week each month with no new features, and give public dates as ranges.</td></tr>
+              <tr><th scope="row">Imitation and AI backlash</th><td>Anime fans spot look-alikes and AI art quickly.</td><td>Follow the originality guardrails, keep character art human-made, and search trademarks early.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Metrics</h3>
+        <div class="table-wrap">
+          <table class="wide">
+            <thead><tr><th scope="col">Stage</th><th scope="col">Watch</th><th scope="col">Target or reference</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Playtests (P1–P3)</th><td>Battles per session, the share of players who start a second Descent, time to first pull, and where onboarding loses people.</td><td>Median battle 2–4 minutes and run 10–15 minutes. At least half start a second run.</td></tr>
+              <tr><th scope="row">Open beta (P5)</th><td>Day-1, day-7 and day-30 retention, session length, sessions per day, Descent completion, bond rank-ups by day 3, crash-free sessions.</td><td>In <a href="https://www.gameanalytics.com/reports/2025-mobile-gaming-benchmarks">GameAnalytics' 2025 benchmarks</a>, median day-1 retention is about 22% and the top quarter reaches 31–33% on iOS. Median day-7 is 3.4–3.9% and the top quarter 7–8%. Aim for the top quarter, and 12–20 minute sessions.</td></tr>
+              <tr><th scope="row">Economy</th><td>Gloam earned per week, pulls to a featured unit, currency sinks against sources.</td><td>About 20 pulls a week, with medians close to what the odds lab predicts.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ SOURCES ============ -->
+      <section id="sources" aria-labelledby="h-sources">
+        <p class="eyebrow">Sources</p>
+        <h2 id="h-sources">Sources</h2>
+        <div class="sources">
+          <div>
+            <h3>Art and design</h3>
+            <ul>
+              <li><a href="https://www.siliconera.com/xenoblade-chronicles-3-characters-designed-by-masatsugu-saito/">Xenoblade Chronicles 3 characters designed by Masatsugu Saito (Siliconera)</a></li>
+              <li><a href="https://www.nintendo.com/us/whatsnew/ask-the-developer-vol-6-xenoblade-chronicles-3-part-2/">Ask the Developer Vol. 6, Xenoblade Chronicles 3 Part 2 (Nintendo)</a></li>
+              <li><a href="https://xenoblade.fandom.com/wiki/Masatsugu_Saito">Masatsugu Saito (Xenoblade Wiki)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Xenoblade_Chronicles_2">Xenoblade Chronicles 2 (Wikipedia)</a></li>
+              <li><a href="https://nintendoeverything.com/square-enixs-tetsuya-nomura-contributing-to-xenoblade-chronicles-2-as-a-guest-designer/">Tetsuya Nomura as a Xenoblade Chronicles 2 guest designer (Nintendo Everything)</a></li>
+              <li><a href="https://nintendoeverything.com/kunihiko-tanaka-designed-a-blade-in-xenoblade-chronicles-2/">Kunihiko Tanaka designed a Blade (Nintendo Everything)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Persona_5">Persona 5 (Wikipedia)</a></li>
+              <li><a href="https://personacentral.com/persona-5-interview-ui-design-sound-music/">Persona 5 interview on UI, sound and music (Persona Central)</a></li>
+              <li><a href="https://www.gamesradar.com/games/jrpg/the-lead-ui-designer-on-metaphor-refantazio-had-never-designed-for-a-game-before-he-just-rolled-up-and-made-some-of-the-best-ui-ive-ever-seen-in-a-jrpg/">Metaphor: ReFantazio's lead UI designer (GamesRadar+)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Akihiko_Yoshida">Akihiko Yoshida (Wikipedia)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Tetsuya_Nomura">Tetsuya Nomura (Wikipedia)</a></li>
+              <li><a href="https://squareenix.fandom.com/wiki/Yoshitaka_Amano">Yoshitaka Amano (Square Enix Wiki)</a></li>
+              <li><a href="https://www.gdcvault.com/play/1022031/GuiltyGearXrd-s-Art-Style-The">Guilty Gear Xrd's Art Style (GDC Vault)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Granblue_Fantasy">Granblue Fantasy (Wikipedia)</a></li>
+              <li><a href="https://zenless-zone-zero.fandom.com/wiki/Zenless_Zone_Zero/Background">Zenless Zone Zero background (ZZZ Wiki)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/HD-2D">HD-2D (Wikipedia)</a></li>
+            </ul>
+            <h3>Game systems</h3>
+            <ul>
+              <li><a href="https://www.gamedeveloper.com/design/learn-how-to-make-turn-based-battles-from-persona-5">Turn-based battles from Persona 5 (Game Developer)</a></li>
+              <li><a href="https://www.xenoserieswiki.org/wiki/Art_Combo_(XC3)">Art Combo, Xenoblade 3 (Xeno Series Wiki)</a></li>
+              <li><a href="https://www.xenoserieswiki.org/wiki/Chain_Attack_(XC3)">Chain Attack, Xenoblade 3 (Xeno Series Wiki)</a></li>
+              <li><a href="https://honkai-star-rail.fandom.com/wiki/Toughness">Toughness (Honkai: Star Rail Wiki)</a></li>
+              <li><a href="https://www.prydwen.gg/star-rail/guides/simulated-universe">Simulated Universe guide (Prydwen)</a></li>
+              <li><a href="https://kotaku.com/arknights-roguelike-integrated-strategy-gacha-1849197379">Arknights' roguelike mode (Kotaku)</a></li>
+              <li><a href="https://www.gamerbraves.com/arknights-integrated-strategies-gets-players-playing-longer-on-average/">Integrated Strategies and playtime (GamerBraves)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Final_Fantasy_X">Final Fantasy X (Wikipedia)</a></li>
+              <li><a href="https://finalfantasy.fandom.com/wiki/Stagger_(VII_Remake)">Stagger in FFVII Remake (Final Fantasy Wiki)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/The_Game_Awards_2025">The Game Awards 2025 (Wikipedia)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Persona_5:_The_Phantom_X">Persona 5: The Phantom X (Wikipedia)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Another_Eden">Another Eden (Wikipedia)</a></li>
+              <li><a href="https://automaton-media.com/en/interviews/another-eden-begins-was-rebuilt-from-scratch-in-a-new-engine-so-the-10-year-old-rpg-could-live-on-beyond-its-service-we-want-gamers-who-hate-gacha-to-try-it-devs-say/">Another Eden Begins interview (AUTOMATON)</a></li>
+              <li><a href="https://gamerant.com/final-fantasy-rpgs-shutting-down-october-2026/">Final Fantasy games shutting down (Game Rant)</a></li>
+              <li><a href="https://collider.com/final-fantasy-vii-spin-off-ever-crisis-ending-service-october-6-2026/">FFVII Ever Crisis ending service (Collider)</a></li>
+              <li><a href="https://www.pockettactics.com/dissidia-final-fantasy-opera-omnia/shut-down">Dissidia Opera Omnia shutdown (Pocket Tactics)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/War_of_the_Visions:_Final_Fantasy_Brave_Exvius">War of the Visions (Wikipedia)</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Final_Fantasy_Record_Keeper">Final Fantasy Record Keeper (Wikipedia)</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Gacha rules and law</h3>
+            <ul>
+              <li><a href="https://game8.co/games/Genshin-Impact/archives/305937">Genshin Impact pity system (Game8)</a></li>
+              <li><a href="https://game8.co/games/Genshin-Impact/archives/468191">Capturing Radiance (Game8)</a></li>
+              <li><a href="https://gbf.wiki/Draw">Granblue Fantasy draws and sparks (GBF Wiki)</a></li>
+              <li><a href="https://bluearchive.wiki/wiki/Recruitment_(Gacha)">Blue Archive recruitment (Blue Archive Wiki)</a></li>
+              <li><a href="https://www.ftc.gov/news-events/news/press-releases/2025/01/genshin-impact-game-developer-will-be-banned-selling-lootboxes-teens-under-16-without-parental">FTC settlement with Genshin Impact's developer</a></li>
+              <li><a href="https://developer.apple.com/app-store/review/guidelines/">App Review Guidelines (Apple)</a></li>
+              <li><a href="https://www.fenwick.com/insights/publications/google-play-now-requires-disclosure-of-loot-box-odds">Google Play odds disclosure (Fenwick)</a></li>
+              <li><a href="https://www.sciencedirect.com/science/article/pii/S0001691825008030">South Korea's disclosure law and compliance (ScienceDirect)</a></li>
+              <li><a href="https://www.classification.gov.au/about-us/media-and-news/news/new-classifications-for-gambling-content-video-games">Australian Classification on gambling-like content</a></li>
+              <li><a href="https://www.pcgamer.com/gaming-industry/brazils-president-has-signed-a-ban-on-selling-loot-boxes-to-minors-as-part-of-a-larger-online-child-safety-law/">Brazil's loot-box ban for minors (PC Gamer)</a></li>
+              <li><a href="https://www.ascjogos.org.br/en/post/brazil-loot-box-ban-eca-digital-kids-games">ECA Digital and kids' games (ASCJogos)</a></li>
+              <li><a href="https://www.gamedeveloper.com/business/why-quot-kompu-gacha-quot-was-banned">Why kompu gacha was banned (Game Developer)</a></li>
+              <li><a href="https://www.cambridge.org/core/journals/behavioural-public-policy/article/gaming-the-system-suboptimal-compliance-with-loot-box-probability-disclosure-regulations-in-china/B2642E2F8B7164236E5477D58D2B26DE">China's disclosure rules (Behavioural Public Policy)</a></li>
+              <li><a href="https://online.ucpress.edu/collabra/article/9/1/57641/195100/Breaking-Ban-Belgium-s-Ineffective-Gambling-Law">Belgium's loot-box ban in practice (Collabra)</a></li>
+              <li><a href="https://www.gamblingcommission.gov.uk/manual/lootboxes-advice-to-the-gambling-commission-from-absg/international-approaches-lootboxes-advice-to-the-gambling-commission-from">International approaches to loot boxes (UK Gambling Commission)</a></li>
+              <li><a href="https://www.gov.uk/guidance/loot-boxes-in-video-games-update-on-improvements-to-industry-led-protections">UK industry-led protections (GOV.UK)</a></li>
+              <li><a href="https://techinsights.linklaters.com/post/102k6t4/game-changer-eu-introduces-consumer-protection-guidance-for-in-game-virtual-curr">EU principles on in-game currencies (Linklaters)</a></li>
+              <li><a href="https://www.freshfields.com/en/our-thinking/blogs/technology-quotient/the-eus-proposed-digital-fairness-act-a-game-developers-guide-to-potential-imp-102ltio">The proposed Digital Fairness Act (Freshfields)</a></li>
+              <li><a href="https://www.fenwick.com/insights/publications/ninth-circuit-largely-upholds-ruling-in-epic-v-apple">Ninth Circuit ruling in Epic v. Apple (Fenwick)</a></li>
+              <li><a href="https://macdailynews.com/2026/08/14/u-s-supreme-court-clears-path-for-app-store-commission-showdown-as-apple-must-defend-its-rates-in-lower-court/">Supreme Court and App Store commissions (MacDailyNews)</a></li>
+              <li><a href="https://support.google.com/googleplay/android-developer/answer/15582165?hl=en">Google Play policies for US users (Play Console Help)</a></li>
+              <li><a href="https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf">Copyright and AI, Part 2 (US Copyright Office)</a></li>
+              <li><a href="https://www.videogameschronicle.com/news/valve-has-significantly-rewritten-steams-rules-for-how-developers-much-disclose-ai-use/">Steam's AI disclosure rules (VGC)</a></li>
+            </ul>
+            <h3>Technology and benchmarks</h3>
+            <ul>
+              <li><a href="https://pixijs.com/blog/june-2026">PixiJS update, June 2026</a></li>
+              <li><a href="https://phaser.io/news/2026/05/phaser-3-vs-phaser-4">Phaser 3 vs Phaser 4</a></li>
+              <li><a href="https://web.dev/blog/webgpu-supported-major-browsers">WebGPU in all major browsers (web.dev)</a></li>
+              <li><a href="https://esotericsoftware.com/blog/spine-pixi-v8-runtime-released">spine-pixi-v8 runtime (Esoteric Software)</a></li>
+              <li><a href="https://esotericsoftware.com/spine-purchase">Spine pricing (Esoteric Software)</a></li>
+              <li><a href="https://www.live2d.com/en/sdk/license/">Live2D SDK publication license</a></li>
+              <li><a href="https://pixiv.github.io/three-vrm/docs/modules/three-vrm-materials-mtoon.html">three-vrm MToon</a></li>
+              <li><a href="https://news.viverse.com/post/vrm-models-explained">VRM models explained (VIVERSE)</a></li>
+              <li><a href="https://ionic.io/blog/announcing-capacitor-8">Announcing Capacitor 8 (Ionic)</a></li>
+              <li><a href="https://github.com/RevenueCat/purchases-capacitor">RevenueCat for Capacitor</a></li>
+              <li><a href="https://www.revenuecat.com/docs/web/integrations/stripe">RevenueCat and Stripe Billing</a></li>
+              <li><a href="https://supabase.com/docs/guides/functions">Supabase Edge Functions</a></li>
+              <li><a href="https://github.com/heroiclabs/nakama">Nakama</a> and <a href="https://heroiclabs.com/docs/hiro/guides/gameplay-mechanics/gacha/index.html">Hiro's gacha guide</a></li>
+              <li><a href="https://github.com/y-lohse/inkjs">inkjs</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Vampire_Survivors">Vampire Survivors (Wikipedia)</a></li>
+              <li><a href="https://www.gameanalytics.com/reports/2025-mobile-gaming-benchmarks">2025 Mobile Gaming Benchmarks (GameAnalytics)</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <footer class="end">Duskline is a working title. Hours, budgets and targets are planning estimates to revisit at every gate.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Contents highlighting ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (l) { l.removeAttribute("aria-current"); });
+        var a = byId[e.target.id];
+        if (a) a.setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-40% 0px -55% 0px" });
+    document.querySelectorAll("main > section[id]").forEach(function (s) { io.observe(s); });
+  }
+
+  /* ---------- Kindling odds model ----------
+     Exact distribution by dynamic programming over (pulls since last ★5, guarantee flag). */
+  function model(p) {
+    var base = p.base, soft = p.soft, step = p.step, hard = p.hard, feat = p.feat, guar = p.guar, spark = p.spark;
+    function rate(k) {
+      if (hard > 0 && k >= hard) return 1;
+      var r = base;
+      if (soft > 0 && k >= soft) r = base + (k - soft + 1) * step;
+      return Math.min(1, Math.max(0, r));
+    }
+    var kMax;
+    if (hard > 0) kMax = hard;
+    else if (soft > 0 && step > 0) kMax = soft - 1 + Math.ceil((1 - base) / step);
+    else kMax = 1;
+    kMax = Math.max(1, Math.min(kMax, 5000));
+    var tCap = spark > 0 ? spark : 5000;
+
+    var anyCdf = [0], surv = 1, t;
+    for (t = 1; t <= tCap; t++) {
+      surv *= 1 - rate(Math.min(t, kMax + 1));
+      anyCdf.push(spark > 0 && t === spark ? 1 : 1 - surv);
+      if (spark === 0 && surv < 1e-7) break;
+    }
+    var avg = 0; surv = 1;
+    for (t = 1; t <= 20000; t++) { avg += surv; surv *= 1 - rate(Math.min(t, kMax + 1)); if (surv < 1e-12) break; }
+
+    var cur0 = new Float64Array(kMax + 1), cur1 = new Float64Array(kMax + 1);
+    cur0[0] = 1;
+    var featCdf = [0], got = 0, truncated = false;
+    for (t = 1; t <= tCap; t++) {
+      var n0 = new Float64Array(kMax + 1), n1 = new Float64Array(kMax + 1), hit = 0, k, m, r;
+      for (k = 0; k <= kMax; k++) {
+        m = cur0[k];
+        if (m) {
+          r = rate(Math.min(k + 1, kMax + 1));
+          hit += m * r * feat;
+          if (guar) n1[0] += m * r * (1 - feat); else n0[0] += m * r * (1 - feat);
+          n0[Math.min(k + 1, kMax)] += m * (1 - r);
+        }
+        m = cur1[k];
+        if (m) {
+          r = rate(Math.min(k + 1, kMax + 1));
+          hit += m * r;
+          n1[Math.min(k + 1, kMax)] += m * (1 - r);
+        }
+      }
+      var rest = 0;
+      for (k = 0; k <= kMax; k++) rest += n0[k] + n1[k];
+      if (spark > 0 && t === spark) { hit += rest; rest = 0; }
+      got += hit;
+      featCdf.push(Math.min(1, got));
+      cur0 = n0; cur1 = n1;
+      if (spark === 0 && rest < 1e-7) break;
+      if (t === tCap && rest > 1e-3) truncated = true;
+    }
+    return { avg: avg, anyCdf: anyCdf, featCdf: featCdf, truncated: truncated };
+  }
+  function firstAt(cdf, q) {
+    for (var i = 1; i < cdf.length; i++) if (cdf[i] >= q - 1e-12) return i;
+    return null;
+  }
+  function valAt(cdf, t) { return t < cdf.length ? cdf[t] : cdf[cdf.length - 1]; }
+
+  /* ---------- Controls ---------- */
+  var PRESETS = {
+    duskline: { base: 2, soft: 45, step: 6.5, hard: 60, feat: 60, guar: true, spark: 120 },
+    genshin: { base: 0.6, soft: 74, step: 6, hard: 90, feat: 50, guar: true, spark: 0 },
+    bluearchive: { base: 3, soft: 0, step: 0, hard: 0, feat: 23.3, guar: false, spark: 200 }
+  };
+  var el = function (id) { return document.getElementById(id); };
+  var inputs = { base: el("lab-base"), soft: el("lab-soft"), step: el("lab-step"), hard: el("lab-hard"), feat: el("lab-feat"), spark: el("lab-spark"), week: el("lab-week"), guar: el("lab-guar") };
+  var presetSel = el("lab-preset");
+
+  function num(input, lo, hi, fallback) {
+    var v = parseFloat(input.value);
+    if (!isFinite(v)) v = fallback;
+    return Math.min(hi, Math.max(lo, v));
+  }
+  function readParams() {
+    return {
+      base: num(inputs.base, 0.1, 100, 2) / 100,
+      soft: Math.round(num(inputs.soft, 0, 1000, 0)),
+      step: num(inputs.step, 0, 100, 0) / 100,
+      hard: Math.round(num(inputs.hard, 0, 2000, 0)),
+      feat: num(inputs.feat, 1, 100, 50) / 100,
+      spark: Math.round(num(inputs.spark, 0, 2000, 0)),
+      week: num(inputs.week, 1, 1000, 20),
+      guar: inputs.guar.checked
+    };
+  }
+  function applyPreset(key) {
+    var p = PRESETS[key]; if (!p) return;
+    inputs.base.value = p.base; inputs.soft.value = p.soft; inputs.step.value = p.step; inputs.hard.value = p.hard;
+    inputs.feat.value = p.feat; inputs.spark.value = p.spark; inputs.guar.checked = p.guar;
+  }
+
+  var state = null;
+  var fmtWeeks = function (pulls, week) { var w = pulls / week; return "About " + (w < 10 ? w.toFixed(1) : Math.round(w)) + " weeks of free pulls"; };
+
+  function compute() {
+    var p = readParams();
+    var res = model(p);
+    var med = firstAt(res.featCdf, 0.5), p90 = firstAt(res.featCdf, 0.9);
+    var worst = Infinity, worstWhy = "";
+    if (p.spark > 0) { worst = p.spark; worstWhy = "Guaranteed by the spark"; }
+    if (p.hard > 0 && (p.feat >= 1 || p.guar)) {
+      var g = p.feat >= 1 ? p.hard : 2 * p.hard;
+      if (g < worst) { worst = g; worstWhy = p.feat >= 1 ? "Guaranteed by hard pity" : "Hard pity twice, then the guarantee"; }
+    }
+    var xMax = p.spark > 0 ? p.spark : (firstAt(res.featCdf, 0.995) || res.featCdf.length - 1);
+    xMax = Math.max(10, xMax);
+    state = { p: p, res: res, med: med, p90: p90, xMax: xMax, hover: null };
+
+    el("t-avg").textContent = res.avg.toFixed(1);
+    el("t-med").textContent = med ? med + " pulls" : "Over 5,000";
+    el("t-med-sub").textContent = med ? fmtWeeks(med, p.week) : "Beyond the modelled range";
+    el("t-p90").textContent = p90 ? p90 + " pulls" : "Over 5,000";
+    el("t-p90-sub").textContent = p90 ? fmtWeeks(p90, p.week) : "Beyond the modelled range";
+    if (isFinite(worst)) {
+      el("t-worst").textContent = worst + " pulls";
+      el("t-worst-sub").textContent = worstWhy + ". " + fmtWeeks(worst, p.week) + ".";
+    } else {
+      el("t-worst").textContent = "No cap";
+      el("t-worst-sub").textContent = "An unlucky player can keep missing";
+    }
+
+    var body = el("lab-table-body");
+    while (body.firstChild) body.removeChild(body.firstChild);
+    [0.25, 0.5, 0.75, 0.9, 0.99].forEach(function (q) {
+      var tr = document.createElement("tr");
+      var f = firstAt(res.featCdf, q), a = firstAt(res.anyCdf, q);
+      var cells = [
+        Math.round(q * 100) + "%",
+        f ? String(f) : "Over 5,000",
+        f ? (f / p.week).toFixed(1) : "–",
+        a ? String(a) : "Over 5,000"
+      ];
+      cells.forEach(function (c, i) {
+        var td = document.createElement(i === 0 ? "th" : "td");
+        if (i === 0) td.setAttribute("scope", "row"); else td.className = "num";
+        td.textContent = c;
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+
+    var svg = el("odds-chart");
+    svg.setAttribute("aria-label", med
+      ? "Featured unit: half of players have it by pull " + med + (p90 ? ", 90% by pull " + p90 : "") + ". Any ★5: half by pull " + firstAt(res.anyCdf, 0.5) + "."
+      : "The featured unit takes more than 5,000 pulls for half of players.");
+    draw();
+  }
+
+  /* ---------- Chart ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+  function mk(name, attrs, parent) {
+    var n = document.createElementNS(NS, name);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function niceStep(raw) {
+    var steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000];
+    for (var i = 0; i < steps.length; i++) if (steps[i] >= raw) return steps[i];
+    return 5000;
+  }
+  var geo = null;
+  function draw() {
+    if (!state) return;
+    var box = el("chart-box"), svg = el("odds-chart");
+    var W = Math.max(280, Math.round(box.clientWidth || 640)), H = 300;
+    var m = { t: 16, r: 16, b: 44, l: 44 };
+    var iw = W - m.l - m.r, ih = H - m.t - m.b, xMax = state.xMax;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var x = function (t) { return m.l + (t / xMax) * iw; };
+    var y = function (v) { return m.t + (1 - v) * ih; };
+    geo = { m: m, iw: iw, ih: ih, W: W, H: H, x: x, y: y };
+
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      mk("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), "class": v === 0 ? "axis" : "grid" }, svg);
+      var tx = mk("text", { x: m.l - 8, y: y(v) + 4, "text-anchor": "end", "class": "tick" }, svg);
+      tx.textContent = Math.round(v * 100) + "%";
+    });
+    var step = niceStep(xMax / (iw < 420 ? 4 : 6));
+    for (var t = 0; t <= xMax + 1e-9; t += step) {
+      var lx = mk("text", { x: x(t), y: m.t + ih + 18, "text-anchor": "middle", "class": "tick" }, svg);
+      lx.textContent = t.toLocaleString("en-US");
+    }
+    var at = mk("text", { x: m.l + iw / 2, y: H - 6, "text-anchor": "middle", "class": "axis-title" }, svg);
+    at.textContent = "PULLS";
+
+    function pathFor(cdf) {
+      var n = Math.min(xMax, cdf.length - 1), stride = Math.max(1, Math.floor(n / (iw * 1.5))), d = "M" + x(0) + "," + y(0);
+      for (var i = 1; i <= xMax; i += stride) d += "L" + x(i).toFixed(1) + "," + y(valAt(cdf, i)).toFixed(1);
+      d += "L" + x(xMax).toFixed(1) + "," + y(valAt(cdf, xMax)).toFixed(1);
+      return d;
+    }
+    mk("path", { d: pathFor(state.res.anyCdf), "class": "line-context" }, svg);
+    mk("path", { d: pathFor(state.res.featCdf), "class": "line-feature" }, svg);
+
+    if (state.p.spark > 0 && state.p.spark <= xMax) {
+      var sl = mk("text", { x: x(state.p.spark) - 6, y: y(1) - 6, "text-anchor": "end", "class": "spark-label" }, svg);
+      sl.textContent = "Spark at " + state.p.spark;
+    }
+    // The featured curve rises to the right and the any-★5 curve sits above it, so the median
+    // label goes below-right of its dot and the 90% label above-left, clear of both lines.
+    [[state.med, "Half · ", "below"], [state.p90, "90% · ", "above"]].forEach(function (spec) {
+      var tt = spec[0]; if (!tt || tt > xMax) return;
+      var cx = x(tt), cy = y(valAt(state.res.featCdf, tt));
+      mk("circle", { cx: cx, cy: cy, r: 4, "class": "dot" }, svg);
+      var below = spec[2] === "below", fitsRight = cx + 96 < W - m.r;
+      var lbl = mk("text", {
+        x: below && fitsRight ? cx + 8 : cx - 8,
+        y: below ? Math.min(cy + 18, m.t + ih - 6) : Math.max(cy - 10, m.t + 12),
+        "text-anchor": below && fitsRight ? "start" : "end",
+        "class": "mark-label"
+      }, svg);
+      lbl.textContent = spec[1] + tt;
+    });
+
+    var cross = mk("g", { "class": "crosshair", visibility: "hidden" }, svg);
+    mk("line", { x1: 0, x2: 0, y1: m.t, y2: m.t + ih, "class": "cross" }, cross);
+    mk("circle", { cx: 0, cy: 0, r: 4, "class": "dot-context" }, cross);
+    mk("circle", { cx: 0, cy: 0, r: 4, "class": "dot" }, cross);
+    geo.cross = cross;
+    if (state.hover != null) showAt(state.hover);
+  }
+
+  function showAt(t) {
+    if (!geo || !state) return;
+    t = Math.max(0, Math.min(state.xMax, Math.round(t)));
+    state.hover = t;
+    var fv = valAt(state.res.featCdf, t), av = valAt(state.res.anyCdf, t);
+    var cx = geo.x(t);
+    var parts = geo.cross.childNodes;
+    parts[0].setAttribute("x1", cx); parts[0].setAttribute("x2", cx);
+    parts[1].setAttribute("cx", cx); parts[1].setAttribute("cy", geo.y(av));
+    parts[2].setAttribute("cx", cx); parts[2].setAttribute("cy", geo.y(fv));
+    geo.cross.setAttribute("visibility", "visible");
+
+    var tip = el("chart-tip");
+    while (tip.firstChild) tip.removeChild(tip.firstChild);
+    var head = document.createElement("div"); head.className = "tt-head"; head.textContent = "By pull " + t.toLocaleString("en-US"); tip.appendChild(head);
+    [["Featured unit", fv, "feature"], ["Any ★5", av, "context"]].forEach(function (r) {
+      var row = document.createElement("div"); row.className = "tt-row";
+      var key = document.createElement("i"); key.className = "key " + r[2]; row.appendChild(key);
+      var b = document.createElement("b"); b.textContent = (r[1] >= 0.9995 ? "100" : (r[1] * 100).toFixed(r[1] < 0.1 ? 1 : 0)) + "%"; row.appendChild(b);
+      var s = document.createElement("span"); s.className = "lbl"; s.textContent = r[0]; row.appendChild(s);
+      tip.appendChild(row);
+    });
+    tip.hidden = false;
+    var boxW = el("chart-box").clientWidth, tipW = tip.offsetWidth || 160;
+    var left = cx + 14;
+    if (left + tipW > boxW - 4) left = cx - tipW - 14;
+    tip.style.left = Math.max(0, left) + "px";
+  }
+  function hide() {
+    if (geo && geo.cross) geo.cross.setAttribute("visibility", "hidden");
+    el("chart-tip").hidden = true;
+    if (state) state.hover = null;
+  }
+
+  var chartBox = el("chart-box");
+  chartBox.addEventListener("pointermove", function (e) {
+    if (!geo) return;
+    var rect = el("odds-chart").getBoundingClientRect();
+    var px = (e.clientX - rect.left) * (geo.W / rect.width);
+    if (px < geo.m.l - 10 || px > geo.W - geo.m.r + 10) { hide(); return; }
+    showAt(((px - geo.m.l) / geo.iw) * state.xMax);
+  });
+  chartBox.addEventListener("pointerleave", hide);
+  chartBox.addEventListener("keydown", function (e) {
+    if (!state) return;
+    var cur = state.hover == null ? (state.med || 0) : state.hover, stepK = e.shiftKey ? 10 : 1;
+    if (e.key === "ArrowRight") { showAt(cur + stepK); e.preventDefault(); }
+    else if (e.key === "ArrowLeft") { showAt(cur - stepK); e.preventDefault(); }
+    else if (e.key === "Home") { showAt(0); e.preventDefault(); }
+    else if (e.key === "End") { showAt(state.xMax); e.preventDefault(); }
+    else if (e.key === "Escape") { hide(); }
+  });
+  chartBox.addEventListener("blur", hide);
+
+  var toggle = el("lab-table-toggle");
+  toggle.addEventListener("click", function () {
+    var tbl = el("lab-table"), open = tbl.hidden;
+    tbl.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.textContent = open ? "Hide table" : "Show as table";
+  });
+
+  Object.keys(inputs).forEach(function (k) {
+    inputs[k].addEventListener("input", function () {
+      if (k !== "week") presetSel.value = "custom";
+      compute();
+    });
+  });
+  presetSel.addEventListener("change", function () {
+    if (presetSel.value !== "custom") applyPreset(presetSel.value);
+    compute();
+  });
+
+  if ("ResizeObserver" in window) {
+    var lastW = 0;
+    new ResizeObserver(function () {
+      var w = chartBox.clientWidth;
+      if (Math.abs(w - lastW) > 2) { lastW = w; draw(); }
+    }).observe(chartBox);
+  } else {
+    window.addEventListener("resize", draw);
+  }
+  compute();
+})();
+</script>
