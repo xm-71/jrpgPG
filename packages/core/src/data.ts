@@ -71,6 +71,9 @@ export interface FoeSpawn {
   enemy: string;
   /** Level offset from the stage or floor level. Default 0. */
   levelOffset?: number;
+  /** Multipliers on the enemy's HP and attack, to tune one fight without editing the enemy. */
+  hpMult?: number;
+  atkMult?: number;
 }
 
 export interface EncounterDef {

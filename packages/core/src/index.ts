@@ -8,3 +8,7 @@ export * from './data';
 export * from './setup';
 export * from './progression';
 export * from './party';
+export * from './economy';
+export * from './tasks';
+export * from './descent';
+export * from './profile';

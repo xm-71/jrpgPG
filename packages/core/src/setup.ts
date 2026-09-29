@@ -32,13 +32,19 @@ export function heroUnit(
   };
 }
 
-export function foeUnit(def: EnemyDef, level: number, id: string): UnitSetup {
+export function foeUnit(def: EnemyDef, level: number, id: string, mult: { hp?: number; atk?: number } = {}): UnitSetup {
+  const stats = statsAtLevel(def.base, level);
   return {
     id,
     defId: def.id,
     name: def.name,
     affinity: null,
-    stats: statsAtLevel(def.base, level),
+    stats: {
+      hp: Math.round(stats.hp * (mult.hp ?? 1)),
+      atk: Math.round(stats.atk * (mult.atk ?? 1)),
+      def: stats.def,
+      spd: stats.spd,
+    },
     tier: def.tier,
     foeKit: def.foeKit,
     shell: def.shell,
@@ -55,7 +61,10 @@ export function encounterFoes(
   enemyById: (id: string) => EnemyDef,
 ): UnitSetup[] {
   return encounter.foes.map((spawn, slot) =>
-    foeUnit(enemyById(spawn.enemy), Math.max(1, level + (spawn.levelOffset ?? 0)), `f${slot}:${spawn.enemy}`),
+    foeUnit(enemyById(spawn.enemy), Math.max(1, level + (spawn.levelOffset ?? 0)), `f${slot}:${spawn.enemy}`, {
+      ...(spawn.hpMult !== undefined ? { hp: spawn.hpMult } : {}),
+      ...(spawn.atkMult !== undefined ? { atk: spawn.atkMult } : {}),
+    }),
   );
 }
 

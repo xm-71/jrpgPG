@@ -2,7 +2,9 @@ import { AFFINITIES } from '@duskline/core';
 import { z } from 'zod';
 import { activeBanners, KINDLING_ITEMS, rateUpBanner, STANDARD_BANNER } from './banners';
 import { CARDS } from './cards';
+import { DESCENT_ENCOUNTERS, DESCENT_POOLS } from './descent';
 import { ENEMIES } from './enemies';
+import { GLIMMERS } from './glimmers';
 import { HEROES } from './heroes';
 import { ENCOUNTERS, STAGES } from './stages';
 
@@ -124,6 +126,15 @@ export const enemySchema = z.strictObject({
   scale: z.number().min(0.5).max(2.5),
 });
 
+export const glimmerSchema = z.strictObject({
+  id: z.string().regex(/^[a-z][a-z0-9-]*$/),
+  name: z.string().min(1),
+  path: z.enum(['noonward', 'duskward', 'nightward']),
+  rarity: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  text: z.string().min(8),
+  passives: z.array(passive).min(1),
+});
+
 const line = z.strictObject({ who: z.string().min(1), text: z.string().min(1) });
 
 export const stageSchema = z.strictObject({
@@ -144,7 +155,17 @@ export const stageSchema = z.strictObject({
 export const encounterSchema = z.strictObject({
   id: z.string().min(1),
   name: z.string().min(1),
-  foes: z.array(z.strictObject({ enemy: z.string(), levelOffset: z.number().int().optional() })).min(1).max(4),
+  foes: z
+    .array(
+      z.strictObject({
+        enemy: z.string(),
+        levelOffset: z.number().int().optional(),
+        hpMult: z.number().positive().optional(),
+        atkMult: z.number().positive().optional(),
+      }),
+    )
+    .min(1)
+    .max(4),
 });
 
 /** Cross-file checks. Returns human-readable problems; an empty list means the content is sound. */
@@ -275,6 +296,45 @@ export function validateContent(): string[] {
     if (b.featured.five.length > 0 && !b.rules.spark) err(`banner ${b.id}: a rate-up banner without a spark`);
     if (b.rules.five.hard > 0 && b.rules.five.softStart >= b.rules.five.hard) err(`banner ${b.id}: soft pity starts at or after hard pity`);
   }
+
+  // Descent
+  const allEncounters = [...ENCOUNTERS, ...DESCENT_ENCOUNTERS];
+  const encIds = new Set<string>();
+  for (const e of allEncounters) {
+    if (encIds.has(e.id)) err(`duplicate encounter id ${e.id}`);
+    encIds.add(e.id);
+  }
+  for (const e of DESCENT_ENCOUNTERS) {
+    const r = encounterSchema.safeParse(e);
+    if (!r.success) err(`descent encounter ${e.id}: ${r.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join('; ')}`);
+    for (const f of e.foes) {
+      if (!enemyIds.has(f.enemy)) err(`descent encounter ${e.id}: unknown enemy ${f.enemy}`);
+      if ((f.hpMult ?? 1) <= 0 || (f.atkMult ?? 1) <= 0) err(`descent encounter ${e.id}: multipliers must be positive`);
+    }
+  }
+  const descentIds = new Set(DESCENT_ENCOUNTERS.map((e) => e.id));
+  for (const [tier, ids] of Object.entries(DESCENT_POOLS)) {
+    for (const id of ids) if (!descentIds.has(id)) err(`descent pool ${tier}: unknown encounter ${id}`);
+  }
+  if (DESCENT_POOLS.boss.length < 3) err('descent needs a boss encounter for each of three floors');
+  if (DESCENT_POOLS.normal.length < 3) err('descent needs at least three ordinary encounters so a floor can offer two different ones');
+  for (const id of DESCENT_POOLS.elite) {
+    const e = DESCENT_ENCOUNTERS.find((x) => x.id === id);
+    if (e && !e.foes.some((f) => ENEMIES.find((en) => en.id === f.enemy)?.tier !== 'mob')) err(`descent elite ${id} has no elite or boss foe`);
+  }
+  const glimmerIds = new Set<string>();
+  for (const g of GLIMMERS) {
+    const r = glimmerSchema.safeParse(g);
+    if (!r.success) err(`glimmer ${g.id}: ${r.error.issues.map((i) => `${i.path.join('.')} ${i.message}`).join('; ')}`);
+    if (glimmerIds.has(g.id)) err(`duplicate glimmer id ${g.id}`);
+    glimmerIds.add(g.id);
+  }
+  for (const path of ['noonward', 'duskward', 'nightward'] as const) {
+    if (GLIMMERS.filter((g) => g.path === path).length < 4) err(`path ${path} has fewer than four Glimmers`);
+    if (!GLIMMERS.some((g) => g.path === path && g.rarity === 3)) err(`path ${path} has no rarity-3 Glimmer`);
+  }
+  // A full run takes an opening pick plus one per battle: at most ten.
+  if (GLIMMERS.length < 10) err('fewer Glimmers than a full run can ask for');
 
   return problems;
 }

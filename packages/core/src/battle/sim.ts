@@ -15,6 +15,8 @@ export interface PlayoutResult {
   events: BattleEvent[];
   /** Fraction of party max HP remaining at the end. */
   partyHpFrac: number;
+  /** Each party member's HP as a fraction of their max, by unit id. */
+  partyHp: Record<string, number>;
   timedOut: boolean;
 }
 
@@ -55,6 +57,7 @@ export function playout(setup: BattleSetup, seed: string | number, opts: Playout
     stats: battle.state.stats,
     events,
     partyHpFrac: max > 0 ? hp / max : 0,
+    partyHp: Object.fromEntries(party.map((u) => [u.id, u.maxHp > 0 ? u.hp / u.maxHp : 0])),
     timedOut: timedOut || battle.state.awaiting.type !== 'over',
   };
 }

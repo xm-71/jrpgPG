@@ -1,5 +1,14 @@
 import {
   analyzeRules,
+  battleFor,
+  chooseNode,
+  choices,
+  finishBattle,
+  pickGlimmer,
+  startRun,
+  takeRest,
+  type CrewMember,
+  type DescentRun,
   encounterFoes,
   heroUnit,
   newKindlingState,
@@ -11,8 +20,10 @@ import {
   type StageDef,
 } from '@duskline/core';
 import {
+  DESCENT_POOLS,
   HEROES,
   STAGES,
+  descentDeps,
   heroById,
   ownedHeroIdsBefore,
   rankBefore,
@@ -167,6 +178,76 @@ function kindling(): void {
   console.log(`at ${week} free pulls a week that is about ${(analysis.medianToFeatured! / week).toFixed(1)} weeks (median) and ${(analysis.p90ToFeatured! / week).toFixed(1)} weeks (90%)`);
 }
 
+/** A player who rests when hurt, takes elites when healthy, and leans into one Path. */
+/** A crew with no defender or healer should lean on defensive Glimmers. */
+function needsSustain(ids: string[]): boolean {
+  const roles = ids.map((id) => requireHero(id).role);
+  return !roles.includes('defender') || !roles.includes('healer');
+}
+
+function playRun(run: DescentRun, leanDefensive = false): void {
+  let guard = 0;
+  while (run.phase !== 'done' && guard++ < 80) {
+    if (run.phase === 'choose') {
+      const options = choices(run);
+      const avg = Object.values(run.hp).reduce((a, b) => a + b, 0) / Math.max(1, Object.keys(run.hp).length);
+      const rest = options.find((n) => n.kind === 'rest');
+      const elite = options.find((n) => n.kind === 'elite');
+      const battle = options.find((n) => n.kind === 'battle' || n.kind === 'boss');
+      chooseNode(run, (avg < 0.65 && rest ? rest : avg >= 0.85 && elite ? elite : (battle ?? options[0]!)).id);
+    } else if (run.phase === 'rest') {
+      takeRest(run);
+    } else if (run.phase === 'battle') {
+      const { setup, seed } = battleFor(run, descentDeps);
+      const out = playout(setup, seed);
+      finishBattle(run, descentDeps, { victory: out.result === 'victory', hp: out.partyHp, actions: out.actions });
+    } else if (run.phase === 'glimmer') {
+      const best = [...(run.offer ?? [])].sort((a, b) => {
+        const ga = descentDeps.glimmer(a);
+        const gb = descentDeps.glimmer(b);
+        const score = (g: typeof ga): number => g.rarity * 2 + run.pathScore[g.path] + (leanDefensive && g.path === 'nightward' ? 3 : 0);
+        return score(gb) - score(ga);
+      })[0]!;
+      pickGlimmer(run, descentDeps, best);
+    }
+  }
+}
+
+function descent(): void {
+  const n = flag('n', 200);
+  const rank = flag('rank', 8);
+  console.log(`\nDescent: ${n} full runs, policy player, crew at Rank ${rank} (${'daily seeds differ per run'})\n`);
+  console.log('crew                          clear  floors  battles  actions  ~min@5s  ~min@auto2x  fails on');
+  const crews: string[][] = [
+    ['wren', 'io', 'marisol', 'pip'],
+    ['aurelian', 'tamsin', 'marisol', 'pip'],
+    ['wren', 'io', 'tamsin', 'pip'],
+    ['aurelian', 'io', 'marisol', 'pip'],
+    ['wren', 'tamsin', 'marisol', 'pip'],
+    ['aurelian', 'io', 'marisol', 'tamsin'],
+    ['wren', 'io', 'tamsin', 'aurelian'],
+  ];
+  for (const ids of crews) {
+    const crew: CrewMember[] = ids.map((hero) => ({ hero, resonance: 1, card: null, copies: 0 }));
+    let cleared = 0;
+    const sum = { floors: 0, battles: 0, actions: 0 };
+    const fails = [0, 0, 0];
+    for (let i = 0; i < n; i++) {
+      const run = startRun({ seed: `sim-${ids.join('')}-${i}`, daily: null, crew, rank, pools: DESCENT_POOLS }, descentDeps);
+      playRun(run, needsSustain(ids));
+      if (run.result === 'cleared') cleared++;
+      else fails[Math.min(2, run.floor)]!++;
+      sum.floors += run.stats.floorsCleared;
+      sum.battles += run.stats.battles;
+      sum.actions += run.stats.actions;
+    }
+    const avg = (v: number): number => v / n;
+    console.log(
+      `${ids.join(',').padEnd(29)} ${pct(cleared / n)}  ${num(avg(sum.floors))}  ${num(avg(sum.battles))}   ${num(avg(sum.actions), 0)}   ${num((avg(sum.actions) * 5) / 60)}     ${num((avg(sum.actions) * 2.5) / 60)}      f1 ${fails[0]} f2 ${fails[1]} f3 ${fails[2]}`,
+    );
+  }
+}
+
 function roster(): void {
   console.log('\nRoster at Rank 1, resonance 1\n');
   console.log('hero        role      aff    hp   atk  def  spd');
@@ -189,12 +270,16 @@ switch (cmd) {
   case 'roster':
     roster();
     break;
+  case 'descent':
+    descent();
+    break;
   case 'all':
     battles();
     sensitivity();
+    descent();
     kindling();
     break;
   default:
-    console.error(`Unknown command "${cmd}". Try: battles, sensitivity, kindling, roster, all`);
+    console.error(`Unknown command "${cmd}". Try: battles, sensitivity, descent, kindling, roster, all`);
     process.exitCode = 1;
 }

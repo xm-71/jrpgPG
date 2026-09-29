@@ -8,6 +8,8 @@ export const CONTENT_VERSION = '0.1.0';
 
 export { CARDS, ENCOUNTERS, ENEMIES, HEROES, STAGES };
 export * from './banners';
+export { DESCENT_ENCOUNTERS, DESCENT_POOLS, descentDeps } from './descent';
+export { GLIMMERS } from './glimmers';
 export { ownedHeroIdsBefore, rankBefore } from './progress';
 
 export { FIRST_KINDLING_HERO, STARTER_HEROES } from './constants';
