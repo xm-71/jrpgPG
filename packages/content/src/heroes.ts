@@ -108,7 +108,7 @@ export const HEROES: readonly HeroDef[] = [
     trait: { name: 'Warm Hands', passives: [{ type: 'breakHeal', value: 3 }, { type: 'victoryHeal', value: 3 }] },
     blurb: "Vesper's youngest Lamplighter. Wren can coax a Gloamstone awake, which is either a gift or a problem depending on who is asking.",
     quote: 'Hold the light steady. Everything else can shake.',
-    look: { height: 0.96, hair: 'short', hairColor: '#4A2E24', skin: '#EBC3A2', outfit: '#2A1D2B', accent: '#E0457B', prop: 'lantern', cape: true },
+    look: { height: 0.96, style: 'shonen', hair: 'spiky', hairColor: '#4A2E24', skin: '#EBC3A2', eyes: '#E8A23A', outfit: '#2A1D2B', under: '#E9DFCB', accent: '#E0457B', prop: 'lantern', wear: ['scarf', 'gloves'] },
   },
   {
     id: 'io',
@@ -126,7 +126,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The First Turning',
     blurb: 'A girl from the very first Turning, when the world still moved. She remembers a sunrise and cannot make anyone believe her.',
     quote: 'You call it the Stillness. I call it a very long afternoon.',
-    look: { height: 1.02, hair: 'long', hairColor: '#DCD6F0', skin: '#F1E2D8', outfit: '#1B1830', accent: '#8FA0FF', prop: 'blade', cape: true },
+    look: { height: 1.02, style: 'rival', hair: 'hime', hairColor: '#DCD6F0', skin: '#F1E2D8', eyes: '#8FA0FF', outfit: '#1B1830', under: '#E6E1F2', accent: '#8FA0FF', prop: 'blade', wear: ['coat'] },
   },
   {
     id: 'marisol',
@@ -143,7 +143,7 @@ export const HEROES: readonly HeroDef[] = [
     trait: { name: 'Rail Guard', passives: [{ type: 'heldWard', value: 2 }] },
     blurb: 'Captain of the oldest, smallest Strider on the Duskline. She keeps the crew fed, the legs oiled, and the secrets to herself.',
     quote: 'Nobody gets left behind on my deck. Not even the ones who deserve it.',
-    look: { height: 1.08, hair: 'ponytail', hairColor: '#15121F', skin: '#C08A62', outfit: '#2B2320', accent: '#F2C23A', prop: 'rail', cape: true },
+    look: { height: 1.08, style: 'sukeban', hair: 'regent', hairColor: '#15121F', skin: '#C08A62', eyes: '#F2C23A', outfit: '#2B2320', under: '#1F2A3A', accent: '#F2C23A', prop: 'rail', wear: ['draped', 'plaster', 'longskirt'] },
   },
   {
     id: 'tamsin',
@@ -160,7 +160,7 @@ export const HEROES: readonly HeroDef[] = [
     trait: { name: 'Cold Read', passives: [{ type: 'startStatus', status: 'chill', stacks: 1 }] },
     blurb: 'A scout from the night side whose glowing tattoos map the stars from before the Stillness. She trusts stars more than people.',
     quote: 'The sky moved once. My skin remembers.',
-    look: { height: 1.02, hair: 'bob', hairColor: '#0E2433', skin: '#D3B29A', outfit: '#141C30', accent: '#57E0D0', prop: 'needle' },
+    look: { height: 1.02, style: 'kunoichi', hair: 'bob', hairColor: '#0E2433', skin: '#D3B29A', eyes: '#57E0D0', outfit: '#141C30', under: '#2B3A55', accent: '#57E0D0', prop: 'needle', wear: ['mask', 'wraps', 'tattoos', 'headband'] },
   },
   {
     id: 'aurelian',
@@ -177,7 +177,7 @@ export const HEROES: readonly HeroDef[] = [
     trait: { name: 'Meridian', passives: [{ type: 'firstStrike', value: 2 }] },
     blurb: 'A Dominion knight sent to stop the climb, who read the Unturning’s scripture on the way up and put down his orders.',
     quote: 'I was taught the Stillness was mercy. Mercy should not look like this.',
-    look: { height: 1.12, hair: 'short', hairColor: '#E7B75A', skin: '#E6C4A0', outfit: '#E9E2D2', accent: '#C8322C', prop: 'greatsword', cape: true },
+    look: { height: 1.12, style: 'bishonen', hair: 'flowing', hairColor: '#E7B75A', skin: '#E6C4A0', eyes: '#D0463A', outfit: '#E9E2D2', under: '#B9A36F', accent: '#C8322C', prop: 'greatsword', wear: ['armor'], cape: true },
   },
   {
     id: 'pip',
@@ -194,7 +194,7 @@ export const HEROES: readonly HeroDef[] = [
     trait: { name: 'Salvage', passives: [{ type: 'victoryHeal', value: 3 }, { type: 'emberGain', pct: 0.25 }] },
     blurb: "Salvage kid with a clockwork kite, picking lamp-glass off the Gnomon’s stairs. Everyone's little sibling, whether they like it or not.",
     quote: "If it's broken, I can fix it. If it's not broken, I can improve it until it is.",
-    look: { height: 0.86, hair: 'spiky', hairColor: '#7BD3B5', skin: '#E2B38C', outfit: '#1E2A2A', accent: '#F28A3A', prop: 'kite' },
+    look: { height: 0.86, style: 'chibi', hair: 'puff', hairColor: '#7BD3B5', skin: '#E2B38C', eyes: '#F28A3A', outfit: '#1E3A3A', under: '#F2E3C4', accent: '#F28A3A', prop: 'kite', wear: ['goggles', 'overalls'] },
   },
   {
     id: 'ysolde',
@@ -212,7 +212,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Sea Turning',
     blurb: 'She kept the lantern-buoys that guided ships home when the sea still moved. She kept them lit for a thousand years after the sea forgot.',
     quote: 'Follow the light. It has never once lied to me.',
-    look: { height: 1.1, hair: 'long', hairColor: '#B7E2F0', skin: '#E2D0C4', outfit: '#0F2A3A', accent: '#8FE3F5', prop: 'lantern', cape: true },
+    look: { height: 1.1, style: 'seinen', hair: 'windswept', hairColor: '#B7E2F0', skin: '#E2D0C4', eyes: '#5FB8D8', outfit: '#0F2A3A', under: '#35505E', accent: '#8FE3F5', prop: 'buoy', wear: ['cloak'] },
   },
   {
     id: 'kestrel',
@@ -230,7 +230,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Surveyors’ Turning',
     blurb: 'The last person to map a world that stayed the same for a whole lifetime. Her maps are now wrong in every way she is grateful for.',
     quote: 'North is a habit. I will teach you a better one.',
-    look: { height: 1.04, hair: 'ponytail', hairColor: '#B25E36', skin: '#D4A27E', outfit: '#1A2A22', accent: '#F2D07A', prop: 'compass' },
+    look: { height: 1.04, style: 'showa', hair: 'explorer', hairColor: '#B25E36', skin: '#D4A27E', eyes: '#2A1A14', outfit: '#2F4A3A', under: '#E8D9B5', accent: '#F2D07A', prop: 'compass', wear: ['hat', 'satchel'] },
   },
   {
     id: 'sable',
@@ -248,7 +248,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Choral Turning',
     blurb: 'Conducted a choir of ten thousand under a moving sun. Her baton remembers every voice.',
     quote: 'Everyone has a note. I just listen until I hear it.',
-    look: { height: 1.06, hair: 'crown', hairColor: '#2A1E33', skin: '#B48160', outfit: '#E8DCC0', accent: '#C8322C', prop: 'staff', cape: true },
+    look: { height: 1.06, style: 'shoujo', hair: 'curls', hairColor: '#2A1E33', skin: '#B48160', eyes: '#E8B04A', outfit: '#E8DCC0', under: '#7A1E2A', accent: '#C8322C', prop: 'baton', wear: ['epaulettes', 'tiara'], cape: true },
   },
   {
     id: 'brannoch',
@@ -266,7 +266,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Builders’ Turning',
     blurb: 'Laid the first stones of the Anchor and has been quietly regretting its foundations ever since.',
     quote: 'A wall is a promise you make with your back.',
-    look: { height: 1.16, hair: 'short', hairColor: '#6E6C78', skin: '#CFA07E', outfit: '#2E2622', accent: '#F26B3A', prop: 'trowel' },
+    look: { height: 1.16, style: 'gekiga', hair: 'crop', hairColor: '#6E6C78', skin: '#CFA07E', eyes: '#8A9AA8', outfit: '#6B4A32', under: '#D9D0BE', accent: '#F26B3A', prop: 'trowel', wear: ['apron', 'beard'] },
   },
   {
     id: 'nim',
@@ -284,7 +284,7 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Wired Turning',
     blurb: 'Strung wires between cities so people could speak across the world. Speaks to ghosts now, since the cities are gone.',
     quote: "Somebody's always listening. I make sure it's someone kind.",
-    look: { height: 0.98, hair: 'spiky', hairColor: '#3B2E7E', skin: '#DDB898', outfit: '#161527', accent: '#F2D24A', prop: 'wire' },
+    look: { height: 0.98, style: 'majokko', hair: 'twintails', hairColor: '#4B3A9E', skin: '#DDB898', eyes: '#F2D24A', outfit: '#1D1A3A', under: '#EDE6F8', accent: '#F2D24A', prop: 'wire', wear: ['witchhat', 'frills'] },
   },
   {
     id: 'ondrej',
@@ -302,6 +302,6 @@ export const HEROES: readonly HeroDef[] = [
     turning: 'The Long Night',
     blurb: 'Carried lanterns for travelers through a night that lasted forty years. Does not sleep. Does not mind.',
     quote: 'Dark is only a door nobody has opened.',
-    look: { height: 1.05, hair: 'hooded', hairColor: '#20223A', skin: '#C9A386', outfit: '#12131F', accent: '#9AA7FF', prop: 'orb', cape: true },
+    look: { height: 1.05, style: 'yokai', hair: 'hooded', hairColor: '#20223A', skin: '#C9A386', eyes: '#9AA7FF', outfit: '#12131F', under: '#3A3B5A', accent: '#9AA7FF', prop: 'chochin', wear: ['haori'] },
   },
 ];

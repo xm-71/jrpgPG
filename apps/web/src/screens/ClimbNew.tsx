@@ -68,7 +68,7 @@ export function ClimbNew({ daily = false }: { daily?: boolean }): JSX.Element {
                 mutate((x) => setHero(x, h.id));
               }}
             >
-              <HeroImg hero={h} crop="bust" />
+              <HeroImg hero={h} crop="face" />
               <span class="hero-pick-name">{h.name.split(' ')[0]}</span>
               <AffinityIcon a={h.affinity} size={12} />
             </button>

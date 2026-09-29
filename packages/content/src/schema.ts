@@ -66,14 +66,21 @@ const passiveParts: z.ZodType[] = [
 ];
 const passive = z.union(passiveParts as [z.ZodType, z.ZodType, ...z.ZodType[]]);
 
+const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 const look = z.strictObject({
   height: z.number().min(0.8).max(1.2),
-  hair: z.enum(['short', 'long', 'ponytail', 'spiky', 'bob', 'hooded', 'crown']),
-  hairColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  skin: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  outfit: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  prop: z.enum(['lantern', 'blade', 'rail', 'needle', 'greatsword', 'kite', 'staff', 'bow', 'orb', 'anchor', 'compass', 'scroll', 'wire', 'trowel']),
+  style: z.enum(['shonen', 'rival', 'sukeban', 'kunoichi', 'bishonen', 'chibi', 'seinen', 'showa', 'shoujo', 'gekiga', 'majokko', 'yokai']),
+  hair: z.enum(['spiky', 'hime', 'regent', 'bob', 'flowing', 'puff', 'windswept', 'explorer', 'curls', 'crop', 'twintails', 'hooded']),
+  hairColor: hex,
+  skin: hex,
+  eyes: hex,
+  outfit: hex,
+  under: hex,
+  accent: hex,
+  prop: z.enum(['lantern', 'blade', 'rail', 'needle', 'greatsword', 'kite', 'baton', 'buoy', 'compass', 'wire', 'trowel', 'chochin']),
+  wear: z.array(
+    z.enum(['scarf', 'coat', 'draped', 'plaster', 'longskirt', 'mask', 'wraps', 'tattoos', 'headband', 'armor', 'goggles', 'overalls', 'cloak', 'hat', 'satchel', 'epaulettes', 'tiara', 'apron', 'beard', 'witchhat', 'frills', 'haori', 'gloves']),
+  ),
   cape: z.boolean().optional(),
 });
 
@@ -209,7 +216,7 @@ const beatSchema = z.strictObject({
     z.strictObject({ type: z.literal('reachFloor'), stratum: z.number().int().min(0), floor: z.number().int().min(0).max(2) }),
     z.strictObject({ type: z.literal('clearStratum'), stratum: z.number().int().min(0) }),
   ]),
-  lines: z.array(z.strictObject({ who: z.string().min(1), text: z.string().min(1) })).min(1),
+  lines: z.array(z.strictObject({ who: z.string().min(1), text: z.string().min(1), mood: z.enum(['calm', 'fierce', 'hurt', 'smile', 'shock']).optional() })).min(1),
   gloam: z.number().int().positive().optional(),
   unlocks: z.array(z.string()).optional(),
   sky: z.enum(['dusk', 'night', 'noon']).optional(),

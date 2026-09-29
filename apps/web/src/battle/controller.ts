@@ -12,6 +12,7 @@ import {
   type CardAction,
   type CardBattleState,
   type CardEvent,
+  type Mood,
 } from '@duskline/core';
 import { sfx } from '../game/sfx';
 import type { BattleScene } from './scene';
@@ -43,12 +44,15 @@ export class CardController {
   readonly floats = signal<Float[]>([]);
   readonly flying = signal<number | null>(null);
   readonly hurt = signal(0);
+  /** The hero's face in the portrait: reacts to hits, Breaks, heals and the end of the fight. */
+  readonly face = signal<Mood>('calm');
   readonly auto = signal(false);
   readonly speed = signal(1);
   readonly ended = signal(false);
   scene: BattleScene | null = null;
   private disposed = false;
   private seq = 0;
+  private faceSeq = 0;
   private lateShown = false;
 
   constructor(setup: BattleSetup, seed: string) {
@@ -92,6 +96,21 @@ export class CardController {
     });
   }
 
+  /** The face to rest on: strained when HP is low. */
+  private baseFace(): Mood {
+    const h = this.state.hero;
+    return h.hp / h.maxHp < 0.3 ? 'hurt' : 'calm';
+  }
+
+  /** Show a feeling for a moment, then settle back. */
+  private react(mood: Mood, ms: number): void {
+    const id = ++this.faceSeq;
+    this.face.value = mood;
+    void this.sleep(ms).then(() => {
+      if (this.faceSeq === id && !this.ended.value) this.face.value = this.baseFace();
+    });
+  }
+
   private float(text: string, kind: Float['kind']): void {
     const id = ++this.seq;
     this.floats.value = [...this.floats.value, { id, text, kind }];
@@ -115,10 +134,13 @@ export class CardController {
     if (v.result && !this.ended.value) {
       this.ended.value = true;
       this.auto.value = false;
+      this.faceSeq++;
+      this.face.value = v.result === 'victory' ? 'smile' : 'hurt';
       if (v.result === 'victory') sfx.win();
       else sfx.lose();
       return;
     }
+    if (this.face.value === 'calm' || this.face.value === 'hurt') this.face.value = this.baseFace();
     if (this.auto.value) void this.autoStep();
   }
 
@@ -245,6 +267,7 @@ export class CardController {
           applyEvent(work, e, this.state);
           push();
           this.say(`Chain ×${e.steps + 1}`, 'gold', 700);
+          if (e.steps >= 1) this.react('smile', 700);
           break;
         case 'hit': {
           applyEvent(work, e, this.state);
@@ -268,12 +291,14 @@ export class CardController {
           sfx.break();
           sc?.breakBurst(e.unit);
           this.say('BREAK', 'gold', 900);
+          this.react('fierce', 1100);
           await this.sleep(380);
           break;
         case 'ko':
           applyEvent(work, e, this.state);
           push();
           sfx.ko();
+          this.react('smile', 800);
           await sc?.ko(e.unit);
           break;
         case 'heal':
@@ -281,7 +306,10 @@ export class CardController {
           push();
           if (e.amount > 0) {
             sfx.heal();
-            if (e.unit === 'hero') this.float(`+${e.amount}`, 'heal');
+            if (e.unit === 'hero') {
+              this.float(`+${e.amount}`, 'heal');
+              this.react('smile', 700);
+            }
             else sc?.heal(e.unit, e.amount);
           }
           break;
@@ -294,6 +322,7 @@ export class CardController {
           applyEvent(work, e, this.state);
           push();
           sfx.ult();
+          this.react('fierce', 1400);
           this.cutin.value = { title: defOf(this.state, { uid: e.uid, id: e.id }).name, hero: this.state.hero.id };
           await this.sleep(900);
           this.cutin.value = null;
@@ -323,6 +352,7 @@ export class CardController {
           if (taken > 0) {
             sfx.hit();
             this.hurt.value++;
+            this.react(taken >= this.state.hero.maxHp * 0.15 ? 'shock' : 'hurt', 900);
             this.float(`−${taken}`, 'hurt');
             void sc?.flash(0xc8322c, 0.22);
             sc?.shake(0.8);

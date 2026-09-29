@@ -1,4 +1,4 @@
-import type { CardDef, FoeDef, HeroDef } from '@duskline/core';
+import type { CardDef, FoeDef, HeroDef, Mood } from '@duskline/core';
 import { heroById } from '@duskline/content';
 import type { JSX } from 'preact';
 import { cardArtSvg } from '../art/cardArt';
@@ -16,9 +16,12 @@ function memo(key: string, make: () => string): string {
   return hit;
 }
 
-export type Crop = 'full' | 'bust' | 'half';
+export type Crop = 'full' | 'bust' | 'half' | 'face';
 
-export const heroUrl = (h: HeroDef, crop: Crop = 'bust'): string => memo(`hero:${h.id}:${crop}`, () => figureSvg(h.look, { crop, noShadow: crop !== 'full' }));
+export const MOODS: readonly Mood[] = ['calm', 'fierce', 'hurt', 'smile', 'shock'];
+
+export const heroUrl = (h: HeroDef, crop: Crop = 'bust', mood: Mood = 'calm'): string =>
+  memo(`hero:${h.id}:${crop}:${mood}`, () => figureSvg(h.look, { crop, mood, noShadow: crop !== 'full' }));
 export const foeUrl = (f: Pick<FoeDef, 'family'>, halo = false): string => memo(`foe:${f.family}:${halo}`, () => enemySvg(f.family, { halo }));
 
 export function cardArtUrl(c: CardDef): string {
@@ -28,8 +31,8 @@ export function cardArtUrl(c: CardDef): string {
   });
 }
 
-export function HeroImg({ hero, crop = 'bust', class: cls = '' }: { hero: HeroDef; crop?: Crop; class?: string }): JSX.Element {
-  return <img class={`art ${cls}`} src={heroUrl(hero, crop)} alt="" draggable={false} />;
+export function HeroImg({ hero, crop = 'bust', mood = 'calm', class: cls = '' }: { hero: HeroDef; crop?: Crop; mood?: Mood; class?: string }): JSX.Element {
+  return <img class={`art ${cls}`} src={heroUrl(hero, crop, mood)} alt="" draggable={false} />;
 }
 
 export function FoeImg({ foe, halo = false, class: cls = '' }: { foe: Pick<FoeDef, 'family'>; halo?: boolean; class?: string }): JSX.Element {

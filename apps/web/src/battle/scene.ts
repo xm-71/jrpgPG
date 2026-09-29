@@ -99,7 +99,7 @@ export class BattleScene {
     const fresh = foes.filter((f) => !this.actors.has(f.id));
     const textures = await Promise.all(
       fresh.map(async (f): Promise<[Texture, Texture]> => [
-        await svgTexture(`foe:${f.family}`, enemySvg(f.family as never), 240, 280),
+        await svgTexture(`foe:${f.family}:${f.tier}`, enemySvg(f.family as never, { menace: f.tier === 'elite' || f.tier === 'boss' }), 240, 280),
         await svgTexture(`halo:${f.family}`, sigilSvg(`halo:${f.family}`, BLOOD, 200), 200, 200),
       ]),
     );

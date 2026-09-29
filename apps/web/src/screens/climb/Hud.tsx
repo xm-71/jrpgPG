@@ -69,7 +69,7 @@ export function ClimbHud({ run }: { run: ClimbRun }): JSX.Element {
   return (
     <>
       <div class="climb-hud">
-        <HeroImg hero={hero} crop="bust" class="climb-hud-face" />
+        <HeroImg hero={hero} crop="face" class="climb-hud-face" />
         <div class="grow climb-hud-vitals">
           <div class="row">
             <span class="climb-hud-name">{hero.name}</span>

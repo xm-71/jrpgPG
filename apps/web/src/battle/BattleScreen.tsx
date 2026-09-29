@@ -4,7 +4,8 @@ import { STATUS_HELP, STATUS_NAME, cardStats, defOf, passiveSum, type BattleSetu
 import { requireHero } from '@duskline/content';
 import { sfx } from '../game/sfx';
 import { mutate, settings } from '../game/store';
-import { heroUrl } from '../ui/Art';
+import { MOODS, heroUrl } from '../ui/Art';
+import { FocusLines } from '../ui/Manga';
 import { CardFace } from '../ui/CardFace';
 import { ask } from '../ui/Dialog';
 import { AffinityIcon, BladeIcon, LightPip, ShieldIcon, StatusIcon } from '../ui/Icons';
@@ -175,6 +176,11 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
   const auto = ctl.auto.value;
   const selected = ctl.selected.value;
   const hero = requireHero(setup.hero.id);
+  // Decode every face up front so the portrait can change expression without a flicker.
+  useEffect(() => {
+    for (const m of MOODS) new Image().src = heroUrl(hero, 'face', m);
+    new Image().src = heroUrl(hero, 'half', 'fierce');
+  }, [hero.id]);
   const canAct = !busy && !auto && !v.result;
   const alive = v.foes.filter((f) => f.alive);
   const targeting = selected !== null && ctl.needsTarget(selected);
@@ -273,9 +279,17 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
           </div>
         )}
         {ctl.cutin.value && (
-          <div class="bt-cutin">
-            <img src={heroUrl(hero, 'half')} alt="" draggable={false} />
-            <div class="bt-cutin-text">
+          <div class="bt-cutin" style={{ '--cut': hero.look.accent }}>
+            <div class="cutin-frame">
+              <div class="cutin-panel">
+                <FocusLines seed={hero.id} color="#FBF5EA" cx={32} cy={46} inner={22} count={80} />
+                <img src={heroUrl(hero, 'half', 'fierce')} alt="" draggable={false} />
+                <span class="cutin-sfx" lang="ja" aria-hidden="true">
+                  ドン
+                </span>
+              </div>
+            </div>
+            <div class="cutin-name">
               <span class="label">Ultimate</span>
               <span class="display">{ctl.cutin.value.title}</span>
             </div>
@@ -290,7 +304,7 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
 
       <div class={`bt-hero${ctl.hurt.value % 2 ? ' hurt-a' : ctl.hurt.value > 0 ? ' hurt-b' : ''}`}>
         <div class="bt-portrait">
-          <img src={heroUrl(hero, 'bust')} alt="" draggable={false} />
+          <img src={heroUrl(hero, 'face', ctl.face.value)} alt="" draggable={false} />
           <svg class="bt-gauge" viewBox="0 0 40 40" aria-label={`Ultimate ${gaugePct}%`}>
             <circle cx="20" cy="20" r="18" />
             <circle cx="20" cy="20" r="18" class="fill" style={{ strokeDasharray: `${(gaugePct / 100) * 113} 113` }} />
@@ -382,6 +396,7 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
       {v.result && (
         <div class="overlay center">
           <div class={`sheet bt-result ${v.result}`}>
+            {v.result === 'victory' && <FocusLines seed="victory" color="rgba(236,230,216,.14)" cx={50} cy={30} inner={30} count={60} />}
             <p class="label">{v.result === 'victory' ? 'The Fades come apart' : 'The light goes out'}</p>
             <h2>{v.result === 'victory' ? 'Victory' : 'Defeat'}</h2>
             <div class="row wrap gap-s bt-result-stats">

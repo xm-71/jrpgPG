@@ -7,7 +7,7 @@ import type { ItemCatalog } from './kindling';
 
 /** Small hand-made data for core tests, so core never depends on the content package. */
 
-const look: HeroDef['look'] = { height: 1, hair: 'short', hairColor: '#000000', skin: '#ffffff', outfit: '#000000', accent: '#ffffff', prop: 'blade' };
+const look: HeroDef['look'] = { height: 1, style: 'shonen', hair: 'spiky', hairColor: '#000000', skin: '#ffffff', eyes: '#000000', outfit: '#000000', under: '#ffffff', accent: '#ffffff', prop: 'blade', wear: [] };
 
 export const CARD_DEFS: CardDef[] = [
   card('cut', { kind: 'strike', atk: 6, ward: 1, tier: 'basic', source: 'basic', plus: { atk: 9 } }),

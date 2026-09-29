@@ -111,6 +111,8 @@ pnpm sim climb --stratum 1 --hero io --n 200
 - **Fair odds.** The gacha rules are data (`BannerRules`). The Odds page, the pull code and the tests all read the same definition; the tests run a million simulated pulls and compare them with an exact dynamic-programming analysis.
 - **Saves carry forward.** Saves from the earlier version (with the Descent and party battles) migrate on load: your heroes, cards, Gloam, pity and pull history are kept.
 - **Art is generated.** Heroes, Fades, card art and sigils are procedural SVG drawn from small records, so the repository has no binary art and everything can be restyled in code. Fonts are Shippori Mincho B1, Chakra Petch and Zen Kaku Gothic New via `@fontsource`.
+- **Each hero is drawn in a different manga tradition.** Wren is a shonen lead, Io a shonen rival, Marisol a sukeban, Tamsin a kunoichi, Aurelian a bishonen, Pip a chibi, Ysolde seinen, Kestrel Showa classic, Sable classic shoujo, Brannoch gekiga, Nim a majokko and Ondrej a yokai-manga figure. A hero's `Look` names the tradition, and `apps/web/src/art/manga` turns it into proportions (2.6 to 8.4 heads tall), eyes, hair, costume, ink weight and the way shadows are filled in (screentone, hatching, stipple or solid black). The Fades are drawn as horror-manga ink.
+- **Five expressions.** Every hero has a calm, fierce, hurt, glad and shocked face, drawn with manga symbols (the popping vein, sweat drops, gloom lines, blush, sparkles). Story lines carry a mood, and the fight portrait reacts to hits, Breaks and heals. Story scenes are laid out as manga pages with speech balloons, and ultimates play as a cut-in panel.
 
 ### Legal
 

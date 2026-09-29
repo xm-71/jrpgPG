@@ -959,3 +959,33 @@
   aspect-ratio: 150 / 230;
 }
 
+
+/* Hero sheet: the five faces of a hero. */
+.expressions {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin: 0.2rem 0 0.1rem;
+}
+
+.expression {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--ink-2);
+  border: 1px solid var(--hair);
+  padding: 2px 2px 4px;
+}
+
+.expression img {
+  width: 100%;
+  aspect-ratio: 0.931;
+  object-fit: cover;
+}
+
+.expression figcaption {
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+}

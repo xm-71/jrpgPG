@@ -17,8 +17,8 @@ export const BEATS: readonly BeatDef[] = [
       { who: 'narrator', text: 'Between them runs the Duskline, a ring of endless sunset, where cities on colossal legs keep walking to stay in the light.' },
       { who: 'narrator', text: 'At the heart of the Duskline stands the Gnomon: a black tower tall enough to pin the sun. Its shadow has not moved in a thousand years.' },
       { who: 'narrator', text: 'Tonight its doors opened, and the Fades came pouring out.' },
-      { who: 'marisol', text: 'Wren. The Fades are on the rail, and they are coming from the tower.' },
-      { who: 'wren', text: 'Then that is where I am going. Hold Vesper. I will hold the light.' },
+      { who: 'marisol', text: 'Wren. The Fades are on the rail, and they are coming from the tower.', mood: 'shock' },
+      { who: 'wren', text: 'Then that is where I am going. Hold Vesper. I will hold the light.', mood: 'fierce' },
     ],
   },
   {
@@ -28,9 +28,9 @@ export const BEATS: readonly BeatDef[] = [
     trigger: { type: 'firstClimbEnd' },
     gloam: 60,
     lines: [
-      { who: 'marisol', text: 'You went into the Gnomon alone, with a lamp and a pocket of paper.' },
+      { who: 'marisol', text: 'You went into the Gnomon alone, with a lamp and a pocket of paper.', mood: 'fierce' },
       { who: 'wren', text: 'The Fades came apart when I pinned them to the paper. Like they had been waiting for someone to.' },
-      { who: 'marisol', text: 'Everything in that tower is waiting. That is what frightens me.' },
+      { who: 'marisol', text: 'Everything in that tower is waiting. That is what frightens me.', mood: 'hurt' },
       { who: 'narrator', text: 'In the lantern-room, the Gloamstone Wren carries has started to glow on its own. It wants to be lit.' },
     ],
   },
@@ -41,10 +41,10 @@ export const BEATS: readonly BeatDef[] = [
     trigger: { type: 'firstClimbEnd' },
     lines: [
       { who: 'io', text: 'Ah. The sun is stuck. That would explain the headache.' },
-      { who: 'marisol', text: 'Who in the Hush are you?' },
-      { who: 'io', text: 'Io. I think I used to be very old, or very early. Either way, hello.' },
-      { who: 'wren', text: 'You came out of the stone. Out of the light.' },
-      { who: 'io', text: 'I came out of a sunrise. You would not believe me if I described it. Point me at the tower.' },
+      { who: 'marisol', text: 'Who in the Hush are you?', mood: 'shock' },
+      { who: 'io', text: 'Io. I think I used to be very old, or very early. Either way, hello.', mood: 'smile' },
+      { who: 'wren', text: 'You came out of the stone. Out of the light.', mood: 'shock' },
+      { who: 'io', text: 'I came out of a sunrise. You would not believe me if I described it. Point me at the tower.', mood: 'fierce' },
     ],
   },
   {
@@ -54,10 +54,10 @@ export const BEATS: readonly BeatDef[] = [
     trigger: { type: 'reachFloor', stratum: 0, floor: 1 },
     unlocks: ['pip'],
     lines: [
-      { who: 'pip', text: 'Oh! Don’t step there. That stair is mine. I mean, I found it first.' },
+      { who: 'pip', text: 'Oh! Don’t step there. That stair is mine. I mean, I found it first.', mood: 'shock' },
       { who: 'wren', text: 'You are picking lamp-glass off the steps. Inside the Gnomon.' },
-      { who: 'pip', text: 'Best glass on the Duskline. The Fades don’t want it and the Unturning don’t notice kids.' },
-      { who: 'pip', text: 'You’re going up? I’m coming. Somebody has to fix you when you break.' },
+      { who: 'pip', text: 'Best glass on the Duskline. The Fades don’t want it and the Unturning don’t notice kids.', mood: 'smile' },
+      { who: 'pip', text: 'You’re going up? I’m coming. Somebody has to fix you when you break.', mood: 'smile' },
     ],
   },
   {
@@ -69,9 +69,9 @@ export const BEATS: readonly BeatDef[] = [
     unlocks: ['tamsin'],
     lines: [
       { who: 'narrator', text: 'The Warden’s page falls from its halo and burns before it touches the floor. On it, a list of names, and the last one is still wet.' },
-      { who: 'tamsin', text: 'Those are people from the night side. My people. The Unturning writes them down, and they stop.' },
-      { who: 'wren', text: 'Stop what?' },
-      { who: 'tamsin', text: 'Everything. Breathing. Ageing. Hoping. They call it mercy. I call it a jar.' },
+      { who: 'tamsin', text: 'Those are people from the night side. My people. The Unturning writes them down, and they stop.', mood: 'hurt' },
+      { who: 'wren', text: 'Stop what?', mood: 'shock' },
+      { who: 'tamsin', text: 'Everything. Breathing. Ageing. Hoping. They call it mercy. I call it a jar.', mood: 'fierce' },
       { who: 'tamsin', text: 'The Hollow is above us. I have been trying to get in for a year. You got further in a night.' },
     ],
   },
@@ -82,10 +82,10 @@ export const BEATS: readonly BeatDef[] = [
     trigger: { type: 'reachFloor', stratum: 1, floor: 1 },
     unlocks: ['aurelian'],
     lines: [
-      { who: 'aurelian', text: 'Stop there, Lamplighter. The Meridian Dominion forbids anyone to climb.' },
+      { who: 'aurelian', text: 'Stop there, Lamplighter. The Meridian Dominion forbids anyone to climb.', mood: 'fierce' },
       { who: 'io', text: 'He has read the hymnal. Look at his hands.' },
-      { who: 'aurelian', text: 'I was sent to protect the Stillness. I read what they sing up here. It is not protection.' },
-      { who: 'aurelian', text: 'I will climb with you, if you will have a knight who has only just learned what he was guarding.' },
+      { who: 'aurelian', text: 'I was sent to protect the Stillness. I read what they sing up here. It is not protection.', mood: 'hurt' },
+      { who: 'aurelian', text: 'I will climb with you, if you will have a knight who has only just learned what he was guarding.', mood: 'smile' },
     ],
   },
   {
@@ -97,9 +97,9 @@ export const BEATS: readonly BeatDef[] = [
     sky: 'night',
     lines: [
       { who: 'narrator', text: 'The Tolling Bell cracks from lip to crown. For one breath, every Fade in the tower goes quiet.' },
-      { who: 'io', text: 'Did you feel that? The shadow on the floor moved. Only a little.' },
-      { who: 'marisol', text: 'The Strider’s compass swung for the first time in my life. Then it went still again.' },
-      { who: 'io', text: 'That is how it starts. That is how I remember it starting.' },
+      { who: 'io', text: 'Did you feel that? The shadow on the floor moved. Only a little.', mood: 'shock' },
+      { who: 'marisol', text: 'The Strider’s compass swung for the first time in my life. Then it went still again.', mood: 'shock' },
+      { who: 'io', text: 'That is how it starts. That is how I remember it starting.', mood: 'smile' },
     ],
   },
   {
@@ -112,8 +112,8 @@ export const BEATS: readonly BeatDef[] = [
     lines: [
       { who: 'narrator', text: 'A voice comes down the stair, calm and very tired.' },
       { who: 'narrator', text: '“Nothing up here has died in a thousand years, Lamplighter. Nothing has been born, either. It is a fair trade. Go home.”' },
-      { who: 'wren', text: 'It sounds so sure.' },
-      { who: 'tamsin', text: 'Jars are always sure.' },
+      { who: 'wren', text: 'It sounds so sure.', mood: 'hurt' },
+      { who: 'tamsin', text: 'Jars are always sure.', mood: 'fierce' },
     ],
   },
   {
@@ -124,9 +124,9 @@ export const BEATS: readonly BeatDef[] = [
     gloam: 400,
     lines: [
       { who: 'narrator', text: 'The Hour-Keeper lets go. For the first time in a thousand years, the Gnomon’s shadow moves one degree across the Duskline.' },
-      { who: 'io', text: 'There. Did you see it? That was a minute. A real one.' },
-      { who: 'wren', text: 'It is still stuck. It moved, and then it stopped again.' },
-      { who: 'io', text: 'Then we keep climbing. There are other towers. There is always another hour.' },
+      { who: 'io', text: 'There. Did you see it? That was a minute. A real one.', mood: 'smile' },
+      { who: 'wren', text: 'It is still stuck. It moved, and then it stopped again.', mood: 'hurt' },
+      { who: 'io', text: 'Then we keep climbing. There are other towers. There is always another hour.', mood: 'fierce' },
       { who: 'narrator', text: 'To be continued.' },
     ],
   },

@@ -45,7 +45,7 @@ function FirstKindle({ onDone }: { onDone: () => void }): JSX.Element {
             <p class="label">Kindled</p>
             <h2>{hero.name}</h2>
             <div class="reveal pop">
-              <HeroImg hero={hero} crop="full" />
+              <HeroImg hero={hero} crop="full" mood="smile" />
             </div>
             <p class="row gap-s">
               <Stars n={hero.rarity} />

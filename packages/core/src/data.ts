@@ -7,15 +7,56 @@ import type { Affinity, Rarity, Role } from './types';
  */
 
 /** Parameters for the procedural figures, until commissioned art replaces them. */
+/** The manga tradition a hero is drawn in. The style guide explains each one. */
+export type MangaStyle = 'shonen' | 'rival' | 'sukeban' | 'kunoichi' | 'bishonen' | 'chibi' | 'seinen' | 'showa' | 'shoujo' | 'gekiga' | 'majokko' | 'yokai';
+
+/** A face for the moment. Story lines and fights pick one. */
+export type Mood = 'calm' | 'fierce' | 'hurt' | 'smile' | 'shock';
+
+export type HairStyle = 'spiky' | 'hime' | 'regent' | 'bob' | 'flowing' | 'puff' | 'windswept' | 'explorer' | 'curls' | 'crop' | 'twintails' | 'hooded';
+
+/** Costume pieces drawn over a hero's base outfit. */
+export type Wear =
+  | 'scarf'
+  | 'coat'
+  | 'draped'
+  | 'plaster'
+  | 'longskirt'
+  | 'mask'
+  | 'wraps'
+  | 'tattoos'
+  | 'headband'
+  | 'armor'
+  | 'goggles'
+  | 'overalls'
+  | 'cloak'
+  | 'hat'
+  | 'satchel'
+  | 'epaulettes'
+  | 'tiara'
+  | 'apron'
+  | 'beard'
+  | 'witchhat'
+  | 'frills'
+  | 'haori'
+  | 'gloves';
+
+export type Prop = 'lantern' | 'blade' | 'rail' | 'needle' | 'greatsword' | 'kite' | 'baton' | 'buoy' | 'compass' | 'wire' | 'trowel' | 'chochin';
+
 export interface Look {
   /** Relative body height, about 0.85 to 1.15. */
   height: number;
-  hair: 'short' | 'long' | 'ponytail' | 'spiky' | 'bob' | 'hooded' | 'crown';
+  style: MangaStyle;
+  hair: HairStyle;
   hairColor: string;
   skin: string;
+  eyes: string;
   outfit: string;
+  /** A second outfit colour: shirts, linings, skirts. */
+  under: string;
   accent: string;
-  prop: 'lantern' | 'blade' | 'rail' | 'needle' | 'greatsword' | 'kite' | 'staff' | 'bow' | 'orb' | 'anchor' | 'compass' | 'scroll' | 'wire' | 'trowel';
+  prop: Prop;
+  wear: Wear[];
   cape?: boolean;
 }
 
@@ -150,6 +191,8 @@ export interface DialogueLine {
   /** A hero id, a foe name, or 'narrator'. */
   who: string;
   text: string;
+  /** The speaker's face on this line. */
+  mood?: Mood;
 }
 
 export type BeatTrigger =

@@ -46,7 +46,7 @@ export function Results({ run }: { run: ClimbRun }): JSX.Element {
       <Sky variant={cleared ? 'noon' : 'night'} />
       <div class="body scroll results">
         <div class="results-head">
-          <HeroImg hero={hero} crop="full" class="results-hero" />
+          <HeroImg hero={hero} crop="full" mood={cleared ? 'smile' : 'hurt'} class="results-hero" />
           <div>
             <p class="label">{kept.daily ? 'Daily climb' : STRATA[kept.stratum]!.name}</p>
             <h2 class="display">{cleared ? 'The stratum is cleared' : 'The light goes out'}</h2>

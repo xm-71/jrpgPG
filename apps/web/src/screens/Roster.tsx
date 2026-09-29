@@ -5,7 +5,8 @@ import { AFTERLIGHTS, BEATS, BOUND, HEROES, KINDLED, POOL, requireCard, requireH
 import { go, back } from '../game/nav';
 import { sfx } from '../game/sfx';
 import { mutate, profile } from '../game/store';
-import { HeroImg } from '../ui/Art';
+import { HeroImg, MOODS } from '../ui/Art';
+import { STYLE_NAME } from '../art/manga/names';
 import { CardFace } from '../ui/CardFace';
 import { ask } from '../ui/Dialog';
 import { AffinityIcon, ROLE_LABEL, Stars } from '../ui/Icons';
@@ -21,6 +22,8 @@ function ResonancePips({ rank }: { rank: number }): JSX.Element {
     </span>
   );
 }
+
+const MOOD_LABEL = { calm: 'Calm', fierce: 'Fierce', hurt: 'Hurt', smile: 'Glad', shock: 'Shocked' } as const;
 
 function joinsHow(h: HeroDef): string {
   if (h.origin === 'afterlight') return 'From Kindling';
@@ -76,6 +79,17 @@ function HeroSheet({ hero, onClose }: { hero: HeroDef; onClose: () => void }): J
           </div>
         </div>
         <p class="quote">“{hero.quote}”</p>
+        <div class="expressions" aria-label="Expressions">
+          {MOODS.map((m) => (
+            <figure key={m} class="expression">
+              <HeroImg hero={hero} crop="bust" mood={owned ? m : 'calm'} />
+              <figcaption class="label">{MOOD_LABEL[m]}</figcaption>
+            </figure>
+          ))}
+        </div>
+        <p class="muted small">
+          Drawn in the <b>{STYLE_NAME[hero.look.style]}</b> tradition.
+        </p>
         <p class="muted small">{hero.blurb}</p>
         <div class="panel panel-pad trait">
           <p class="label">Trait · {hero.trait.name}</p>
