@@ -9,6 +9,7 @@
     "dev": "vite --host",
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview --host",
+    "build:single": "tsc -p tsconfig.json && vite build --config vite.single.config.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "echo \"no unit tests in @duskline/web yet\""
   },
@@ -26,6 +27,7 @@
     "@babel/core": "^7.28.0",
     "@preact/preset-vite": "^2.10.6",
     "typescript": "^7.0.2",
-    "vite": "^8.3.1"
+    "vite": "^8.3.1",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }
