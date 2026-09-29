@@ -1,6 +1,7 @@
-import type { CardDef, EnemyDef, HeroDef } from '@duskline/core';
+import type { CardDef, FoeDef, HeroDef } from '@duskline/core';
+import { heroById } from '@duskline/content';
 import type { JSX } from 'preact';
-import { cardSvg } from '../art/cardArt';
+import { cardArtSvg } from '../art/cardArt';
 import { enemySvg } from '../art/enemy';
 import { figureSvg, svgUrl } from '../art/figure';
 
@@ -15,20 +16,22 @@ function memo(key: string, make: () => string): string {
   return hit;
 }
 
-export type Crop = 'full' | 'half' | 'bust';
+export type Crop = 'full' | 'bust' | 'half';
 
 export const heroUrl = (h: HeroDef, crop: Crop = 'bust'): string => memo(`hero:${h.id}:${crop}`, () => figureSvg(h.look, { crop, noShadow: crop !== 'full' }));
-export const cardUrl = (c: CardDef): string => memo(`card:${c.id}`, () => cardSvg(c));
-export const foeUrl = (e: EnemyDef): string => memo(`foe:${e.family}`, () => enemySvg(e.family));
+export const foeUrl = (f: Pick<FoeDef, 'family'>, halo = false): string => memo(`foe:${f.family}:${halo}`, () => enemySvg(f.family, { halo }));
+
+export function cardArtUrl(c: CardDef): string {
+  return memo(`card:${c.id}`, () => {
+    const hero = c.art.glyph.startsWith('hero:') ? heroById(c.art.glyph.slice(5)) : undefined;
+    return cardArtSvg(c, hero ? { heroLook: hero.look } : {});
+  });
+}
 
 export function HeroImg({ hero, crop = 'bust', class: cls = '' }: { hero: HeroDef; crop?: Crop; class?: string }): JSX.Element {
   return <img class={`art ${cls}`} src={heroUrl(hero, crop)} alt="" draggable={false} />;
 }
 
-export function CardImg({ card, class: cls = '' }: { card: CardDef; class?: string }): JSX.Element {
-  return <img class={`art ${cls}`} src={cardUrl(card)} alt={card.name} draggable={false} />;
-}
-
-export function FoeImg({ enemy, class: cls = '' }: { enemy: EnemyDef; class?: string }): JSX.Element {
-  return <img class={`art ${cls}`} src={foeUrl(enemy)} alt="" draggable={false} />;
+export function FoeImg({ foe, halo = false, class: cls = '' }: { foe: Pick<FoeDef, 'family'>; halo?: boolean; class?: string }): JSX.Element {
+  return <img class={`art ${cls}`} src={foeUrl(foe, halo)} alt="" draggable={false} />;
 }

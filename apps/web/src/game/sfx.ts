@@ -76,4 +76,13 @@ export const sfx = {
     else [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.24, 'triangle', 0.07, undefined, i * 0.09));
   },
   spend: () => tone(320, 0.1, 'triangle', 0.05, 200),
+  card: () => tone(880, 0.06, 'triangle', 0.04, 1200),
+  ward: () => {
+    tone(240, 0.16, 'sine', 0.05);
+    tone(360, 0.18, 'sine', 0.04, undefined, 0.05);
+  },
+  bell: () => {
+    tone(196, 0.9, 'sine', 0.07, 190);
+    tone(392, 0.6, 'sine', 0.03, 380, 0.02);
+  },
 };

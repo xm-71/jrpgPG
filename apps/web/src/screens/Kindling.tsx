@@ -12,6 +12,7 @@ import { GloamIcon, Stars } from '../ui/Icons';
 import { Sky } from '../ui/Sky';
 import { dateLabel } from '../ui/text';
 import { itemView } from '../ui/items';
+import { CardFace } from '../ui/CardFace';
 import { GloamPill } from './Home';
 
 interface Reveal {
@@ -86,9 +87,7 @@ function RevealOverlay({ reveal, onClose }: { reveal: Reveal; onClose: () => voi
       </button>
       <div key={i} class="kx-card pop">
         <Stars n={cur!.rarity} />
-        <div class={`kx-art ${v.kind}`}>
-          <img src={v.url} alt="" draggable={false} />
-        </div>
+        <div class={`kx-art ${v.kind}`}>{v.card ? <CardFace def={v.card} size="big" /> : <img src={v.url} alt="" draggable={false} />}</div>
         <h2 class="display kx-name">{v.name}</h2>
         <p class="muted">{v.sub}</p>
         <p class="kx-note">{noteFor(cur!)}</p>
@@ -118,7 +117,7 @@ function BannerPanel({ banner, ends }: { banner: BannerDef; ends: number | null 
     if (busy) return;
     const cost = kindleCost(banner, count);
     if (profile.value.gloam < cost) {
-      toast(`You need ${cost} Gloam. Play stages, tasks and Descent to earn more.`, 'warn');
+      toast(`You need ${cost} Gloam. Climb, clear daily tasks and the daily climb to earn more.`, 'warn');
       return;
     }
     setBusy(true);

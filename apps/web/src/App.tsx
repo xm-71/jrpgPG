@@ -2,15 +2,16 @@ import { useEffect } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { screen } from './game/nav';
 import { profile } from './game/store';
-import { Descent } from './screens/Descent';
+import { Chronicle } from './screens/Chronicle';
+import { Climb } from './screens/climb/Climb';
+import { ClimbNew } from './screens/ClimbNew';
 import { History } from './screens/History';
 import { Home } from './screens/Home';
 import { Kindling } from './screens/Kindling';
 import { Odds } from './screens/Odds';
 import { Roster } from './screens/Roster';
+import { Scene } from './screens/Scene';
 import { Settings } from './screens/Settings';
-import { Stage } from './screens/Stage';
-import { Story } from './screens/Story';
 import { Title } from './screens/Title';
 import { DialogHost } from './ui/Dialog';
 import { Toasts } from './ui/Toasts';
@@ -36,8 +37,17 @@ export function App(): JSX.Element {
     case 'home':
       view = <Home />;
       break;
-    case 'roster':
-      view = <Roster hero={s.hero} />;
+    case 'scene':
+      view = <Scene />;
+      break;
+    case 'climb':
+      view = <Climb />;
+      break;
+    case 'climb-new':
+      view = <ClimbNew key={String(s.daily)} daily={s.daily === true} />;
+      break;
+    case 'chronicle':
+      view = <Chronicle />;
       break;
     case 'kindling':
       view = <Kindling />;
@@ -48,14 +58,8 @@ export function App(): JSX.Element {
     case 'history':
       view = <History />;
       break;
-    case 'descent':
-      view = <Descent />;
-      break;
-    case 'story':
-      view = <Story />;
-      break;
-    case 'stage':
-      view = <Stage key={s.id} id={s.id} />;
+    case 'roster':
+      view = <Roster {...(s.hero ? { hero: s.hero } : {})} />;
       break;
     case 'settings':
       view = <Settings />;

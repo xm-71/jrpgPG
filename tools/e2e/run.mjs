@@ -1,4 +1,4 @@
-// End-to-end smoke test: a new player plays the first two stages, kindles, reloads, and keeps their progress.
+// End-to-end smoke test: a new player climbs the Root for the first time, meets Io, kindles, and reloads.
 // Run `pnpm build` first. Uses the Chromium that Playwright is configured to find (PLAYWRIGHT_BROWSERS_PATH)
 // or CHROMIUM_PATH. Falls back to /opt/pw-browsers/chromium when it exists.
 import { spawn } from 'node:child_process';
@@ -37,21 +37,68 @@ const check = (cond, msg) => {
   console.log(`ok  ${msg}`);
 };
 
-async function playBattle(page) {
-  await page.getByRole('button', { name: '2×' }).click();
-  await page.getByRole('button', { name: 'Auto' }).click();
+const saved = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('duskline:profile') ?? 'null'));
+const shown = async (page, sel) => (await page.locator(sel).count()) > 0 && (await page.locator(sel).first().isVisible());
+
+/** Fights on Auto and returns true for a win. */
+async function fight(page) {
+  const auto = page.locator('.bt-top button[aria-pressed="false"]', { hasText: 'Auto' });
+  await page.locator('.bt-hand').waitFor();
+  if (await auto.count()) await auto.click();
   await page.locator('.bt-result').waitFor({ timeout: 120000 });
-  const victory = (await page.locator('.bt-result h2').innerText()).toLowerCase().includes('victory');
-  await page.getByRole('button', { name: 'Continue' }).click();
-  return victory;
+  const won = (await page.locator('.bt-result h2').innerText()).toLowerCase().includes('victory');
+  await page.locator('.bt-result .btn-primary').click();
+  return won;
 }
 
-async function skipDialogue(page) {
-  await page.getByRole('button', { name: 'Skip' }).click();
+/**
+ * Plays one step of the climb from whatever screen is up. Goes to places in a fixed order of preference,
+ * so the same build always walks the same path through the tutorial seed.
+ */
+async function climbStep(page, log) {
+  if (await shown(page, '.results')) return 'results';
+  if (await shown(page, '.screen.battle')) {
+    log.push(`fight:${(await fight(page)) ? 'won' : 'lost'}`);
+  } else if (await shown(page, '.glimmer')) {
+    await page.locator('.glimmer').first().click();
+    log.push('glimmer');
+  } else if (await shown(page, '.mirror')) {
+    await page.locator('.mirror .cardf').first().click();
+    log.push('mirror');
+  } else if (await shown(page, '.pick-grid')) {
+    await page.locator('.pick-grid .cardf').first().click();
+    log.push('pick');
+  } else if (await shown(page, '.shop')) {
+    await page.getByRole('button', { name: 'Leave the market' }).click();
+    log.push('shop');
+  } else if (await shown(page, '.rest')) {
+    await page.getByRole('button', { name: /Sleep/ }).click();
+    log.push('rest');
+  } else if (await shown(page, '.event')) {
+    if (await shown(page, '.event-after')) await page.locator('.foot .btn-primary').click();
+    else await page.locator('.event-choice:not([disabled])').last().click();
+    log.push('event');
+  } else if (await shown(page, '.offer-cards')) {
+    await page.locator('.offer-cards .cardf').first().click();
+    log.push('card');
+  } else if (await shown(page, '.climb-map')) {
+    for (const kind of ['rest', 'shop', 'mirror', 'battle', 'event', 'elite', 'guardian', 'boss']) {
+      const node = page.locator(`.map-node.open.k-${kind}`);
+      if (await node.count()) {
+        await node.first().click();
+        break;
+      }
+    }
+    await page.getByRole('button', { name: 'Go', exact: true }).click();
+    log.push('go');
+  }
+  await page.waitForTimeout(120);
+  return 'climbing';
 }
 
 try {
   await waitForServer();
+  const started = Date.now();
   const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined),
     args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
@@ -62,34 +109,72 @@ try {
   page.on('console', (m) => m.type() === 'error' && !/ERR_CERT|fonts\.g|Failed to load resource/.test(m.text()) && errors.push(m.text()));
   await page.goto(GAME_URL);
 
-  // Prologue and stage 0-1
+  // Settings first: reduced motion keeps the fights quick.
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('checkbox', { name: /Reduce motion/ }).check();
+  await page.getByRole('button', { name: 'Back' }).click();
+
+  // The prologue, then straight up the tower with Wren.
   await page.getByRole('button', { name: 'Begin' }).click();
-  for (let i = 0; i < 5; i++) await page.locator('.narration').click();
-  await skipDialogue(page);
-  await page.getByRole('button', { name: 'Fight' }).click();
-  await page.locator('.battle canvas').waitFor();
-  check(await playBattle(page), 'stage 0-1 is won');
+  await page.locator('.dialogue').click();
+  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.locator('.glimmer').first().waitFor();
+  let p = await saved(page);
+  check(p.v === 2 && p.climb.run?.hero === 'wren' && p.climb.run.seed === 'first-light', 'the first climb starts with Wren on the tutorial seed');
+  check(p.climb.run.deck.length === 8, 'Wren starts with 8 cards');
+  await page.locator('.glimmer').first().click();
 
-  // After-story, then the scripted first Kindling gives Io
-  await skipDialogue(page);
-  await page.getByRole('button', { name: 'Kindle' }).click();
-  await page.getByText('Io', { exact: false }).first().waitFor();
+  // First fight and its spoils.
+  await page.locator('.map-node.open.k-battle').first().click();
+  await page.getByRole('button', { name: 'Go', exact: true }).click();
+  check(await fight(page), 'the first fight is won');
+  await page.locator('.offer-cards .cardf').first().waitFor();
+  check((await page.locator('.offer-cards .cardf').count()) === 3, 'a win offers three cards');
+  await page.locator('.offer-cards .cardf').first().click();
+  await page.locator('.climb-map').waitFor();
+  p = await saved(page);
+  check(p.climb.run.deck.length === 9 && p.climb.run.embers > 0, `the card joins the deck and Embers are paid (${p.climb.run.embers})`);
+
+  // A reload mid-climb resumes where it left off.
+  const at = p.climb.run.at;
+  await page.reload();
+  await page.getByRole('button', { name: 'Resume the climb' }).click();
+  await page.locator('.climb-map').waitFor();
+  check((await saved(page)).climb.run.at === at, 'a reload resumes the climb on the same node');
+
+  // Climb to the end of the Root.
+  const log = [];
+  for (let i = 0; i < 400 && (await climbStep(page, log)) !== 'results'; i++);
+  check(await shown(page, '.results'), `the climb reaches its results (${log.join(' ')})`);
+  const cleared = (await page.locator('.results h2').innerText()).includes('cleared');
+  console.log(`    ${cleared ? 'the Root is cleared' : 'the light went out'} after ${log.filter((l) => l.startsWith('fight')).length + 1} fights`);
+  const gloamBefore = (await saved(page)).gloam;
+  await page.getByRole('button', { name: 'Collect' }).click();
+  await page.getByRole('button', { name: 'Continue' }).waitFor();
+  p = await saved(page);
+  check(p.climb.run === null && p.climb.runs === 1 && p.gloam > gloamBefore, `the climb settles and pays Gloam (${gloamBefore} to ${p.gloam})`);
+  if (await page.locator('.keep .cardf').count()) {
+    await page.locator('.keep .cardf').first().click();
+    check((await saved(page)).archive.length === 1, 'an Echo from the climb is kept');
+  }
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByText('Stage cleared').waitFor();
-  check((await page.locator('.gloam').first().innerText()).includes('60'), 'first clear pays 60 Gloam');
 
-  // Stage 0-2 with Io
-  await page.getByRole('button', { name: /Next:/ }).click();
-  await skipDialogue(page);
-  await page.getByRole('button', { name: 'Fight' }).click();
-  check(await playBattle(page), 'stage 0-2 is won');
-  await skipDialogue(page);
-  await page.getByText('Stage cleared').waitFor();
-  await page.getByRole('button', { name: 'Home' }).click();
+  // The story answers: the Gloamstone is lit for free and Io steps out.
+  await page.getByRole('button', { name: 'Skip' }).click();
+  await page.getByRole('button', { name: 'Kindle' }).click();
+  await page.locator('.kindle-first h2', { hasText: 'Io' }).waitFor();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  for (let i = 0; i < 8 && !(await shown(page, '.home')); i++) {
+    if (await shown(page, '.dialogue')) await page.getByRole('button', { name: 'Skip' }).click();
+    await page.waitForTimeout(250);
+  }
+  await page.locator('.home').waitFor();
+  p = await saved(page);
+  check(!!p.collection.heroes.io && p.progress.beats.includes('answering-lamp'), 'Io joins after the first climb');
 
-  // Kindling: a ten-pull spends exactly 1000 Gloam
+  // Kindling: a ten-pull never costs more than 1000 Gloam.
   const gloamText = async () => Number((await page.locator('.topbar .gloam').first().innerText()).replace(/\D/g, ''));
-  await page.getByText('Kindling').first().click();
+  await page.getByRole('button', { name: /^Kindling/ }).click();
   const before = await gloamText();
   check(before >= 1000, `enough Gloam for a ten-pull (${before})`);
   await page.getByRole('button', { name: /Kindle ×10/ }).click();
@@ -100,19 +185,18 @@ try {
   await page.locator('.kx-summary').waitFor();
   await page.getByRole('button', { name: 'Done' }).click();
   const after = await gloamText();
-  check(before - after === 1000 || before - after < 1000, `ten-pull charged (${before} to ${after}; duplicates may refund)`);
-  check(before - after <= 1000, 'a ten-pull never costs more than 1000');
+  check(before - after > 0 && before - after <= 1000, `a ten-pull costs at most 1000 Gloam (${before} to ${after}; duplicates may refund)`);
 
-  // Reload keeps the save
+  // A reload keeps everything.
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('duskline:profile') ?? 'null'));
-  check(stored && stored.progress.cleared['0-1'] === 1 && stored.progress.cleared['0-2'] === 1, 'progress survives a reload');
-  check(stored.kindling.totalPulls === 10, 'pull history survives a reload');
+  await page.locator('.home').waitFor();
+  p = await saved(page);
+  check(p.climb.runs === 1 && p.kindling.totalPulls === 10 && !!p.collection.heroes.io, 'climbs, pulls and heroes survive a reload');
 
   check(errors.length === 0, `no console or page errors${errors.length ? ': ' + errors.join(' | ') : ''}`);
   await browser.close();
-  console.log('\nAll end-to-end checks passed.');
+  console.log(`\nAll end-to-end checks passed in ${Math.round((Date.now() - started) / 1000)} s.`);
   stop();
 } catch (e) {
   console.error(e.message ?? e);

@@ -65,7 +65,7 @@ export function Settings(): JSX.Element {
         </button>
         <h1 class="display">Settings</h1>
       </header>
-      <div class="body scroll">
+      <div class="body scroll settings-list">
         <section class="panel panel-pad">
           <label class="switch">
             <span>

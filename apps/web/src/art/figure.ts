@@ -1,13 +1,12 @@
 import type { Look } from '@duskline/core';
 
 /**
- * Placeholder hero art, drawn as SVG from a hero's `Look`. It is a deliberate stand-in: flat,
- * paper-cut figures in the Twilight Graphic palette, so the whole game can be built and
- * played before commissioned illustration and Spine rigs exist. The same SVG feeds menus
- * (as an image) and the battle scene (rasterised to a texture).
+ * Hero art, drawn as SVG from a hero's `Look`: tall, angular figures in long coats, cut from ink
+ * with a hard shadow and a rim of accent light. A deliberate stand-in until commissioned
+ * illustration exists; the same SVG feeds menus, cards and the battle scene.
  */
 
-const INK = '#17132B';
+const INK = '#07060B';
 
 function shade(hex: string, amount: number): string {
   const n = parseInt(hex.slice(1), 16);
@@ -138,45 +137,47 @@ export function figureSvg(look: Look, opts: FigureOptions = {}): string {
   const skin = look.skin;
   const dark = shade(o, -0.35);
   const trouser = shade(o, -0.55);
-  const cape = look.cape ? `<path d="M64 120 L136 120 L168 300 L32 300 Z" fill="${shade(o, -0.42)}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>` : '';
+  const cape = look.cape ? `<path d="M62 118 L138 118 L176 312 L100 296 L24 312 Z" fill="${shade(o, -0.55)}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>` : '';
+  const rim = shade(a, 0.15);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${crop === 'full' ? 200 : ''}" fill="none">
   <g transform="translate(100 330) scale(${h}) translate(-100 -330)">
-    ${opts.noShadow ? '' : '<ellipse cx="100" cy="330" rx="54" ry="8" fill="#000" opacity=".35"/>'}
+    ${opts.noShadow ? '' : '<ellipse cx="100" cy="330" rx="54" ry="8" fill="#000" opacity=".5"/>'}
     ${cape}
     ${hairBack(look)}
     <g stroke="${INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-      <path d="M84 250 L82 322 L106 322 L102 250 Z" fill="${trouser}"/>
-      <path d="M98 250 L96 322 L120 322 L116 250 Z" fill="${shade(trouser, 0.08)}"/>
-      <path d="M78 318 L110 318 L114 330 L74 330 Z" fill="${INK}"/>
-      <path d="M92 318 L124 318 L128 330 L88 330 Z" fill="${INK}"/>
-      <path d="M72 116 L128 116 L122 202 L78 202 Z" fill="${o}"/>
-      <path d="M70 192 L130 192 L148 268 L52 268 Z" fill="${o}"/>
-      <path d="M70 192 L130 192 L134 208 L66 208 Z" fill="${dark}"/>
-      <path d="M62 122 L74 118 L80 186 L64 190 Z" fill="${o}"/>
-      <path d="M126 118 L138 122 L148 184 L134 190 Z" fill="${o}"/>
-      <circle cx="64" cy="194" r="7" fill="${skin}"/>
-      <circle cx="144" cy="192" r="7" fill="${skin}"/>
-      <path d="M92 106 L108 106 L110 120 L90 120 Z" fill="${skin}"/>
-      <path d="M72 200 L128 200" stroke="${a}" stroke-width="5"/>
-      <path d="M88 116 L100 140 L112 116" stroke="${a}" stroke-width="4" fill="none"/>
+      <path d="M86 250 L84 322 L104 322 L100 250 Z" fill="${trouser}"/>
+      <path d="M100 250 L98 322 L118 322 L114 250 Z" fill="${shade(trouser, 0.06)}"/>
+      <path d="M80 316 L108 316 L112 330 L76 330 Z" fill="${INK}"/>
+      <path d="M94 316 L122 316 L126 330 L90 330 Z" fill="${INK}"/>
+      <path d="M72 114 L128 114 L124 200 L76 200 Z" fill="${o}"/>
+      <path d="M74 190 L126 190 L150 304 L112 296 L100 250 L88 296 L50 304 Z" fill="${o}"/>
+      <path d="M100 118 L100 250" stroke="${dark}" stroke-width="3"/>
+      <path d="M62 120 L74 116 L78 190 L62 196 Z" fill="${o}"/>
+      <path d="M126 116 L138 120 L146 190 L132 194 Z" fill="${o}"/>
+      <path d="M58 188 L70 192 L68 204 L56 200 Z" fill="${skin}"/>
+      <path d="M136 188 L148 186 L150 198 L138 200 Z" fill="${skin}"/>
+      <path d="M92 104 L108 104 L110 118 L90 118 Z" fill="${skin}"/>
+      <path d="M76 198 L124 198" stroke="${a}" stroke-width="4"/>
+      <path d="M80 114 L100 146 L120 114" stroke="${a}" stroke-width="4" fill="${dark}"/>
     </g>
-    <path d="M128 120 L122 200 L146 264" stroke="#FFD58A" stroke-width="2.5" stroke-linecap="round" opacity=".75"/>
+    <path d="M100 120 L100 190 L112 296 L150 304 L126 190 L128 116 Z" fill="#000" opacity=".22"/>
+    <circle cx="100" cy="162" r="7" fill="${INK}" stroke="${a}" stroke-width="2"/>
+    <path d="M100 157 L100 167 M95 162 L105 162" stroke="${a}" stroke-width="1.5"/>
+    <path d="M128 118 L126 190 L150 302" stroke="${rim}" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M72 116 L62 124 L60 190" stroke="${rim}" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>
     ${prop(look)}
     <g stroke="${INK}" stroke-width="3" stroke-linejoin="round">
-      <ellipse cx="100" cy="86" rx="28" ry="31" fill="${skin}"/>
+      <path d="M74 84 C74 62 86 54 100 54 C114 54 126 62 126 84 C126 104 116 118 100 120 C84 118 74 104 74 84 Z" fill="${skin}"/>
     </g>
-    <path d="M74 92 C76 114 90 122 100 122 C90 116 82 106 80 92 Z" fill="#000" opacity=".1"/>
-    <ellipse cx="86" cy="98" rx="6" ry="3.5" fill="#E0457B" opacity=".25"/>
-    <ellipse cx="114" cy="98" rx="6" ry="3.5" fill="#E0457B" opacity=".25"/>
+    <path d="M100 56 C114 56 126 64 126 84 C126 104 116 118 100 120 C108 110 112 98 112 84 C112 70 108 60 100 56 Z" fill="#000" opacity=".16"/>
     <g>
-      <ellipse cx="88" cy="88" rx="5" ry="7.5" fill="${INK}"/>
-      <ellipse cx="112" cy="88" rx="5" ry="7.5" fill="${INK}"/>
-      <ellipse cx="88" cy="90" rx="3.4" ry="5.4" fill="${a}"/>
-      <ellipse cx="112" cy="90" rx="3.4" ry="5.4" fill="${a}"/>
-      <circle cx="86.5" cy="86" r="1.8" fill="#fff"/>
-      <circle cx="110.5" cy="86" r="1.8" fill="#fff"/>
-      <path d="M81 79 C85 76 90 76 94 78 M106 78 C110 76 115 76 119 79" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>
-      <path d="M95 105 C98 107 102 107 105 105" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M81 88 L88 84 L96 88 L88 91 Z" fill="${INK}"/>
+      <path d="M104 88 L112 84 L119 88 L112 91 Z" fill="${INK}"/>
+      <circle cx="88.5" cy="87.8" r="2.3" fill="${a}"/>
+      <circle cx="111.5" cy="87.8" r="2.3" fill="${a}"/>
+      <path d="M80 80 L95 81 M105 81 L120 80" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M97 101 L103 101" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M100 90 L98 97 L101 97" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity=".5"/>
     </g>
     ${hairFront(look)}
   </g>

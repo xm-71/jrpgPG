@@ -1,4 +1,5 @@
-import '@fontsource/dela-gothic-one/latin-400.css';
+import '@fontsource/shippori-mincho-b1/latin-600.css';
+import '@fontsource/shippori-mincho-b1/latin-800.css';
 import '@fontsource/chakra-petch/latin-500.css';
 import '@fontsource/chakra-petch/latin-600.css';
 import '@fontsource/zen-kaku-gothic-new/latin-400.css';
@@ -7,7 +8,9 @@ import '@fontsource/zen-kaku-gothic-new/latin-700.css';
 import './styles/theme.css';
 import './styles/ui.css';
 import './styles/screens.css';
+import './styles/cards.css';
 import './styles/battle.css';
+import './styles/climb.css';
 import './styles/story.css';
 
 import { render } from 'preact';

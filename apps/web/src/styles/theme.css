@@ -1,44 +1,61 @@
-/* Twilight Graphic: one world, one look. A sun stuck on the horizon, panels cut on a slant. */
+/*
+ * Ink and Ember: the look of the Gnomon.
+ * Near-black ink, bone text, one vermilion accent, Gloam gold for money, occult geometry in hairlines.
+ * One deliberate dark world, so there is no light theme.
+ */
 :root {
   color-scheme: dark;
 
-  --gold: #f2b43a;
-  --rose: #e0457b;
-  --violet: #6a3a9e;
-  --night: #1e1846;
-  --deep: #110e26;
-  --teal: #2bb5a6;
-  --paper: #f4f1f8;
-  --fade: #8a86a0;
+  --ink-0: #07060b;
+  --ink-1: #0d0b13;
+  --ink-2: #14111c;
+  --ink-3: #1c1826;
+  --ink-4: #262033;
+  --hair: rgba(236, 230, 216, 0.14);
+  --hair-2: rgba(236, 230, 216, 0.26);
 
-  --bg: #0c0a18;
-  --panel: #181530;
-  --panel-2: #221e3e;
-  --panel-3: #2c2750;
-  --line: #332d57;
-  --ink: #f3f0fb;
-  --ink-2: #c4bedb;
-  --muted: #9d97bb;
-  --good: #43d3c3;
-  --bad: #ff6b7a;
+  --bone: #ece6d8;
+  --bone-2: #c9c0ae;
+  --muted: #8e8598;
+  --blood: #c8322c;
+  --ember: #e25a45;
+  --gold: #d9a441;
+  --moon: #a9b6cc;
+  --violet: #4e2f66;
+  --good: #4fc1b0;
+  --bad: #e25a45;
 
-  --aff-sun: #ffb84a;
-  --aff-moon: #9aa7ff;
-  --aff-flame: #ff7a45;
-  --aff-frost: #7fd8f5;
-  --aff-gale: #7be0b0;
-  --aff-volt: #e9f04d;
+  /* Older names still used by some screens. */
+  --bg: var(--ink-0);
+  --deep: var(--ink-1);
+  --panel: var(--ink-2);
+  --panel-2: var(--ink-3);
+  --panel-3: var(--ink-4);
+  --line: var(--hair-2);
+  --ink: var(--bone);
+  --ink-2t: var(--bone-2);
+  --rose: var(--blood);
+  --teal: var(--good);
+  --paper: var(--bone);
+  --fade: var(--muted);
+  --night: var(--ink-2);
 
-  --r5: #f2b43a;
-  --r4: #b58cff;
-  --r3: #8fb4d9;
+  --aff-sun: #e8b04a;
+  --aff-moon: #a3aeff;
+  --aff-flame: #ec6a3c;
+  --aff-frost: #80d2ef;
+  --aff-gale: #6fd6a6;
+  --aff-volt: #e6df55;
 
-  --font-display: 'Dela Gothic One', 'Arial Black', 'Helvetica Neue', Impact, sans-serif;
+  --r5: #d9a441;
+  --r4: #b28ae6;
+  --r3: #8fb0cc;
+
+  --font-display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', Georgia, serif;
   --font-label: 'Chakra Petch', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Zen Kaku Gothic New', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans', sans-serif;
 
   --text-scale: 1;
-  --slant: 10px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -53,14 +70,17 @@ html {
   font-size: calc(16px * var(--text-scale));
   -webkit-text-size-adjust: 100%;
   height: 100%;
+  background: var(--ink-0);
 }
 
 body {
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(120% 80% at 50% 110%, #3b1f5e 0%, #15112e 45%, #0a0815 100%);
-  color: var(--ink);
+  background:
+    radial-gradient(90% 60% at 50% 115%, rgba(200, 50, 44, 0.22), transparent 70%),
+    radial-gradient(120% 90% at 50% -10%, #17111f 0%, var(--ink-0) 60%);
+  color: var(--bone);
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.5;
@@ -116,8 +136,19 @@ p {
   height: 100%;
   margin: 0 auto;
   overflow: hidden;
-  background: var(--deep);
+  background: var(--ink-1);
   isolation: isolate;
+}
+
+/* Film grain over everything, very faint. */
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
 }
 
 @media (min-width: 640px) and (min-height: 720px) {
@@ -128,11 +159,11 @@ p {
   }
   .stage {
     height: min(100%, 900px);
-    border-radius: 22px;
+    border-radius: 6px;
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.08),
-      0 30px 90px -20px rgba(0, 0, 0, 0.75),
-      0 0 120px -30px rgba(224, 69, 123, 0.35);
+      0 0 0 1px var(--hair),
+      0 30px 90px -20px rgba(0, 0, 0, 0.9),
+      0 0 140px -30px rgba(200, 50, 44, 0.35);
   }
 }
 
@@ -142,17 +173,17 @@ p {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  animation: screen-in 0.22s ease-out both;
+  animation: screen-in 0.26s ease-out both;
 }
 
 @keyframes screen-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    filter: brightness(0.4);
   }
   to {
     opacity: 1;
-    transform: none;
+    filter: none;
   }
 }
 
@@ -179,17 +210,17 @@ html[data-motion='reduced'] *::after {
 /* Type */
 .display {
   font-family: var(--font-display);
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-wrap: balance;
 }
 
 .label {
   font-family: var(--font-label);
   font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -207,4 +238,9 @@ html[data-motion='reduced'] *::after {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
+}
+
+/* Inside a scrolling column, content scrolls; it never squashes. */
+.scroll > * {
+  flex-shrink: 0;
 }

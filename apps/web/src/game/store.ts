@@ -46,11 +46,23 @@ export interface Toast {
   kind: 'info' | 'good' | 'warn';
 }
 
+/** The toasts on screen. At most two show at once so they never bury the top of a screen; the rest wait their turn. */
 export const toasts = signal<Toast[]>([]);
+const MAX_TOASTS = 2;
+const waiting: Array<{ t: Toast; ms: number }> = [];
 let nextToast = 1;
 
+function showToast(t: Toast, ms: number): void {
+  toasts.value = [...toasts.value, t];
+  setTimeout(() => {
+    toasts.value = toasts.value.filter((x) => x.id !== t.id);
+    const next = waiting.shift();
+    if (next) showToast(next.t, Math.min(next.ms, 2600));
+  }, ms);
+}
+
 export function toast(text: string, kind: Toast['kind'] = 'info', ms = 3400): void {
-  const id = nextToast++;
-  toasts.value = [...toasts.value, { id, text, kind }].slice(-4);
-  setTimeout(() => (toasts.value = toasts.value.filter((t) => t.id !== id)), ms);
+  const t = { id: nextToast++, text, kind };
+  if (toasts.value.length < MAX_TOASTS) showToast(t, ms);
+  else if (waiting.length < 6) waiting.push({ t, ms });
 }

@@ -1,197 +1,284 @@
 import {
-  burstLegal,
-  planFor,
-  previewTimeline,
-  type Action,
+  incoming,
+  intentOf,
+  living,
+  maxLight,
+  moveHit,
   type Affinity,
-  type Battle,
-  type BattleEvent,
-  type BattleState,
-  type ModStat,
-  type Side,
-  type TimelineEntry,
-  type Unit,
+  type CardBattleState,
+  type CardEvent,
+  type CardInstance,
+  type FoeMove,
+  type FoeState,
+  type Statuses,
 } from '@duskline/core';
 
 /**
- * What the screen shows. The engine resolves a whole action at once; the controller plays its
- * events back one at a time and applies each to this view, so bars and numbers move in step
- * with the animation. When playback ends the view is rebuilt from the engine, which is the truth.
+ * What the battle screen shows. The engine settles a whole action at once; the controller plays
+ * its events back one at a time and applies each one here, so bars and numbers move in step with
+ * the animation. When playback ends the view is rebuilt from the engine, which is the truth.
  */
 
+export type IntentPart = 'attack' | 'ward' | 'rage' | 'heal' | 'curse' | 'summon' | 'chill' | 'hex' | 'dim' | 'shatter';
+
 export interface IntentView {
+  id: string;
   name: string;
-  target: string | null;
+  perHit: number;
+  hits: number;
+  pierce: boolean;
+  parts: IntentPart[];
   heavy: boolean;
-  aoe: boolean;
 }
 
-export interface ModView {
-  stat: ModStat | 'taunt';
-  pct: number;
-  turns: number;
-}
-
-export interface UnitView {
+export interface FoeView {
   id: string;
   defId: string;
   name: string;
-  side: Side;
-  slot: number;
+  family: string;
   tier: string;
-  affinity: Affinity | null;
+  slot: number;
   hp: number;
   maxHp: number;
+  ward: number;
   shell: number;
   maxShell: number;
-  weaknesses: Affinity[];
-  resists: Affinity[];
   broken: boolean;
   hardened: boolean;
-  gauge: number;
   alive: boolean;
-  guarding: boolean;
-  mods: ModView[];
+  statuses: Statuses;
+  weaknesses: Affinity[];
+  resists: Affinity[];
   intent: IntentView | null;
 }
 
+export interface HeroView {
+  hp: number;
+  maxHp: number;
+  ward: number;
+  gauge: number;
+  statuses: Statuses;
+}
+
 export interface BattleView {
-  units: UnitView[];
-  lantern: number;
-  order: TimelineEntry[];
-  awaiting: { actor: string; mode: 'turn' | 'encore' | 'passed' } | null;
-  /** Allies the baton can be passed to right now. */
-  passTargets: string[];
-  burstReady: boolean;
-  canSkill: boolean;
+  turn: number;
+  light: number;
+  maxLight: number;
+  hero: HeroView;
+  foes: FoeView[];
+  hand: CardInstance[];
+  drawCount: number;
+  discardCount: number;
+  spentCount: number;
+  chain: { steps: number; affinity: Affinity | null };
+  incoming: { damage: number; pierce: number; ward: number; taken: number };
   result: 'victory' | 'defeat' | null;
 }
 
-function unitView(u: Unit): UnitView {
-  const intentSkill = u.intent ? u.foeKit.find((k) => k.id === u.intent?.skill) : undefined;
+function parts(m: FoeMove): IntentPart[] {
+  const out: IntentPart[] = [];
+  if (m.shatter) out.push('shatter');
+  if (m.dmg) out.push('attack');
+  if (m.ward || m.wardAll) out.push('ward');
+  if (m.rage || m.rageAll) out.push('rage');
+  if (m.heal || m.healAll) out.push('heal');
+  if (m.curse) out.push('curse');
+  if (m.summon) out.push('summon');
+  if (m.afflict) out.push(m.afflict.status as IntentPart);
+  return out;
+}
+
+export function intentView(s: CardBattleState, f: FoeState): IntentView | null {
+  const m = intentOf(f);
+  if (!m || f.broken || !f.alive) return null;
+  const perHit = moveHit(s, f, m);
+  return { id: m.id, name: m.name, perHit, hits: m.hits ?? 1, pierce: m.pierce === true, parts: parts(m), heavy: perHit * (m.hits ?? 1) >= 14 };
+}
+
+function foeView(s: CardBattleState, f: FoeState): FoeView {
   return {
-    id: u.id,
-    defId: u.defId,
-    name: u.name,
-    side: u.side,
-    slot: u.slot,
-    tier: u.tier,
-    affinity: u.affinity,
-    hp: u.hp,
-    maxHp: u.maxHp,
-    shell: u.shell,
-    maxShell: u.maxShell,
-    weaknesses: [...u.weaknesses],
-    resists: [...u.resists],
-    broken: u.broken,
-    hardened: u.hardened,
-    gauge: u.gauge,
-    alive: u.alive,
-    guarding: u.guarding,
-    mods: u.mods.map((m) => ({ stat: m.stat, pct: m.pct, turns: m.turns })),
-    intent:
-      u.intent && intentSkill
-        ? { name: intentSkill.name, target: u.intent.target, heavy: intentSkill.heavy === true || intentSkill.power >= 1.6, aoe: intentSkill.target === 'allEnemies' }
-        : null,
+    id: f.id,
+    defId: f.defId,
+    name: f.name,
+    family: f.family,
+    tier: f.tier,
+    slot: f.slot,
+    hp: f.hp,
+    maxHp: f.maxHp,
+    ward: f.ward,
+    shell: f.shell,
+    maxShell: f.maxShell,
+    broken: f.broken,
+    hardened: f.hardened,
+    alive: f.alive,
+    statuses: { ...f.statuses },
+    weaknesses: [...f.weaknesses],
+    resists: [...f.resists],
+    intent: intentView(s, f),
   };
 }
 
-/** A pending choice, so the turn-order bar can preview how it would reorder things. */
-export function snapshot(battle: Battle, preview?: Action | null): BattleView {
-  const s: BattleState = battle.state;
-  const aw = s.awaiting;
-  const actor = aw.type === 'input' ? s.units.find((u) => u.id === aw.actor) : undefined;
-  const plan = preview && aw.type === 'input' ? planFor(s, preview) : {};
-  const passTargets =
-    aw.type === 'input' && aw.mode === 'encore' && s.chain
-      ? s.units.filter((u) => u.side === 'party' && u.alive && !s.chain!.used.includes(u.id)).map((u) => u.id)
-      : [];
+export function snapshot(s: CardBattleState): BattleView {
   return {
-    units: s.units.map(unitView),
-    lantern: s.lantern,
-    order: previewTimeline(s, 8, plan),
-    awaiting: aw.type === 'input' ? { actor: aw.actor, mode: aw.mode } : null,
-    passTargets,
-    burstReady: aw.type === 'input' && burstLegal(s),
-    canSkill: !!actor?.kit && s.lantern >= -actor.kit.skill.lantern,
+    turn: s.turn,
+    light: s.light,
+    maxLight: maxLight(s),
+    hero: { hp: s.hero.hp, maxHp: s.hero.maxHp, ward: s.hero.ward, gauge: s.hero.gauge, statuses: { ...s.hero.statuses } },
+    foes: s.foes.map((f) => foeView(s, f)),
+    hand: s.hand.map((c) => ({ ...c })),
+    drawCount: s.draw.length,
+    discardCount: s.discard.length,
+    spentCount: s.spent.length,
+    chain: { steps: s.chain.steps, affinity: s.chain.affinity },
+    incoming: s.over ? { damage: 0, pierce: 0, ward: s.hero.ward, taken: 0 } : incoming(s),
     result: s.result,
   };
 }
 
-const unit = (v: BattleView, id: string): UnitView | undefined => v.units.find((u) => u.id === id);
+const foe = (v: BattleView, id: string): FoeView | undefined => v.foes.find((f) => f.id === id);
 
-/** Apply one engine event to the view, in place. */
-export function applyEvent(v: BattleView, e: BattleEvent): void {
+function findCard(s: CardBattleState, uid: number): CardInstance {
+  for (const pile of [s.hand, s.draw, s.discard, s.spent]) {
+    const c = pile.find((x) => x.uid === uid);
+    if (c) return { ...c };
+  }
+  return { uid, id: 'ash' };
+}
+
+/** Apply one engine event to the view, in place. `after` is the engine state once the action settled. */
+export function applyEvent(v: BattleView, e: CardEvent, after: CardBattleState): void {
   switch (e.t) {
+    case 'turn':
+      v.turn = e.turn;
+      v.light = e.light;
+      v.chain = { steps: 0, affinity: null };
+      break;
+    case 'draw':
+      for (const uid of e.uids) v.hand.push(findCard(after, uid));
+      v.drawCount = Math.max(0, v.drawCount - e.uids.length);
+      break;
+    case 'shuffle':
+      v.drawCount = e.count;
+      v.discardCount = 0;
+      break;
+    case 'play':
+      v.hand = v.hand.filter((c) => c.uid !== e.uid);
+      v.light = e.light;
+      if (e.to === 'spent') v.spentCount++;
+      else v.discardCount++;
+      break;
+    case 'chain':
+      v.chain = { steps: e.steps, affinity: e.affinity };
+      break;
     case 'hit': {
-      const u = unit(v, e.target);
-      if (u) {
-        u.hp = e.hp;
-        u.shell = e.shell;
-        if (e.hp <= 0) u.alive = false;
+      const f = foe(v, e.target);
+      if (f) {
+        f.hp = e.hp;
+        f.ward = e.ward;
+        f.shell = e.shell;
       }
       break;
     }
-    case 'heal': {
-      const u = unit(v, e.target);
-      if (u) u.hp = e.hp;
-      break;
-    }
-    case 'gauge': {
-      const u = unit(v, e.unit);
-      if (u) u.gauge = e.value;
-      break;
-    }
-    case 'lantern':
-      v.lantern = e.value;
-      break;
-    case 'ko': {
-      const u = unit(v, e.unit);
-      if (u) {
-        u.alive = false;
-        u.hp = 0;
-        u.intent = null;
-      }
+    case 'crack': {
+      const f = foe(v, e.unit);
+      if (f) f.shell = e.shell;
       break;
     }
     case 'break': {
-      const u = unit(v, e.unit);
-      if (u) {
-        u.broken = true;
-        u.intent = null;
+      const f = foe(v, e.unit);
+      if (f) {
+        f.broken = true;
+        f.intent = null;
       }
       break;
     }
     case 'recover': {
-      const u = unit(v, e.unit);
-      if (u) {
-        u.broken = false;
-        u.shell = e.shell;
-        u.hardened = u.maxShell > 0;
+      const f = foe(v, e.unit);
+      if (f) {
+        f.broken = false;
+        f.shell = e.shell;
+        f.hardened = f.maxShell > 0;
       }
+      break;
+    }
+    case 'ko': {
+      const f = foe(v, e.unit);
+      if (f) {
+        f.alive = false;
+        f.hp = 0;
+        f.intent = null;
+        f.ward = 0;
+      }
+      break;
+    }
+    case 'status': {
+      const target = e.unit === 'hero' ? v.hero.statuses : foe(v, e.unit)?.statuses;
+      if (target) {
+        if (e.stacks > 0) target[e.status] = e.stacks;
+        else delete target[e.status];
+      }
+      break;
+    }
+    case 'heal':
+      if (e.unit === 'hero') v.hero.hp = e.hp;
+      else {
+        const f = foe(v, e.unit);
+        if (f) f.hp = e.hp;
+      }
+      break;
+    case 'ward':
+      if (e.unit === 'hero') v.hero.ward = e.value;
+      else {
+        const f = foe(v, e.unit);
+        if (f) f.ward = e.value;
+      }
+      break;
+    case 'light':
+      v.light = e.value;
+      break;
+    case 'gauge':
+      v.hero.gauge = e.value;
+      break;
+    case 'ultimate':
+      v.hand.push(findCard(after, e.uid));
+      break;
+    case 'spend':
+      v.hand = v.hand.filter((c) => !e.uids.includes(c.uid));
+      v.spentCount += e.uids.length;
+      break;
+    case 'discard':
+      v.hand = v.hand.filter((c) => !e.uids.includes(c.uid));
+      v.discardCount += e.uids.length;
+      break;
+    case 'heroHit':
+      v.hero.hp = e.hp;
+      v.hero.ward = e.ward;
+      break;
+    case 'burn': {
+      const f = foe(v, e.unit);
+      if (f) f.hp = e.hp;
+      break;
+    }
+    case 'move': {
+      const f = foe(v, e.unit);
+      if (f) f.hardened = false;
       break;
     }
     case 'intent': {
-      const u = unit(v, e.unit);
-      if (u) u.intent = { name: e.name, target: e.target, heavy: e.heavy, aoe: e.aoe };
+      const f = foe(v, e.unit);
+      const real = after.foes.find((x) => x.id === e.unit);
+      if (f) f.intent = real && e.move ? intentView(after, real) : null;
       break;
     }
-    case 'act': {
-      const u = unit(v, e.actor);
-      if (u && u.side === 'foe') {
-        u.intent = null;
-        u.hardened = false;
-      }
+    case 'shatter':
+      v.hero.ward = e.ward;
       break;
-    }
-    case 'mod': {
-      const u = unit(v, e.target);
-      if (u) {
-        const i = u.mods.findIndex((m) => m.stat === e.stat && Math.sign(m.pct) === Math.sign(e.pct));
-        const next: ModView = { stat: e.stat, pct: e.pct, turns: e.turns };
-        if (i >= 0) u.mods[i] = next;
-        else u.mods.push(next);
-      }
+    case 'curse':
+      v.discardCount += e.count;
+      break;
+    case 'summon': {
+      const real = after.foes.find((x) => x.id === e.unit);
+      if (real && !foe(v, e.unit)) v.foes.push(foeView(after, real));
       break;
     }
     case 'end':
@@ -201,3 +288,5 @@ export function applyEvent(v: BattleView, e: BattleEvent): void {
       break;
   }
 }
+
+export const aliveFoes = (s: CardBattleState): FoeState[] => living(s);

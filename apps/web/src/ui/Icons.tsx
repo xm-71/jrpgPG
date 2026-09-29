@@ -1,4 +1,4 @@
-import type { Affinity } from '@duskline/core';
+import type { Affinity, StatusId } from '@duskline/core';
 import type { JSX } from 'preact';
 
 const shapes: Record<Affinity, JSX.Element> = {
@@ -33,10 +33,10 @@ export function AffinityIcon({ a, size = 16 }: { a: Affinity; size?: number }): 
 }
 
 /** Weakness and affinity tags always carry the word as well as the colour and shape. */
-export function AffinityTag({ a, hit = false }: { a: Affinity; hit?: boolean }): JSX.Element {
+export function AffinityTag({ a }: { a: Affinity }): JSX.Element {
   return (
-    <span class={`aff-tag aff-${a}${hit ? ' hit' : ''}`}>
-      <AffinityIcon a={a} size={12} />
+    <span class={`aff-tag aff-${a}`}>
+      <AffinityIcon a={a} size={11} />
       {AFFINITY_LABEL[a]}
     </span>
   );
@@ -58,7 +58,58 @@ export function GloamIcon(): JSX.Element {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true">
       <path d="M8 1 14 8 8 15 2 8Z" fill="currentColor" />
-      <path d="M8 4.5 11 8 8 11.5 5 8Z" fill="#241a05" opacity=".35" />
+      <path d="M8 4.5 11 8 8 11.5 5 8Z" fill="#1a1206" opacity=".4" />
+    </svg>
+  );
+}
+
+export function EmberIcon(): JSX.Element {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 1.5c.8 2.6 4 4 4 7.4A4 4 0 0 1 4 8.9c0-2 1.3-2.8 2-4.7.7.6 1.3 1.4 1.4 2.2.8-1.3.9-3.2.6-4.9Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function BladeIcon({ size = 14 }: { size?: number }): JSX.Element {
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
+      <path d="M2.5 13.5 11 5l1-3.5L8.5 2.5 0 11l2.5 2.5Z M3.5 9.5l3 3M1.5 14.5l2-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
+    </svg>
+  );
+}
+
+export function ShieldIcon({ size = 14 }: { size?: number }): JSX.Element {
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} aria-hidden="true">
+      <path d="M8 1.2 13.6 3c0 5.2-2 8.6-5.6 11.8C4.4 11.6 2.4 8.2 2.4 3L8 1.2Z" fill="currentColor" opacity=".2" />
+      <path d="M8 1.2 13.6 3c0 5.2-2 8.6-5.6 11.8C4.4 11.6 2.4 8.2 2.4 3L8 1.2Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+    </svg>
+  );
+}
+
+/** A lamp for each point of Light. */
+export function LightPip({ on }: { on: boolean }): JSX.Element {
+  return (
+    <svg viewBox="0 0 12 16" class={`light-pip${on ? ' on' : ''}`} aria-hidden="true">
+      <path d="M6 1 11 8 6 15 1 8Z" />
+    </svg>
+  );
+}
+
+const statusShapes: Record<StatusId, JSX.Element> = {
+  burn: <path d="M8 1.5c.8 2.6 4 4 4 7.4A4 4 0 0 1 4 8.9c0-2 1.3-2.8 2-4.7.7.6 1.3 1.4 1.4 2.2.8-1.3.9-3.2.6-4.9Z" />,
+  chill: <path d="M8 1v14M2 4.5l12 7M14 4.5l-12 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />,
+  hex: <path d="M8 2.5 13.2 11.5H2.8Z M8 6.5a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2Z" fill-rule="evenodd" />,
+  shock: <path d="M9 1 3.5 9h4L6.5 15l6-8.5H8.3Z" />,
+  rage: <path d="M2 13 5 4l3 5 3-7 3 11Z" />,
+  dim: <path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 1 8 2Z" />,
+};
+
+export function StatusIcon({ s, size = 12 }: { s: StatusId; size?: number }): JSX.Element {
+  return (
+    <svg viewBox="0 0 16 16" width={size} height={size} class={`st-ico st-${s}`} fill="currentColor" aria-hidden="true">
+      {statusShapes[s]}
     </svg>
   );
 }

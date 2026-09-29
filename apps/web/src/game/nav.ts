@@ -3,19 +3,20 @@ import { signal } from '@preact/signals';
 export type Screen =
   | { name: 'title' }
   | { name: 'home' }
-  | { name: 'story' }
-  | { name: 'stage'; id: string }
+  | { name: 'scene' }
+  | { name: 'climb' }
+  | { name: 'climb-new'; daily?: boolean }
+  | { name: 'chronicle' }
   | { name: 'kindling' }
   | { name: 'odds'; banner: string }
   | { name: 'history' }
   | { name: 'roster'; hero?: string }
-  | { name: 'descent' }
   | { name: 'settings' };
 
 export const screen = signal<Screen>({ name: 'title' });
 
 /**
- * A screen can ask to intercept "back", for example a battle that wants to confirm a retreat.
+ * A screen can ask to intercept "back", for example a battle that wants to confirm giving up.
  * Return true when the back press was handled.
  */
 export const backGuard = signal<(() => boolean) | null>(null);

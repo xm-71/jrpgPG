@@ -1,131 +1,144 @@
 import { useEffect, useMemo, useRef } from 'preact/hooks';
 import type { JSX } from 'preact';
-import type { Battle, BattleSetup } from '@duskline/core';
+import { STATUS_HELP, STATUS_NAME, cardStats, defOf, passiveSum, type BattleSetup, type CardBattle, type StatusId, type Statuses } from '@duskline/core';
 import { requireHero } from '@duskline/content';
 import { sfx } from '../game/sfx';
 import { mutate, settings } from '../game/store';
-import { heroUrl, foeUrl } from '../ui/Art';
-import { AffinityIcon } from '../ui/Icons';
-import { Sky } from '../ui/Sky';
+import { heroUrl } from '../ui/Art';
+import { CardFace } from '../ui/CardFace';
 import { ask } from '../ui/Dialog';
-import { requireEnemy } from '@duskline/content';
-import { skillCost } from '../ui/text';
-import { BattleController } from './controller';
+import { AffinityIcon, BladeIcon, LightPip, ShieldIcon, StatusIcon } from '../ui/Icons';
+import { Sky } from '../ui/Sky';
+import { CardController } from './controller';
 import { foeSpot } from './layout';
 import { BattleScene } from './scene';
-import type { UnitView } from './view';
+import type { FoeView, IntentPart } from './view';
 
 export interface BattleOutcome {
   result: 'victory' | 'defeat';
-  battle: Battle;
+  battle: CardBattle;
 }
 
 interface Props {
   setup: BattleSetup;
   seed: string;
   title: string;
-  sky?: 'dusk' | 'night' | 'noon';
+  /** A small line under the title, such as where in the tower this fight is. */
+  subtitle?: string;
   onDone: (o: BattleOutcome) => void;
-  /** Retreat. When omitted the battle cannot be left. */
+  /** Give up. When omitted the fight cannot be left. */
   onQuit?: () => void;
-  /** Shown above the action bar for the first fights. */
-  tip?: string;
-  /** What retreating costs, for the confirmation. */
   quitNote?: string;
+  /** Shown above the hand for the first fights. */
+  tips?: string[];
 }
 
-function TurnBar({ ctl }: { ctl: BattleController }): JSX.Element {
-  const v = ctl.view.value;
+const PART_LABEL: Record<IntentPart, string> = {
+  attack: 'Attack',
+  ward: 'Ward',
+  rage: 'Rage',
+  heal: 'Heal',
+  curse: 'Ash',
+  summon: 'Summon',
+  chill: 'Chill you',
+  hex: 'Hex you',
+  dim: 'Dim you',
+  shatter: 'Break ward',
+};
+
+function StatusChips({ statuses }: { statuses: Statuses }): JSX.Element | null {
+  const list = (Object.entries(statuses) as Array<[StatusId, number]>).filter(([, n]) => n > 0);
+  if (list.length === 0) return null;
   return (
-    <ol class="bt-order" aria-label="Turn order">
-      {v.order.slice(0, 7).map((o, i) => {
-        const u = v.units.find((x) => x.id === o.unit);
-        if (!u) return null;
-        const src = u.side === 'party' ? heroUrl(requireHero(u.defId), 'bust') : foeUrl(requireEnemy(u.defId));
-        return (
-          <li key={`${o.unit}:${i}`} class={`bt-chip ${u.side}${o.current ? ' now' : ''}${o.skip ? ' skip' : ''}`} title={u.name}>
-            <img src={src} alt={u.name} draggable={false} />
-            {o.skip && <b>zz</b>}
-          </li>
-        );
-      })}
-    </ol>
+    <span class="st-chips">
+      {list.map(([s, n]) => (
+        <span key={s} class={`st-chip st-${s}`} title={`${STATUS_NAME[s]} ${n}: ${STATUS_HELP[s]}`}>
+          <StatusIcon s={s} size={11} />
+          {n}
+        </span>
+      ))}
+    </span>
   );
 }
 
-function FoePlate({ u, count, targetable, onPick }: { u: UnitView; count: number; targetable: boolean; onPick: () => void }): JSX.Element {
-  const spot = foeSpot(u.slot, count, u.tier);
-  const hpPct = (u.hp / u.maxHp) * 100;
+function Intent({ f }: { f: FoeView }): JSX.Element | null {
+  if (!f.alive) return null;
+  if (f.broken) return <span class="intent broken">Broken · loses its turn</span>;
+  const i = f.intent;
+  if (!i) return null;
+  const others = i.parts.filter((p) => p !== 'attack');
   return (
-    <button
-      class={`foe-plate${u.alive ? '' : ' down'}${u.broken ? ' broken' : ''}${targetable ? ' targetable' : ''}`}
-      style={{ left: `${(spot.x - spot.col / 2) * 100}%`, width: `${spot.col * 100}%` }}
-      disabled={!targetable}
-      onClick={onPick}
-      aria-label={`${u.name}, ${u.hp} of ${u.maxHp} HP${u.broken ? ', broken' : ''}`}
-    >
-      <span class="foe-name">{u.name}</span>
-      <span class="meter meter-foe">
-        <i style={{ width: `${hpPct}%` }} />
-      </span>
-      <span class="foe-shell" aria-label={`Shell ${u.shell} of ${u.maxShell}`}>
-        {u.broken ? (
-          <b class="foe-broken">BREAK</b>
-        ) : (
-          Array.from({ length: u.maxShell }, (_, i) => <i key={i} class={i < u.shell ? 'on' : ''} />)
-        )}
-      </span>
-      <span class="foe-weak">
-        {u.weaknesses.map((a) => (
-          <AffinityIcon key={a} a={a} size={15} />
-        ))}
-      </span>
-      {u.intent && (
-        <span class={`foe-intent${u.intent.heavy ? ' heavy' : ''}`}>
-          {u.intent.heavy ? '! ' : '▸ '}
-          {u.intent.name}
-        </span>
+    <span class={`intent${i.heavy ? ' heavy' : ''}`} title={i.name}>
+      {i.parts.includes('attack') && (
+        <b class="intent-atk">
+          <BladeIcon size={13} />
+          {i.perHit}
+          {i.hits > 1 && <small>×{i.hits}</small>}
+          {i.pierce && <small> pierce</small>}
+        </b>
       )}
-      {u.hardened && !u.broken && <span class="foe-hard">Hardened</span>}
-    </button>
-  );
-}
-
-function PartyCard({ u, active, targetable, ready, onTap }: { u: UnitView; active: boolean; targetable: boolean; ready: boolean; onTap: () => void }): JSX.Element {
-  const hero = requireHero(u.defId);
-  const low = u.hp / u.maxHp < 0.3;
-  return (
-    <button
-      class={`pcard${active ? ' active' : ''}${u.alive ? '' : ' down'}${targetable ? ' targetable' : ''}${ready ? ' ready' : ''}`}
-      onClick={onTap}
-      disabled={!targetable && !ready}
-      aria-label={`${u.name}, ${u.hp} of ${u.maxHp} HP${ready ? ', ultimate ready' : ''}`}
-    >
-      <span class="pcard-top">
-        <img src={heroUrl(hero, 'bust')} alt="" draggable={false} />
-        <span class="pcard-name">
-          <AffinityIcon a={hero.affinity} size={12} />
-          {u.name}
+      {others.map((p) => (
+        <span key={p} class={`intent-part p-${p}`}>
+          {PART_LABEL[p]}
         </span>
-      </span>
-      <span class={`meter meter-hp${low ? ' low' : ''}`}>
-        <i style={{ width: `${(u.hp / u.maxHp) * 100}%` }} />
-      </span>
-      <span class="pcard-hp num">
-        {Math.ceil(u.hp)}
-        <small>/{Math.round(u.maxHp)}</small>
-      </span>
-      <span class="meter meter-gauge">
-        <i style={{ width: `${Math.min(100, u.gauge)}%` }} />
-      </span>
-      {ready && <span class="pcard-ult">ULT</span>}
-    </button>
+      ))}
+    </span>
   );
 }
 
-export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit, tip, quitNote }: Props): JSX.Element {
+function FoePlate({ f, count, ctl, targetable }: { f: FoeView; count: number; ctl: CardController; targetable: boolean }): JSX.Element {
+  const spot = foeSpot(f.slot, count, f.tier);
+  const preview = targetable ? ctl.previewOn(f.id) : null;
+  return (
+    <div
+      class={`foe-plate${f.alive ? '' : ' down'}${f.broken ? ' broken' : ''}${targetable ? ' targetable' : ''}`}
+      style={{ left: `${(spot.x - spot.col / 2) * 100}%`, width: `${spot.col * 100}%` }}
+    >
+      <Intent f={f} />
+      <button class="foe-card" disabled={!targetable} onClick={() => ctl.tapFoe(f.id)} aria-label={`${f.name}, ${f.hp} of ${f.maxHp} HP${targetable ? '. Tap to target' : ''}`}>
+        <span class="foe-name">{f.name}</span>
+        <span class="foe-hpline">
+          <span class="meter meter-foe grow">
+            <i style={{ width: `${(f.hp / f.maxHp) * 100}%` }} />
+          </span>
+          <span class="foe-hp num">{f.hp}</span>
+          {f.ward > 0 && (
+            <span class="foe-ward num">
+              <ShieldIcon size={10} />
+              {f.ward}
+            </span>
+          )}
+        </span>
+        <span class="foe-row">
+          <span class="foe-shell" aria-label={`Shell ${f.shell} of ${f.maxShell}${f.hardened ? ', hardened' : ''}`}>
+            {f.broken ? (
+              <b class="foe-broken">BREAK</b>
+            ) : (
+              Array.from({ length: f.maxShell }, (_, i) => <i key={i} class={`${i < f.shell ? 'on' : ''}${f.hardened ? ' hard' : ''}`} />)
+            )}
+          </span>
+          <span class="foe-weak" title="Weak to">
+            {f.weaknesses.map((a) => (
+              <AffinityIcon key={a} a={a} size={13} />
+            ))}
+          </span>
+        </span>
+        <StatusChips statuses={f.statuses} />
+        {preview && (
+          <span class={`foe-preview${preview.weak ? ' weak' : ''}${preview.resist ? ' resist' : ''}`}>
+            −{preview.amount}
+            {preview.hits > 1 ? `×${preview.hits}` : ''}
+            {preview.weak ? ' weak' : preview.resist ? ' resist' : ''}
+          </span>
+        )}
+      </button>
+    </div>
+  );
+}
+
+export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, quitNote, tips }: Props): JSX.Element {
   const ctl = useMemo(() => {
-    const c = new BattleController(setup, seed);
+    const c = new CardController(setup, seed);
     c.speed.value = settings.value.battleSpeed;
     c.auto.value = settings.value.autoBattle;
     return c;
@@ -138,14 +151,14 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
     let dead = false;
     void (async () => {
       try {
-        await document.fonts?.load("24px 'Dela Gothic One'");
+        await document.fonts?.load("800 24px 'Shippori Mincho B1'");
       } catch {
         /* the fallback face is fine */
       }
       await scene.init();
       if (dead) return;
       scene.reduced = settings.value.reducedMotion;
-      await scene.load(ctl.view.value.units);
+      await scene.load(ctl.view.value.foes);
       if (dead) return;
       ctl.attach(scene);
       await ctl.start();
@@ -159,26 +172,35 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
 
   const v = ctl.view.value;
   const busy = ctl.busy.value;
-  const pending = ctl.pending.value;
   const auto = ctl.auto.value;
-  const callout = ctl.callout.value;
-  const cutin = ctl.cutin.value;
-  const actor = v.awaiting ? v.units.find((u) => u.id === v.awaiting!.actor) : undefined;
-  const hero = actor ? requireHero(actor.defId) : undefined;
-  const canAct = !!actor && !busy && !auto && !v.result;
-  const foes = v.units.filter((u) => u.side === 'foe');
-  const party = v.units.filter((u) => u.side === 'party');
-  const targets = pending ? ctl.targetsFor(pending) : [];
-  const legal = canAct ? ctl.battle.legalActions() : [];
-  const canGuard = legal.some((a) => a.type === 'guard');
+  const selected = ctl.selected.value;
+  const hero = requireHero(setup.hero.id);
+  const canAct = !busy && !auto && !v.result;
+  const alive = v.foes.filter((f) => f.alive);
+  const targeting = selected !== null && ctl.needsTarget(selected);
+  const perHeld = passiveSum(ctl.state.hero.passives, 'heldWard');
+  const handDefs = v.hand.map((c) => {
+    const inState = ctl.state.hand.find((x) => x.uid === c.uid);
+    return { c, def: defOf(ctl.state, inState ?? c) };
+  });
+  const selectedWard = (() => {
+    if (selected === null) return 0;
+    const h = handDefs.find((x) => x.c.uid === selected);
+    if (!h) return 0;
+    const st = cardStats(h.def, h.c.up);
+    return st.keywords.includes('fleeting') || st.keywords.includes('unplayable') ? 0 : st.ward + perHeld;
+  })();
+  const wardIfEnd = v.incoming.ward - selectedWard;
+  const taken = Math.max(0, v.incoming.damage - wardIfEnd) + v.incoming.pierce;
+  const gaugePct = Math.min(100, v.hero.gauge);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (!canAct) return;
-      if (e.key === 'Escape') ctl.cancel();
-      if (e.key === '1') ctl.begin({ kind: 'skill', skill: 'basic' });
-      if (e.key === '2' && v.canSkill) ctl.begin({ kind: 'skill', skill: 'skill' });
-      if (e.key === '3' && canGuard) void ctl.submit({ type: 'guard' });
+      if (e.key === 'Escape') ctl.clearSelection();
+      if (e.key === 'e' || e.key === 'E') void ctl.endTurn();
+      const n = Number(e.key);
+      if (n >= 1 && n <= v.hand.length) ctl.tapCard(v.hand[n - 1]!.uid);
     };
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
@@ -198,33 +220,20 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
   };
   const quit = async (): Promise<void> => {
     if (!onQuit) return;
-    const ok = await ask({ title: 'Retreat?', body: quitNote ?? 'You will leave this fight and earn nothing from it.', confirm: 'Retreat', cancel: 'Keep fighting', danger: true });
+    const ok = await ask({ title: 'Give up the climb?', body: quitNote ?? 'You will leave this fight.', confirm: 'Give up', cancel: 'Keep fighting', danger: true });
     if (ok) onQuit();
   };
 
-  const tapPlate = (id: string): void => {
-    if (pending && targets.includes(id)) ctl.choose(id);
-  };
-
-  const passes = v.awaiting?.mode === 'encore' ? v.passTargets.filter((id) => id !== actor?.id) : [];
-  const prompt = pending
-    ? 'Choose a target'
-    : auto
-      ? 'Auto-battle'
-      : !actor
-        ? busy
-          ? ''
-          : ''
-        : v.awaiting!.mode === 'encore'
-          ? `${actor.name}: Encore! Act again or pass the baton`
-          : v.awaiting!.mode === 'passed'
-            ? `${actor.name} takes the baton`
-            : `${actor.name}'s turn`;
+  const tip = tips?.[Math.min(tips.length - 1, Math.max(0, v.turn - 1))];
 
   return (
     <div class="screen battle">
+      <Sky variant="tower" />
       <div class="bt-top">
-        <h1 class="display bt-title">{title}</h1>
+        <span class="bt-title">
+          <span class="bt-title-name">{title}</span>
+          {subtitle && <span class="label bt-title-sub">{subtitle}</span>}
+        </span>
         <button class={`btn btn-small btn-ghost${auto ? ' on' : ''}`} onClick={toggleAuto} aria-pressed={auto} disabled={!!v.result}>
           Auto
         </button>
@@ -232,123 +241,157 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
           2×
         </button>
         {onQuit && (
-          <button class="btn btn-small btn-ghost" onClick={() => void quit()} disabled={!!v.result}>
-            Retreat
+          <button class="btn btn-small btn-ghost btn-icon" onClick={() => void quit()} disabled={!!v.result} aria-label="Give up the climb">
+            ✕
           </button>
         )}
       </div>
-      <TurnBar ctl={ctl} />
 
       <div class="bt-field">
-        <div class="bt-sky">
-          <Sky variant={sky} />
-        </div>
         <div class="bt-canvas" ref={host} />
         <div class="bt-plates">
-          {foes.map((u) => (
-            <FoePlate key={u.id} u={u} count={foes.length} targetable={targets.includes(u.id)} onPick={() => tapPlate(u.id)} />
+          {v.foes.map((f) => (
+            <FoePlate key={f.id} f={f} count={v.foes.length} ctl={ctl} targetable={targeting && f.alive} />
           ))}
         </div>
-        {foes
-          .filter((u) => targets.includes(u.id))
-          .map((u) => {
-            const s = foeSpot(u.slot, foes.length, u.tier);
+        {targeting &&
+          alive.map((f) => {
+            const s = foeSpot(f.slot, v.foes.length, f.tier);
             return (
               <button
-                key={u.id}
+                key={f.id}
                 class="bt-hit"
                 style={{ left: `${(s.x - s.col / 2) * 100}%`, width: `${s.col * 100}%`, top: `${(s.y - s.h) * 100}%`, height: `${s.h * 100}%` }}
-                onClick={() => tapPlate(u.id)}
-                aria-label={`Target ${u.name}`}
+                onClick={() => ctl.tapFoe(f.id)}
+                aria-label={`Target ${f.name}`}
               />
             );
           })}
-        {callout && (
-          <div key={callout.text + (ctl.speed.value as number)} class={`bt-callout ${callout.tone}`}>
-            {callout.text}
+        {ctl.callout.value && (
+          <div key={ctl.callout.value.id} class={`bt-callout ${ctl.callout.value.tone}`}>
+            {ctl.callout.value.text}
           </div>
         )}
-        {cutin && (
-          <div class={`bt-cutin ${cutin.kind}`}>
-            {cutin.unit && <img src={heroUrl(requireHero(cutin.unit), 'half')} alt="" draggable={false} />}
-            <div class="bt-cutin-text display">{cutin.title}</div>
+        {ctl.cutin.value && (
+          <div class="bt-cutin">
+            <img src={heroUrl(hero, 'half')} alt="" draggable={false} />
+            <div class="bt-cutin-text">
+              <span class="label">Ultimate</span>
+              <span class="display">{ctl.cutin.value.title}</span>
+            </div>
           </div>
         )}
-        {tip && !v.result && !auto && <p class="bt-tip">{tip}</p>}
+        {v.chain.steps > 0 && !busy && (
+          <div class={`bt-chain aff-${v.chain.affinity ?? 'none'}`}>
+            Chain ×{v.chain.steps + 1} <small>+{Math.min(3, v.chain.steps) * 20}%</small>
+          </div>
+        )}
       </div>
 
-      <div class="bt-lantern" role="img" aria-label={`Lantern ${v.lantern} of 5`}>
-        <span class="label">Lantern</span>
-        <span class="bt-pips">
-          {Array.from({ length: 5 }, (_, i) => (
-            <i key={i} class={i < v.lantern ? 'on' : ''} />
+      <div class={`bt-hero${ctl.hurt.value % 2 ? ' hurt-a' : ctl.hurt.value > 0 ? ' hurt-b' : ''}`}>
+        <div class="bt-portrait">
+          <img src={heroUrl(hero, 'bust')} alt="" draggable={false} />
+          <svg class="bt-gauge" viewBox="0 0 40 40" aria-label={`Ultimate ${gaugePct}%`}>
+            <circle cx="20" cy="20" r="18" />
+            <circle cx="20" cy="20" r="18" class="fill" style={{ strokeDasharray: `${(gaugePct / 100) * 113} 113` }} />
+          </svg>
+        </div>
+        <div class="bt-vitals">
+          <div class="row">
+            <span class="bt-name">{hero.name}</span>
+            <StatusChips statuses={v.hero.statuses} />
+            <span class="grow" />
+            <span class="bt-hpnum num">
+              {v.hero.hp}
+              <small>/{v.hero.maxHp}</small>
+            </span>
+          </div>
+          <span class={`meter meter-hp${v.hero.hp / v.hero.maxHp < 0.3 ? ' low' : ''}`}>
+            <i style={{ width: `${(v.hero.hp / v.hero.maxHp) * 100}%` }} />
+          </span>
+          <div class="row bt-lightrow">
+            <span class="bt-light" aria-label={`Light ${v.light} of ${v.maxLight}`}>
+              {Array.from({ length: Math.max(v.maxLight, v.light) }, (_, i) => (
+                <LightPip key={i} on={i < v.light} />
+              ))}
+            </span>
+            <span class="label">Light</span>
+            <span class="grow" />
+            <span class="bt-piles label" title="Draw pile, discard pile">
+              Draw {v.drawCount} · Discard {v.discardCount}
+            </span>
+            {v.hero.ward > 0 && (
+              <span class="bt-ward num">
+                <ShieldIcon size={13} />
+                {v.hero.ward}
+              </span>
+            )}
+          </div>
+        </div>
+        <div class="bt-floats" aria-hidden="true">
+          {ctl.floats.value.map((f) => (
+            <span key={f.id} class={`bt-float ${f.kind}`}>
+              {f.text}
+            </span>
           ))}
-        </span>
-        <span class="bt-prompt">{prompt}</span>
-        {pending && (
-          <button class="btn btn-small btn-ghost" onClick={() => ctl.cancel()}>
-            Back
-          </button>
-        )}
+        </div>
       </div>
 
-      <div class="bt-party">
-        {party.map((u) => (
-          <PartyCard
-            key={u.id}
-            u={u}
-            active={u.id === actor?.id && canAct}
-            targetable={targets.includes(u.id)}
-            ready={canAct && u.alive && u.gauge >= 100 && !pending}
-            onTap={() => {
-              if (targets.includes(u.id)) ctl.choose(u.id);
-              else if (canAct && u.alive && u.gauge >= 100) {
-                sfx.tap();
-                ctl.begin({ kind: 'ultimate', unit: u.id });
-              }
-            }}
-          />
-        ))}
+      {tip && !v.result && !auto && <p class="bt-tip">{tip}</p>}
+
+      <div class="bt-hand" role="group" aria-label="Your hand">
+        {handDefs.map(({ c, def }) => {
+          const st = cardStats(def, c.up);
+          const holdable = !st.keywords.includes('fleeting') && !st.keywords.includes('unplayable');
+          return (
+            <div key={c.uid} class={`bt-slot${ctl.flying.value === c.uid ? ' flying' : ''}`}>
+              <CardFace
+                def={def}
+                up={c.up === true}
+                size="hand"
+                dim={!canAct || ctl.blocked(c.uid) !== null}
+                selected={selected === c.uid}
+                holdWard={holdable ? st.ward + perHeld : 0}
+                onClick={() => ctl.tapCard(c.uid)}
+              />
+            </div>
+          );
+        })}
+        {handDefs.length === 0 && <p class="bt-empty muted">No cards in hand.</p>}
       </div>
 
       <div class="bt-actions">
-        <button class="btn btn-primary" disabled={!canAct || !!pending} onClick={() => ctl.begin({ kind: 'skill', skill: 'basic' })}>
-          {hero?.kit.basic.name ?? 'Attack'}
-          <span class="sub">+1 ◆</span>
+        <p class="bt-forecast" aria-live="polite">
+          {v.result ? (
+            ' '
+          ) : v.incoming.damage + v.incoming.pierce === 0 ? (
+            <>No attacks coming</>
+          ) : (
+            <>
+              Incoming <b>{v.incoming.damage + v.incoming.pierce}</b> · ward <b>{Math.max(0, wardIfEnd)}</b> ·{' '}
+              <b class={taken > 0 ? 'bad' : 'good'}>{taken > 0 ? `take ${taken}` : 'safe'}</b>
+            </>
+          )}
+        </p>
+        <button class="btn btn-primary bt-end" disabled={!canAct} onClick={() => void ctl.endTurn()}>
+          End turn
+          <span class="sub">{v.hand.length > 0 ? `Hold ${v.hand.length} to ward` : 'Nothing held'}</span>
         </button>
-        <button class="btn btn-gold" disabled={!canAct || !!pending || !v.canSkill} onClick={() => ctl.begin({ kind: 'skill', skill: 'skill' })}>
-          {hero?.kit.skill.name ?? 'Skill'}
-          <span class="sub">{hero ? skillCost(hero.kit.skill) : ''}</span>
-        </button>
-        <button class="btn" disabled={!canAct || !!pending || !canGuard} onClick={() => void ctl.submit({ type: 'guard' })}>
-          Guard
-        </button>
-        {v.burstReady && (
-          <button class="btn btn-burst" disabled={!canAct || !!pending} onClick={() => void ctl.submit({ type: 'burst' })}>
-            Horizon Burst
-          </button>
-        )}
-        {canAct &&
-          !pending &&
-          passes.map((id) => {
-            const p = v.units.find((x) => x.id === id);
-            return (
-              <button key={id} class="btn btn-pass" onClick={() => void ctl.submit({ type: 'pass', to: id })}>
-                Pass to {p?.name}
-              </button>
-            );
-          })}
       </div>
 
       {v.result && (
         <div class="overlay center">
           <div class={`sheet bt-result ${v.result}`}>
-            <h2 class="display">{v.result === 'victory' ? 'Victory' : 'Defeat'}</h2>
-            <p class="muted">{v.result === 'victory' ? 'The Fades scatter, and the light holds.' : 'The party falls. You can try again.'}</p>
-            <div class="bt-result-stats row wrap gap-s">
-              <span class="chip">{ctl.battle.state.stats.turns} turns</span>
-              <span class="chip chip-gold">{ctl.battle.state.stats.breaks} breaks</span>
-              <span class="chip">{ctl.battle.state.stats.passes} passes</span>
+            <p class="label">{v.result === 'victory' ? 'The Fades come apart' : 'The light goes out'}</p>
+            <h2>{v.result === 'victory' ? 'Victory' : 'Defeat'}</h2>
+            <div class="row wrap gap-s bt-result-stats">
+              <span class="chip">
+                {ctl.state.stats.turns} {ctl.state.stats.turns === 1 ? 'turn' : 'turns'}
+              </span>
+              <span class={`chip${ctl.state.stats.breaks > 0 ? ' chip-gold' : ''}`}>
+                {ctl.state.stats.breaks === 0 ? 'No breaks' : `${ctl.state.stats.breaks} ${ctl.state.stats.breaks === 1 ? 'break' : 'breaks'}`}
+              </span>
+              <span class="chip">{ctl.state.stats.maxChain > 1 ? `Chain ×${ctl.state.stats.maxChain}` : 'No chains'}</span>
             </div>
             <button class="btn btn-primary btn-block" onClick={() => onDone({ result: v.result!, battle: ctl.battle })}>
               Continue
@@ -359,4 +402,3 @@ export function BattleScreen({ setup, seed, title, sky = 'dusk', onDone, onQuit,
     </div>
   );
 }
-

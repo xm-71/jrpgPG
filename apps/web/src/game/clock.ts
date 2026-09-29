@@ -1,5 +1,5 @@
 /**
- * The game's clock. `?now=2026-10-05T10:00:00Z` shifts it, which is how the daily Descent,
+ * The game's clock. `?now=2026-10-05T10:00:00Z` shifts it, which is how the daily climb,
  * banner rotation and tasks are tested without waiting. `?cycle=2` pins the rate-up banner.
  */
 const params = new URLSearchParams(typeof location === 'undefined' ? '' : location.search);

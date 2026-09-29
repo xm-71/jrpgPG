@@ -4,10 +4,10 @@ import type { DialogueLine } from '@duskline/core';
 import { heroById } from '@duskline/content';
 import { sfx } from '../game/sfx';
 import { heroUrl } from './Art';
-import { Sky } from './Sky';
+import { Sky, type SkyVariant } from './Sky';
 
-/** A visual-novel beat: the speaker's portrait rises from the ground, the line sits in a slanted box. */
-export function Dialogue({ lines, onDone, sky = 'dusk' }: { lines: readonly DialogueLine[]; onDone: () => void; sky?: 'dusk' | 'night' | 'noon' }): JSX.Element {
+/** A story beat: narration in the middle of the screen, speech in a box under the speaker. */
+export function Dialogue({ lines, title, onDone, sky = 'dusk' }: { lines: readonly DialogueLine[]; title?: string; onDone: () => void; sky?: SkyVariant }): JSX.Element {
   const [i, setI] = useState(0);
   const line = lines[i];
   const last = i >= lines.length - 1;
@@ -26,15 +26,13 @@ export function Dialogue({ lines, onDone, sky = 'dusk' }: { lines: readonly Dial
     addEventListener('keydown', onKey);
     return () => removeEventListener('keydown', onKey);
   });
-  if (!line) {
-    onDone();
-    return <div class="screen" />;
-  }
+  if (!line) return <div class="screen" />;
   const hero = heroById(line.who);
   const narrator = line.who === 'narrator';
   return (
-    <div class="screen dialogue" onClick={next} role="button" tabIndex={0} aria-label="Continue">
+    <div class={`screen dialogue${narrator ? ' is-narration' : ''}`} onClick={next} role="button" tabIndex={0} aria-label="Continue">
       <Sky variant={sky} />
+      {title && i === 0 && <p class="dlg-title label">{title}</p>}
       <button
         class="btn btn-small btn-ghost dlg-skip"
         onClick={(e) => {
@@ -44,14 +42,20 @@ export function Dialogue({ lines, onDone, sky = 'dusk' }: { lines: readonly Dial
       >
         Skip
       </button>
-      {hero && <img key={hero.id} class="dlg-portrait pop" src={heroUrl(hero, 'half')} alt="" draggable={false} />}
-      <div key={i} class={`dlg-box pop${narrator ? ' narrator' : ''}`}>
-        {!narrator && <span class="dlg-name display">{hero?.name ?? line.who}</span>}
-        <p lang="en">{line.text}</p>
-        <span class="dlg-more label">
-          {i + 1}/{lines.length} {last ? '· tap to go on' : '▸'}
-        </span>
-      </div>
+      {hero && <img key={hero.id} class="dlg-portrait" src={heroUrl(hero, 'full')} alt="" draggable={false} />}
+      {narrator ? (
+        <p key={i} class="dlg-narration">
+          {line.text}
+        </p>
+      ) : (
+        <div key={i} class="dlg-box">
+          <span class="dlg-name">{hero?.name ?? line.who}</span>
+          <p>{line.text}</p>
+        </div>
+      )}
+      <span class="dlg-more label">
+        {i + 1} / {lines.length} · {last ? 'tap to go on' : 'tap'}
+      </span>
     </div>
   );
 }
