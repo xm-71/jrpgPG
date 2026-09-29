@@ -1,16 +1,27 @@
-import { Application, Graphics } from 'pixi.js';
+import '@fontsource/dela-gothic-one/latin-400.css';
+import '@fontsource/chakra-petch/latin-500.css';
+import '@fontsource/chakra-petch/latin-600.css';
+import '@fontsource/zen-kaku-gothic-new/latin-400.css';
+import '@fontsource/zen-kaku-gothic-new/latin-500.css';
+import '@fontsource/zen-kaku-gothic-new/latin-700.css';
+import './styles/theme.css';
+import './styles/ui.css';
+import './styles/screens.css';
+
 import { render } from 'preact';
+import { expireBanners } from '@duskline/core';
+import { activeBanners } from '@duskline/content';
+import { App } from './App';
+import { cycleOverride, now } from './game/clock';
+import { startNavigation } from './game/nav';
+import { mutate, profile, toast } from './game/store';
 
-// Temporary smoke test: proves the toolchain, Preact and PixiJS (WebGL) all work.
-async function boot() {
-  const host = document.getElementById('app')!;
-  render(<p id="hello">Duskline pipeline check</p>, host);
-
-  const app = new Application();
-  await app.init({ width: 320, height: 200, background: '#1e1846', antialias: true, preference: 'webgl' });
-  host.appendChild(app.canvas);
-  app.stage.addChild(new Graphics().circle(160, 100, 50).fill(0xf2b43a));
-  (window as unknown as { __renderer: string }).__renderer = app.renderer.name;
+// When a rate-up banner ends, leftover spark points turn into Gloam.
+const cycle = activeBanners(now(), cycleOverride).cycle;
+if (profile.value.lastCycle < cycle) {
+  const refunded = mutate((p) => expireBanners(p, cycle, now()));
+  if (refunded > 0) toast(`A banner ended. ${refunded} Gloam came back from unused spark points.`, 'good', 6000);
 }
 
-void boot();
+startNavigation({ name: 'title' });
+render(<App />, document.getElementById('app')!);
