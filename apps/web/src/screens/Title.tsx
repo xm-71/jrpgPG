@@ -3,6 +3,7 @@ import { BLOOD, BONE } from '../art/palette';
 import { sigil } from '../art/sigil';
 import { afterward } from '../game/flow';
 import { go } from '../game/nav';
+import { canInstall, installed, promptInstall } from '../game/offline';
 import { sfx } from '../game/sfx';
 import { isFreshSave, profile, recoveredSave, savingWorks } from '../game/store';
 import { Sky } from '../ui/Sky';
@@ -45,6 +46,17 @@ export function Title(): JSX.Element {
             }}
           >
             Begin
+          </button>
+        )}
+        {canInstall.value && !installed.value && (
+          <button
+            class="btn btn-ghost btn-block"
+            onClick={() => {
+              sfx.tap();
+              void promptInstall();
+            }}
+          >
+            Install to play offline
           </button>
         )}
         <button

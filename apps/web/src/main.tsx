@@ -19,6 +19,7 @@ import { activeBanners } from '@duskline/content';
 import { App } from './App';
 import { cycleOverride, now } from './game/clock';
 import { startNavigation } from './game/nav';
+import { startOffline } from './game/offline';
 import { mutate, profile, toast } from './game/store';
 
 // When a rate-up banner ends, leftover spark points turn into Gloam.
@@ -30,3 +31,4 @@ if (profile.value.lastCycle < cycle) {
 
 startNavigation({ name: 'title' });
 render(<App />, document.getElementById('app')!);
+startOffline();

@@ -1,9 +1,11 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { newProfile } from '@duskline/core';
 import { STARTER_HEROES } from '@duskline/content';
 import { now } from '../game/clock';
 import { back } from '../game/nav';
+import { applyUpdate, cacheVersion, canInstall, installed, needsShareSheet, offlineState, online, persisted, promptInstall, updateReady } from '../game/offline';
+import { copyMode, downloadOfflineCopy, isDownloadedCopy, type CopyMode } from '../game/offlineCopy';
 import { exportProfile, importProfile } from '../game/persist';
 import { sfx } from '../game/sfx';
 import { isFreshSave, mutate, profile, replaceProfile, resetProfile, savingWorks, toast } from '../game/store';
@@ -15,6 +17,93 @@ const SIZES = [
   { label: 'Large', value: 1.15 },
   { label: 'Larger', value: 1.3 },
 ];
+
+/** What the offline state means, in words. */
+function offlineStatus(): { text: string; tone: 'good' | 'wait' | 'warn' | 'plain' } {
+  const state = offlineState.value;
+  if (isDownloadedCopy()) return { text: 'You are playing the offline copy. It needs no connection.', tone: 'good' };
+  if (installed.value) return { text: 'Installed. Duskline opens from your home screen or app list, with or without a connection.', tone: 'good' };
+  if (state === 'ready') return { text: online.value ? 'Ready. This device has everything it needs, so Duskline opens with no connection.' : 'You are offline, and the game is running from this device.', tone: 'good' };
+  if (state === 'preparing') return { text: 'Saving Duskline to this device. Stay connected until this says Ready.', tone: 'wait' };
+  if (state === 'failed') return { text: 'Duskline could not be saved for offline play. The browser may be out of space or blocking storage. You can still play while connected.', tone: 'warn' };
+  if (__SINGLE_FILE__) return { text: 'This page cannot install itself. Download the offline copy to play anywhere without a connection.', tone: 'plain' };
+  if (!window.isSecureContext) return { text: 'Browsers only save a game for offline play from a secure (https) address. Download the offline copy instead.', tone: 'plain' };
+  return { text: 'This browser cannot save the game for offline play. Download the offline copy instead.', tone: 'plain' };
+}
+
+function OfflinePanel(): JSX.Element {
+  const [mode, setMode] = useState<CopyMode>('checking');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void copyMode().then((m) => live && setMode(m));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const status = offlineStatus();
+  const iphone = !installed.value && !canInstall.value && needsShareSheet() && offlineState.value === 'ready';
+  return (
+    <section class="panel panel-pad offline" aria-labelledby="offline-title">
+      <h2 class="label" id="offline-title">
+        Play offline
+      </h2>
+      <p class={`offline-status ${status.tone}`} role="status">
+        <span class="offline-dot" aria-hidden="true" />
+        {status.text}
+      </p>
+      {updateReady.value && (
+        <div class="offline-row">
+          <p class="grow">A new version is ready.</p>
+          <button
+            class="btn btn-small btn-primary"
+            onClick={() => {
+              sfx.tap();
+              applyUpdate();
+            }}
+          >
+            Restart to update
+          </button>
+        </div>
+      )}
+      {canInstall.value && (
+        <button
+          class="btn btn-primary btn-block"
+          onClick={() => {
+            sfx.tap();
+            void promptInstall();
+          }}
+        >
+          Install Duskline
+        </button>
+      )}
+      {iphone && <p class="muted small">To install on an iPhone or iPad, tap Share in Safari, then Add to Home Screen.</p>}
+      {(mode === 'checking' || mode === 'viewer' || mode === 'link') && (
+        <button
+          class="btn btn-block btn-stacked"
+          disabled={mode === 'checking' || busy}
+          onClick={async () => {
+            sfx.tap();
+            setBusy(true);
+            await downloadOfflineCopy(mode === 'viewer' ? 'viewer' : 'link');
+            setBusy(false);
+          }}
+        >
+          Download offline copy
+          <span class="sub">One file with the whole game. Open it in any browser, no install.</span>
+        </button>
+      )}
+      {mode === 'blocked' && <p class="muted small">This view cannot save files. Open Duskline in your browser to download the offline copy.</p>}
+      <p class="muted small">Progress is kept separately in the installed app, in each browser and in the offline file. To move it between them, use Copy save and Paste a save below.</p>
+      {offlineState.value === 'ready' && (
+        <p class="muted small offline-meta">
+          {cacheVersion.value ? `Files ${cacheVersion.value}` : 'Files saved'}
+          {persisted.value ? ' · kept safe from clean-ups' : ''}
+        </p>
+      )}
+    </section>
+  );
+}
 
 export function Settings(): JSX.Element {
   const p = profile.value;
@@ -101,6 +190,8 @@ export function Settings(): JSX.Element {
             </div>
           </div>
         </section>
+
+        <OfflinePanel />
 
         <section class="panel panel-pad">
           <h2 class="label">Your save</h2>

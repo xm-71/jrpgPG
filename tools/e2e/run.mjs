@@ -1,4 +1,5 @@
-// End-to-end smoke test: a new player climbs the Root for the first time, meets Io, kindles, and reloads.
+// End-to-end smoke test: a new player climbs the Root for the first time, meets Io, kindles, reloads,
+// and plays again with the connection cut.
 // Run `pnpm build` first. Uses the Chromium that Playwright is configured to find (PLAYWRIGHT_BROWSERS_PATH)
 // or CHROMIUM_PATH. Falls back to /opt/pw-browsers/chromium when it exists.
 import { spawn } from 'node:child_process';
@@ -193,6 +194,30 @@ try {
   await page.locator('.home').waitFor();
   p = await saved(page);
   check(p.climb.runs === 1 && p.kindling.totalPulls === 10 && !!p.collection.heroes.io, 'climbs, pulls and heroes survive a reload');
+
+  // Offline: the first visit saved the game on the device, so it opens and plays with no connection.
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  const cached = await page.evaluate(async () => {
+    const keys = await caches.keys();
+    const urls = (await (await caches.open(keys[0])).keys()).map((r) => new URL(r.url).pathname);
+    return { keys, urls };
+  });
+  check(cached.keys.length === 1 && cached.urls.includes('/index.html') && cached.urls.some((u) => u.endsWith('.woff2')) && cached.urls.length >= 20, `the game is saved on the device (${cached.urls.length} files)`);
+  const failedRequests = [];
+  page.on('requestfailed', (r) => failedRequests.push(r.url()));
+  await ctx.setOffline(true);
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.locator('.home').waitFor();
+  await page.locator('.cta-climb').click();
+  await page.getByRole('button', { name: /^Enter/ }).click();
+  await page.locator('.glimmer').first().click();
+  await page.locator('.map-node.open').first().click();
+  await page.getByRole('button', { name: 'Go', exact: true }).click();
+  await page.locator('.bt-hand .cardf').first().waitFor({ timeout: 30000 });
+  check(true, 'with no connection, the game reloads and a fight starts');
+  check(failedRequests.filter((u) => u.startsWith(`http://127.0.0.1:${PORT}`)).length === 0, 'nothing the game needs was fetched from the network');
+  await ctx.setOffline(false);
 
   check(errors.length === 0, `no console or page errors${errors.length ? ': ' + errors.join(' | ') : ''}`);
   await browser.close();

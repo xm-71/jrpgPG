@@ -6,6 +6,8 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 export default defineConfig({
   base: './',
   plugins: [preact(), viteSingleFile()],
+  // One file with no service worker: it cannot install, and it is already the offline copy.
+  define: { __SINGLE_FILE__: 'true' },
   build: {
     target: 'es2022',
     outDir: 'dist-single',

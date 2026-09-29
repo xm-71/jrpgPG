@@ -989,3 +989,60 @@
   font-size: 0.56rem;
   letter-spacing: 0.1em;
 }
+
+/* Settings: play offline. */
+.offline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.offline-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.offline-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 0.42rem;
+  background: var(--muted);
+}
+
+.offline-status.good .offline-dot {
+  background: var(--good);
+  box-shadow: 0 0 8px var(--good);
+}
+
+.offline-status.wait .offline-dot {
+  background: var(--gold);
+  animation: offline-pulse 1.1s ease-in-out infinite alternate;
+}
+
+.offline-status.warn .offline-dot {
+  background: var(--ember);
+}
+
+@keyframes offline-pulse {
+  to {
+    opacity: 0.25;
+  }
+}
+
+.offline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--gold);
+  background: rgba(217, 164, 65, 0.08);
+}
+
+.offline-meta {
+  font-family: var(--font-label);
+  letter-spacing: 0.08em;
+}
