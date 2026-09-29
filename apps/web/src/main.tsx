@@ -7,6 +7,8 @@ import '@fontsource/zen-kaku-gothic-new/latin-700.css';
 import './styles/theme.css';
 import './styles/ui.css';
 import './styles/screens.css';
+import './styles/battle.css';
+import './styles/story.css';
 
 import { render } from 'preact';
 import { expireBanners } from '@duskline/core';

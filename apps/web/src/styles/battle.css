@@ -1,0 +1,540 @@
+/* Battle screen: sky and canvas on top, controls in a thumb-reach panel below. */
+.battle {
+  background: var(--deep);
+}
+
+.bt-top {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: calc(var(--safe-top) + 0.5rem) 0.7rem 0.3rem;
+}
+
+.bt-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 2px 2px 0 var(--rose);
+}
+
+.bt-top .btn.on {
+  background: var(--gold);
+  color: #241a05;
+}
+
+.bt-order {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  gap: 5px;
+  margin: 0;
+  padding: 0 0.7rem 0.4rem;
+  list-style: none;
+  min-height: 42px;
+}
+
+.bt-chip {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  overflow: hidden;
+  border: 2px solid var(--fade);
+  background: var(--panel-2);
+  transform: skewX(-8deg);
+  transition: transform 0.2s;
+}
+
+.bt-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: skewX(8deg) scale(1.15);
+}
+
+.bt-chip.party {
+  border-color: var(--teal);
+}
+
+.bt-chip.foe {
+  border-color: var(--rose);
+}
+
+.bt-chip.now {
+  width: 42px;
+  height: 42px;
+  margin-top: -4px;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(242, 180, 58, 0.35);
+}
+
+.bt-chip.skip {
+  opacity: 0.55;
+}
+
+.bt-chip b {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  font: 700 0.6rem var(--font-label);
+  background: #000a;
+  color: var(--gold);
+}
+
+/* The field */
+.bt-field {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bt-sky .sky {
+  /* Lower the horizon to where the foes stand. */
+}
+
+.bt-sky .sky-sun {
+  bottom: 54%;
+  width: 96px;
+  height: 96px;
+}
+
+.bt-sky .sky-city {
+  bottom: 51%;
+  width: 40%;
+}
+
+.bt-sky .sky-ground {
+  height: 54%;
+}
+
+.bt-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.bt-canvas canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Enemy plates sit in a row across the top of the field, one column per foe. */
+.bt-plates {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.foe-plate {
+  position: absolute;
+  top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  padding: 5px 7px 6px;
+  border: 0;
+  background: rgba(17, 14, 38, 0.82);
+  color: var(--ink);
+  font-family: var(--font-label);
+  text-align: left;
+  pointer-events: none;
+  transform: scale(0.94);
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.foe-plate.targetable {
+  pointer-events: auto;
+  background: rgba(224, 69, 123, 0.9);
+  animation: plate-pulse 0.8s ease-in-out infinite alternate;
+}
+
+.foe-plate.down {
+  opacity: 0;
+}
+
+.foe-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foe-plate .meter {
+  height: 5px;
+}
+
+.foe-shell {
+  display: flex;
+  gap: 2px;
+  min-height: 9px;
+}
+
+.foe-shell i {
+  width: 12px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.18);
+  transform: skewX(-20deg);
+}
+
+.foe-shell i.on {
+  background: #fff;
+}
+
+.foe-broken {
+  font: 400 0.7rem var(--font-display);
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+.foe-weak {
+  display: flex;
+  gap: 3px;
+}
+
+.foe-intent {
+  font-size: 0.66rem;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.foe-intent.heavy {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.foe-hard {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--r4);
+}
+
+@keyframes plate-pulse {
+  to {
+    filter: brightness(1.25);
+  }
+}
+
+.bt-hit {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.bt-callout {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 3;
+  transform: translate(-50%, -50%) skewX(-8deg);
+  padding: 0.25rem 1.1rem;
+  font: 400 1.5rem var(--font-display);
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(17, 14, 38, 0.82);
+  border-left: 4px solid var(--fade);
+  border-right: 4px solid var(--fade);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: callout-in 0.25s ease-out both;
+}
+
+.bt-callout.gold {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.bt-callout.rose {
+  border-color: var(--rose);
+}
+
+.bt-callout.teal {
+  color: var(--good);
+  border-color: var(--teal);
+}
+
+@keyframes callout-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) skewX(-8deg) scale(1.4);
+  }
+}
+
+.bt-cutin {
+  position: absolute;
+  inset: 22% -10% auto -10%;
+  z-index: 5;
+  height: 34%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 14%;
+  background: linear-gradient(100deg, var(--violet), var(--rose));
+  transform: skewY(-4deg);
+  border-block: 3px solid var(--gold);
+  animation: cutin-in 0.3s ease-out both;
+  overflow: visible;
+}
+
+.bt-cutin.burst {
+  background: linear-gradient(100deg, var(--gold), var(--rose));
+  justify-content: center;
+  padding: 0;
+}
+
+.bt-cutin img {
+  position: absolute;
+  left: 4%;
+  bottom: 0;
+  height: 135%;
+  transform: skewY(4deg);
+  filter: drop-shadow(0 0 12px #0008);
+}
+
+.bt-cutin-text {
+  font-size: 1.7rem;
+  color: #fff;
+  text-shadow: 3px 3px 0 var(--night);
+  transform: skewY(4deg);
+}
+
+@keyframes cutin-in {
+  from {
+    opacity: 0;
+    transform: skewY(-4deg) translateX(-40%);
+  }
+}
+
+.bt-tip {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.4rem;
+  z-index: 2;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  background: rgba(17, 14, 38, 0.86);
+  border-left: 3px solid var(--gold);
+  color: var(--ink-2);
+  pointer-events: none;
+}
+
+/* Lantern strip */
+.bt-lantern {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 34px;
+  padding: 0.3rem 0.8rem;
+  background: var(--panel);
+  border-top: 2px solid var(--gold);
+}
+
+.bt-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.bt-pips i {
+  width: 14px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  transform: rotate(45deg) scale(0.8);
+}
+
+.bt-pips i.on {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+.bt-prompt {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Party cards */
+.bt-party {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  padding: 6px 8px 0;
+  background: var(--panel);
+}
+
+.pcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px 6px;
+  border: 0;
+  background: var(--panel-2);
+  color: var(--ink);
+  text-align: left;
+  min-width: 0;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.pcard:disabled {
+  opacity: 1;
+}
+
+.pcard.active {
+  background: var(--panel-3);
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+
+.pcard.down {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+
+.pcard.targetable {
+  background: var(--teal);
+  color: #04221f;
+  animation: plate-pulse 0.8s ease-in-out infinite alternate;
+}
+
+.pcard.ready {
+  animation: ready-glow 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes ready-glow {
+  to {
+    box-shadow: 0 0 14px var(--gold);
+    filter: brightness(1.2);
+  }
+}
+
+.pcard-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pcard-top img {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  object-fit: cover;
+  background: var(--night);
+}
+
+.pcard-name {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  font: 600 0.64rem var(--font-label);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pcard-hp {
+  font: 600 0.75rem var(--font-label);
+}
+
+.pcard-hp small {
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+
+.pcard .meter {
+  height: 5px;
+}
+
+.pcard-ult {
+  position: absolute;
+  right: 8px;
+  top: 4px;
+  font: 400 0.6rem var(--font-display);
+  color: #241a05;
+  background: var(--gold);
+  padding: 0 4px;
+}
+
+/* Action bar */
+.bt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 8px calc(var(--safe-bottom) + 8px);
+  background: var(--panel);
+}
+
+.bt-actions .btn {
+  flex: 1 1 0;
+  min-width: 96px;
+  min-height: 52px;
+  padding: 0.4rem 0.6rem;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1.15;
+  font-size: 0.85rem;
+}
+
+.bt-actions .btn .sub {
+  font-size: 0.66rem;
+  opacity: 0.8;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.btn-burst {
+  flex-basis: 100% !important;
+  background: linear-gradient(90deg, var(--gold), var(--rose));
+  color: #241a05;
+  animation: ready-glow 0.9s ease-in-out infinite alternate;
+}
+
+.btn-pass {
+  background: var(--teal);
+  color: #04221f;
+}
+
+.bt-result h2 {
+  font-size: 2rem;
+  text-shadow: 3px 3px 0 var(--rose);
+}
+
+.bt-result.defeat h2 {
+  text-shadow: 3px 3px 0 var(--violet);
+}
+
+.bt-result-stats {
+  margin: 0.8rem 0 1rem;
+}
+
+@media (max-height: 640px) {
+  .bt-actions .btn {
+    min-height: 44px;
+  }
+}

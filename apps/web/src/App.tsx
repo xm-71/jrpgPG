@@ -6,6 +6,8 @@ import { Home } from './screens/Home';
 import { Roster } from './screens/Roster';
 import { Settings } from './screens/Settings';
 import { Soon } from './screens/Soon';
+import { Stage } from './screens/Stage';
+import { Story } from './screens/Story';
 import { Title } from './screens/Title';
 import { DialogHost } from './ui/Dialog';
 import { Toasts } from './ui/Toasts';
@@ -33,6 +35,12 @@ export function App(): JSX.Element {
       break;
     case 'roster':
       view = <Roster hero={s.hero} />;
+      break;
+    case 'story':
+      view = <Story />;
+      break;
+    case 'stage':
+      view = <Stage key={s.id} id={s.id} />;
       break;
     case 'settings':
       view = <Settings />;
