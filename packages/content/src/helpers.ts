@@ -1,36 +1,31 @@
-import type { Affinity, EffectDef, SkillDef, TargetKind } from '@duskline/core';
+import type { Affinity, CardDef } from '@duskline/core';
 
-interface SkillOpts {
-  id: string;
-  name: string;
-  blurb: string;
-  affinity: Affinity | null;
-  target?: TargetKind;
-  power?: number;
-  shell?: number;
-  lantern?: number;
-  gauge?: number;
-  timeCost?: number;
-  effects?: EffectDef[];
-  heavy?: boolean;
-}
+/** Tint for card art by affinity. Neutral cards use a cold violet. */
+export const AFFINITY_HUE: Record<Affinity | 'none', number> = {
+  sun: 42,
+  moon: 232,
+  flame: 12,
+  frost: 196,
+  gale: 150,
+  volt: 56,
+  none: 268,
+};
 
-/** A hero's basic attack: builds Lantern, chips Shell a little. */
-export function basicAttack(o: SkillOpts): SkillDef {
-  return { kind: 'basic', target: 'enemy', power: 1, shell: 1, lantern: 1, gauge: 10, ...o };
-}
+type CardInput = Omit<CardDef, 'art' | 'target' | 'affinity' | 'source'> &
+  Partial<Pick<CardDef, 'target' | 'affinity' | 'source'>> & {
+    /** Art glyph; defaults to a sigil. */
+    glyph?: string;
+  };
 
-/** A hero's skill: spends one Lantern. */
-export function skill(o: SkillOpts): SkillDef {
-  return { kind: 'skill', target: 'enemy', power: 1, shell: 1, lantern: -1, gauge: 8, ...o };
-}
-
-/** A hero's ultimate: free to use once the gauge is full. */
-export function ultimate(o: SkillOpts): SkillDef {
-  return { kind: 'ultimate', target: 'enemy', power: 4, shell: 3, lantern: 0, gauge: 0, ...o };
-}
-
-/** An enemy skill. Enemies are not weak or strong to anything by their own affinity. */
-export function foeSkill(o: Omit<SkillOpts, 'affinity'> & { affinity?: Affinity | null }): SkillDef {
-  return { kind: 'skill', affinity: null, target: 'enemy', power: 1, shell: 0, lantern: 0, gauge: 0, ...o };
+/** A card with sensible defaults: aimed at one foe, neutral, from the common pool. */
+export function card(o: CardInput): CardDef {
+  const { glyph, ...rest } = o;
+  const affinity = o.affinity ?? null;
+  return {
+    target: 'foe',
+    source: 'pool',
+    ...rest,
+    affinity,
+    art: { glyph: glyph ?? 'sigil', hue: AFFINITY_HUE[affinity ?? 'none'] },
+  };
 }

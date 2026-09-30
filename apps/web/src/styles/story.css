@@ -1,0 +1,256 @@
+/* Story scenes, laid out as a manga page: paper gutters, inked panel borders, balloons. */
+.manga-page {
+  --page: #e9e2d2;
+  --page-ink: #16111d;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.35), transparent 60%),
+    var(--page);
+  color: var(--page-ink);
+  padding: calc(var(--safe-top) + 8px) 10px calc(var(--safe-bottom) + 30px);
+  gap: 8px;
+  cursor: pointer;
+}
+
+.mp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px;
+}
+
+.mp-title {
+  color: #7a1e22;
+  letter-spacing: 0.24em;
+}
+
+.mp-skip {
+  background: var(--page-ink);
+  border-color: var(--page-ink);
+  color: var(--page);
+}
+
+.mp-panel {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid var(--page-ink);
+  background: #fbf5ea;
+}
+
+.mp-scene {
+  flex: 0 0 34%;
+}
+
+.is-narration .mp-scene {
+  flex: 1;
+}
+
+.mp-speaker {
+  flex: 1;
+  animation: panel-in 0.22s ease-out both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    filter: brightness(1.4);
+  }
+}
+
+.mp-bust {
+  position: absolute;
+  bottom: -3%;
+  height: 106%;
+  width: auto;
+  max-width: none;
+}
+
+.mp-speaker.at-right .mp-bust {
+  right: -8%;
+}
+
+.mp-speaker.at-left .mp-bust {
+  left: -8%;
+}
+
+.mp-name {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  padding: 2px 10px 3px;
+  background: var(--page-ink);
+  color: #fbf5ea;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+}
+
+.at-right .mp-name {
+  right: 0;
+}
+
+.at-left .mp-name {
+  left: 0;
+}
+
+/* Screentone backgrounds, one per feeling. */
+.tone-soft {
+  background-color: #eee6d6;
+  background-image: radial-gradient(rgba(22, 17, 29, 0.26) 0.8px, transparent 1.15px);
+  background-size: 5px 5px;
+}
+
+.tone-focus {
+  background: #fbf5ea;
+}
+
+.tone-hatch {
+  background: repeating-linear-gradient(-35deg, rgba(22, 17, 29, 0.24) 0 1px, transparent 1px 5px), #e2d9c7;
+}
+
+.tone-sparkle {
+  background-color: #f6efe2;
+  background-image: radial-gradient(rgba(200, 50, 44, 0.2) 1px, transparent 1.5px);
+  background-size: 7px 7px;
+}
+
+.focus-lines,
+.speed-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Balloons */
+.mp-balloon {
+  position: absolute;
+  z-index: 5;
+  top: 31%;
+  min-width: 46%;
+  max-width: 66%;
+  padding: 18px 24px;
+  isolation: isolate;
+  background: #fff;
+  border: 2.5px solid var(--page-ink);
+  border-radius: 50% / 46%;
+  color: var(--page-ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+  animation: pop 0.22s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.mp-balloon.speaker-right {
+  left: 12px;
+}
+
+.mp-balloon.speaker-left {
+  right: 12px;
+}
+
+.mp-balloon.burst,
+.mp-balloon.wobble {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 34px 38px;
+}
+
+.mp-balloon.burst p {
+  font-size: 1.08rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.mp-balloon-shape {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.mp-balloon-shape path {
+  fill: #fff;
+  stroke: var(--page-ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.mp-balloon.wobble p {
+  font-weight: 500;
+  font-style: italic;
+}
+
+.mp-tail {
+  position: absolute;
+  bottom: -28px;
+  width: 26px;
+  height: 30px;
+}
+
+.mp-tail path {
+  fill: #fff;
+  stroke: var(--page-ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.speaker-right .mp-tail {
+  right: 20%;
+}
+
+.speaker-left .mp-tail {
+  left: 20%;
+  transform: scaleX(-1);
+}
+
+/* Narration goes in a boxed caption. */
+.mp-caption {
+  position: absolute;
+  z-index: 3;
+  left: 10px;
+  top: 10px;
+  max-width: 80%;
+  padding: 10px 13px;
+  background: #fbf5ea;
+  border: 2.5px solid var(--page-ink);
+  color: var(--page-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  box-shadow: 4px 4px 0 rgba(22, 17, 29, 0.85);
+  animation: screen-in 0.35s ease-out both;
+}
+
+.mp-more {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--safe-bottom) + 8px);
+  color: #5a4e5e;
+}
+
+.kindle-first .stone {
+  width: 170px;
+  height: 170px;
+  animation: drift 40s linear infinite, stone-glow 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes stone-glow {
+  to {
+    filter: drop-shadow(0 0 16px var(--blood));
+  }
+}
+
+.kindle-first .reveal img {
+  height: 260px;
+  width: auto;
+  filter: drop-shadow(0 0 18px var(--gold));
+}

@@ -1,44 +1,25 @@
 import {
   analyzeRules,
-  battleFor,
-  chooseNode,
-  choices,
-  finishBattle,
-  pickGlimmer,
-  startRun,
-  takeRest,
-  type CrewMember,
-  type DescentRun,
-  encounterFoes,
-  heroUnit,
+  autoClimb,
+  autoPlay,
+  battleSetup,
+  createBattle,
   newKindlingState,
-  playout,
   pullInPlace,
-  recommendParty,
   seedRng,
-  type BattleSetup,
-  type StageDef,
+  startClimb,
+  type ClimbRun,
+  type NodeKind,
 } from '@duskline/core';
-import {
-  DESCENT_POOLS,
-  HEROES,
-  STAGES,
-  descentDeps,
-  heroById,
-  ownedHeroIdsBefore,
-  rankBefore,
-  rateUpBanner,
-  requireEncounter,
-  requireEnemy,
-  requireHero,
-} from '@duskline/content';
+import { HEROES, STRATA, climbDeps, rateUpBanner } from '@duskline/content';
 
 /**
  * Headless simulations for balance and economy.
  *
- *   pnpm sim battles [--n 300] [--stage 1-5]   story stages with the auto-play policy
- *   pnpm sim kindling [--pulls 1000000]        pull odds against the exact analysis
- *   pnpm sim all                               both
+ *   pnpm sim climb [--n 120] [--stratum 0] [--hero wren] [--rank 1] [--res 1]   whole climbs with the plain auto-climber
+ *   pnpm sim fights [--n 60] [--stratum 0]                                       every encounter, starter deck, full HP
+ *   pnpm sim kindling [--pulls 1000000]                                          pull odds against the exact analysis
+ *   pnpm sim all
  */
 
 const args = process.argv.slice(2);
@@ -48,105 +29,116 @@ const flag = (name: string, fallback: number): number => {
   const v = i >= 0 ? Number(args[i + 1]) : NaN;
   return Number.isFinite(v) ? v : fallback;
 };
-const only = (() => {
-  const i = args.indexOf('--stage');
+const text = (name: string): string | undefined => {
+  const i = args.indexOf(`--${name}`);
   return i >= 0 ? args[i + 1] : undefined;
-})();
-
-/** Experimental multipliers on top of the content data, to find good numbers before editing it. */
-const tune = {
-  hp: flag('hp', 1),
-  atk: flag('atk', 1),
-  def: flag('def', 1),
-  shell: flag('shell', 0),
-  eliteHp: flag('eliteHp', 1),
-  bossHp: flag('bossHp', 1),
-  bossAtk: flag('bossAtk', 1),
-  bossShell: flag('bossShell', 0),
-  skip: flag('skipTutorial', 0),
 };
 
-function stageSetup(stage: StageDef, index: number, rankDelta = 0): { setup: BattleSetup; party: string[] } {
-  const encounter = requireEncounter(stage.encounter);
-  const owned = ownedHeroIdsBefore(index).map((id) => requireHero(id));
-  const foesDefs = encounter.foes.map((f) => requireEnemy(f.enemy));
-  const partyIds = stage.forcedParty ?? recommendParty(owned, foesDefs);
-  const rank = Math.max(1, rankBefore(index) + rankDelta);
-  const foes = encounterFoes(encounter, stage.level, requireEnemy);
-  if (!(tune.skip && index === 0)) {
-    for (const f of foes) {
-      const boss = f.tier === 'boss';
-      const elite = f.tier === 'elite';
-      f.stats = {
-        hp: f.stats.hp * tune.hp * (elite ? tune.eliteHp : 1) * (boss ? tune.bossHp : 1),
-        atk: f.stats.atk * tune.atk * (boss ? tune.bossAtk : 1),
-        def: f.stats.def * tune.def,
-        spd: f.stats.spd,
+const pct = (v: number): string => `${(v * 100).toFixed(0).padStart(3)}%`;
+const f1 = (v: number): string => v.toFixed(1).padStart(5);
+const strata = (): number[] => {
+  const s = text('stratum');
+  return s === undefined ? STRATA.map((_, i) => i) : [Number(s)];
+};
+const heroes = (): string[] => {
+  const h = text('hero');
+  return h ? [h] : HEROES.map((x) => x.id);
+};
+
+interface FightLog {
+  kind: string;
+  encounter: string;
+  victory: boolean;
+  lost: number;
+  turns: number;
+  floor: number;
+}
+
+function climb(): void {
+  const n = flag('n', 120);
+  const rank = flag('rank', 1);
+  const res = flag('res', 1);
+  for (const s of strata()) {
+    console.log(`\n${STRATA[s]!.name}: ${n} climbs per hero, Rank ${rank}, Resonance ${res}\n`);
+    console.log('hero        clear  floors fights  turns  lost/battle  elite  guard   boss  deck  died on');
+    const allDeaths = new Map<string, number>();
+    let totalClear = 0;
+    for (const hero of heroes()) {
+      const logs: FightLog[] = [];
+      let clears = 0;
+      let floors = 0;
+      let deck = 0;
+      const deaths = new Map<string, number>();
+      for (let i = 0; i < n; i++) {
+        const run: ClimbRun = startClimb({ seed: `sim-${s}-${hero}-${i}`, daily: null, stratum: s, hero, resonance: res, rank, kindled: {}, archive: [] }, climbDeps);
+        autoClimb(run, climbDeps, {
+          onFight: (f) => {
+            logs.push({ kind: f.kind, encounter: f.encounter, victory: f.victory, lost: Math.max(0, f.hpBefore - f.hpAfter), turns: f.turns, floor: f.floor });
+            if (!f.victory) {
+              const key = `${f.kind} ${f.encounter}`;
+              deaths.set(key, (deaths.get(key) ?? 0) + 1);
+              allDeaths.set(key, (allDeaths.get(key) ?? 0) + 1);
+            }
+          },
+        });
+        if (run.result === 'cleared') clears++;
+        floors += run.stats.floorsCleared;
+        deck += run.deck.length;
+      }
+      totalClear += clears;
+      const of = (k: NodeKind) => logs.filter((l) => l.kind === k);
+      const winRate = (k: NodeKind) => {
+        const l = of(k);
+        return l.length ? l.filter((x) => x.victory).length / l.length : NaN;
       };
-      f.shell = (f.shell ?? 0) + tune.shell + (boss ? tune.bossShell : 0);
+      const battles = of('battle');
+      const worst = [...deaths.entries()].sort((a, b) => b[1] - a[1])[0];
+      console.log(
+        `${hero.padEnd(10)} ${pct(clears / n)}  ${f1(floors / n)}  ${f1(logs.length / n)} ${f1(logs.reduce((a, l) => a + l.turns, 0) / Math.max(1, logs.length))}   ${f1(
+          battles.reduce((a, l) => a + l.lost, 0) / Math.max(1, battles.length),
+        )}       ${pct(winRate('elite'))}  ${pct(winRate('guardian'))}  ${pct(winRate('boss'))}  ${f1(deck / n)}  ${worst ? `${worst[0]} (${worst[1]})` : '-'}`,
+      );
     }
-  }
-  return {
-    party: partyIds,
-    setup: { party: partyIds.map((id) => heroUnit(requireHero(id), rank)), foes },
-  };
-}
-
-const pct = (x: number): string => `${(x * 100).toFixed(0)}%`.padStart(4);
-const num = (x: number, d = 1): string => x.toFixed(d).padStart(6);
-
-function battles(): void {
-  const n = flag('n', 300);
-  console.log(`\nStory stages: ${n} seeded battles each, auto-play policy, on-curve party\n`);
-  console.log('stage  name                    lvl rank  win   partyTurns  actions  ~min   hp left dmg%  break  encore  pass  burst  ult   KOs  foeActs skips  party');
-  for (const [index, stage] of STAGES.entries()) {
-    if (only && stage.id !== only) continue;
-    const { setup, party } = stageSetup(stage, index);
-    const partyMax = setup.party.reduce((a, u) => a + u.stats.hp, 0);
-    let wins = 0;
-    let timeouts = 0;
-    const sum = { turns: 0, actions: 0, hp: 0, breaks: 0, encores: 0, passes: 0, bursts: 0, ults: 0, kos: 0, foeActs: 0, foeSkips: 0, dmg: 0 };
-    for (let seed = 0; seed < n; seed++) {
-      const r = playout(setup, `${stage.id}:${seed}`);
-      if (r.result === 'victory') wins++;
-      if (r.timedOut) timeouts++;
-      sum.turns += r.turns;
-      sum.actions += r.actions;
-      sum.hp += r.partyHpFrac;
-      sum.breaks += r.stats.breaks;
-      sum.encores += r.stats.encores;
-      sum.passes += r.stats.passes;
-      sum.bursts += r.stats.bursts;
-      sum.ults += r.stats.ultimates;
-      sum.kos += r.stats.partyKos;
-      sum.foeActs += r.stats.foeActions;
-      sum.dmg += r.stats.damageTaken / partyMax;
-      sum.foeSkips += r.stats.foeSkips;
-    }
-    const avg = (v: number): number => v / n;
-    // A tap takes about five seconds including animation, so this is the time a player spends deciding.
-    const minutes = (avg(sum.actions) * 5) / 60;
-    console.log(
-      `${stage.id.padEnd(6)} ${stage.name.padEnd(23)} ${String(stage.level).padStart(3)} ${String(rankBefore(index)).padStart(4)} ${pct(wins / n)} ${num(avg(sum.turns))}      ${num(avg(sum.actions))} ${num(minutes)} ${pct(avg(sum.hp))} ${pct(avg(sum.dmg))}    ${num(avg(sum.breaks))} ${num(avg(sum.encores))} ${num(avg(sum.passes))} ${num(avg(sum.bursts))} ${num(avg(sum.ults))} ${num(avg(sum.kos), 2)} ${num(avg(sum.foeActs))} ${num(avg(sum.foeSkips))}  ${party.join(',')}` +
-        (timeouts ? `  !! ${timeouts} timeouts` : ''),
-    );
+    console.log(`\nall heroes: ${pct(totalClear / (n * heroes().length))} cleared`);
+    const top = [...allDeaths.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    console.log(`deadliest: ${top.map(([k, v]) => `${k} ${v}`).join(' | ')}`);
   }
 }
 
-function sensitivity(): void {
-  const n = flag('n', 200);
-  console.log(`\nRank sensitivity: win rate when the party is under or over-levelled (${n} battles per cell)\n`);
-  console.log('stage   -2    -1     0    +1    +2');
-  for (const [index, stage] of STAGES.entries()) {
-    if (only && stage.id !== only) continue;
-    const cells: string[] = [];
-    for (const delta of [-2, -1, 0, 1, 2]) {
-      const { setup } = stageSetup(stage, index, delta);
+/** Every encounter in a stratum against every hero's starter deck at full HP. */
+function fights(): void {
+  const n = flag('n', 40);
+  for (const s of strata()) {
+    const st = STRATA[s]!;
+    console.log(`\n${st.name}: each encounter, starter decks, full HP, ${n} seeds per hero\n`);
+    console.log('floor encounter            kind      win   lost%  turns');
+    const rows: Array<{ floor: number; id: string; kind: NodeKind }> = [];
+    st.floors.forEach((f, i) => {
+      for (const id of f.battles) rows.push({ floor: i, id, kind: 'battle' });
+      for (const id of st.elites) rows.push({ floor: i, id, kind: 'elite' });
+      rows.push({ floor: i, id: f.guardian, kind: i === 2 ? 'boss' : 'guardian' });
+    });
+    for (const r of rows) {
       let wins = 0;
-      for (let seed = 0; seed < n; seed++) if (playout(setup, `${stage.id}:s${seed}`).result === 'victory') wins++;
-      cells.push(pct(wins / n));
+      let lost = 0;
+      let turns = 0;
+      let count = 0;
+      for (const hero of heroes()) {
+        for (let i = 0; i < n; i++) {
+          const run = startClimb({ seed: `f-${hero}-${i}`, daily: null, stratum: s, hero, resonance: 1, rank: 1, kindled: {}, archive: [] }, climbDeps);
+          run.phase = 'battle';
+          run.floor = r.floor;
+          run.battle = { encounter: r.id, kind: r.kind, seed: `fs-${r.id}-${hero}-${i}` };
+          const { state } = createBattle(battleSetup(run, climbDeps), run.battle.seed);
+          autoPlay(state);
+          count++;
+          if (state.result === 'victory') wins++;
+          lost += (state.hero.maxHp - state.hero.hp) / state.hero.maxHp;
+          turns += state.turn;
+        }
+      }
+      console.log(`${String(r.floor + 1).padStart(5)} ${r.id.padEnd(22)} ${r.kind.padEnd(8)} ${pct(wins / count)}  ${pct(lost / count)}  ${f1(turns / count)}`);
     }
-    console.log(`${stage.id.padEnd(6)} ${cells.join('  ')}`);
   }
 }
 
@@ -178,108 +170,22 @@ function kindling(): void {
   console.log(`at ${week} free pulls a week that is about ${(analysis.medianToFeatured! / week).toFixed(1)} weeks (median) and ${(analysis.p90ToFeatured! / week).toFixed(1)} weeks (90%)`);
 }
 
-/** A player who rests when hurt, takes elites when healthy, and leans into one Path. */
-/** A crew with no defender or healer should lean on defensive Glimmers. */
-function needsSustain(ids: string[]): boolean {
-  const roles = ids.map((id) => requireHero(id).role);
-  return !roles.includes('defender') || !roles.includes('healer');
-}
-
-function playRun(run: DescentRun, leanDefensive = false): void {
-  let guard = 0;
-  while (run.phase !== 'done' && guard++ < 80) {
-    if (run.phase === 'choose') {
-      const options = choices(run);
-      const avg = Object.values(run.hp).reduce((a, b) => a + b, 0) / Math.max(1, Object.keys(run.hp).length);
-      const rest = options.find((n) => n.kind === 'rest');
-      const elite = options.find((n) => n.kind === 'elite');
-      const battle = options.find((n) => n.kind === 'battle' || n.kind === 'boss');
-      chooseNode(run, (avg < 0.65 && rest ? rest : avg >= 0.85 && elite ? elite : (battle ?? options[0]!)).id);
-    } else if (run.phase === 'rest') {
-      takeRest(run);
-    } else if (run.phase === 'battle') {
-      const { setup, seed } = battleFor(run, descentDeps);
-      const out = playout(setup, seed);
-      finishBattle(run, descentDeps, { victory: out.result === 'victory', hp: out.partyHp, actions: out.actions });
-    } else if (run.phase === 'glimmer') {
-      const best = [...(run.offer ?? [])].sort((a, b) => {
-        const ga = descentDeps.glimmer(a);
-        const gb = descentDeps.glimmer(b);
-        const score = (g: typeof ga): number => g.rarity * 2 + run.pathScore[g.path] + (leanDefensive && g.path === 'nightward' ? 3 : 0);
-        return score(gb) - score(ga);
-      })[0]!;
-      pickGlimmer(run, descentDeps, best);
-    }
-  }
-}
-
-function descent(): void {
-  const n = flag('n', 200);
-  const rank = flag('rank', 8);
-  console.log(`\nDescent: ${n} full runs, policy player, crew at Rank ${rank} (${'daily seeds differ per run'})\n`);
-  console.log('crew                          clear  floors  battles  actions  ~min@5s  ~min@auto2x  fails on');
-  const crews: string[][] = [
-    ['wren', 'io', 'marisol', 'pip'],
-    ['aurelian', 'tamsin', 'marisol', 'pip'],
-    ['wren', 'io', 'tamsin', 'pip'],
-    ['aurelian', 'io', 'marisol', 'pip'],
-    ['wren', 'tamsin', 'marisol', 'pip'],
-    ['aurelian', 'io', 'marisol', 'tamsin'],
-    ['wren', 'io', 'tamsin', 'aurelian'],
-  ];
-  for (const ids of crews) {
-    const crew: CrewMember[] = ids.map((hero) => ({ hero, resonance: 1, card: null, copies: 0 }));
-    let cleared = 0;
-    const sum = { floors: 0, battles: 0, actions: 0 };
-    const fails = [0, 0, 0];
-    for (let i = 0; i < n; i++) {
-      const run = startRun({ seed: `sim-${ids.join('')}-${i}`, daily: null, crew, rank, pools: DESCENT_POOLS }, descentDeps);
-      playRun(run, needsSustain(ids));
-      if (run.result === 'cleared') cleared++;
-      else fails[Math.min(2, run.floor)]!++;
-      sum.floors += run.stats.floorsCleared;
-      sum.battles += run.stats.battles;
-      sum.actions += run.stats.actions;
-    }
-    const avg = (v: number): number => v / n;
-    console.log(
-      `${ids.join(',').padEnd(29)} ${pct(cleared / n)}  ${num(avg(sum.floors))}  ${num(avg(sum.battles))}   ${num(avg(sum.actions), 0)}   ${num((avg(sum.actions) * 5) / 60)}     ${num((avg(sum.actions) * 2.5) / 60)}      f1 ${fails[0]} f2 ${fails[1]} f3 ${fails[2]}`,
-    );
-  }
-}
-
-function roster(): void {
-  console.log('\nRoster at Rank 1, resonance 1\n');
-  console.log('hero        role      aff    hp   atk  def  spd');
-  for (const h of HEROES) {
-    const b = heroById(h.id)!.base;
-    console.log(`${h.id.padEnd(11)} ${h.role.padEnd(9)} ${h.affinity.padEnd(6)} ${String(b.hp).padStart(4)} ${String(b.atk).padStart(4)} ${String(b.def).padStart(4)} ${String(b.spd).padStart(4)}`);
-  }
-}
-
 switch (cmd) {
-  case 'battles':
-    battles();
+  case 'climb':
+    climb();
     break;
-  case 'sensitivity':
-    sensitivity();
+  case 'fights':
+    fights();
     break;
   case 'kindling':
     kindling();
     break;
-  case 'roster':
-    roster();
-    break;
-  case 'descent':
-    descent();
-    break;
   case 'all':
-    battles();
-    sensitivity();
-    descent();
+    fights();
+    climb();
     kindling();
     break;
   default:
-    console.error(`Unknown command "${cmd}". Try: battles, sensitivity, descent, kindling, roster, all`);
-    process.exitCode = 1;
+    console.error(`Unknown command: ${cmd}`);
+    process.exit(1);
 }

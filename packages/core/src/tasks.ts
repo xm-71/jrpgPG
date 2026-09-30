@@ -2,7 +2,7 @@ import { deriveSeed, rngShuffle, seedRng } from './rng';
 
 /** Daily tasks: three small goals a day, each worth a little Gloam. */
 
-export type TaskEvent = 'wins' | 'breaks' | 'encores' | 'passes' | 'ultimates' | 'bursts' | 'descentFloors';
+export type TaskEvent = 'wins' | 'breaks' | 'chains' | 'ultimates' | 'floors' | 'elites' | 'echoes';
 
 export interface TaskDef {
   id: string;
@@ -14,13 +14,13 @@ export interface TaskDef {
 export const TASK_GLOAM = 25;
 
 export const TASKS: readonly TaskDef[] = [
-  { id: 'win-3', text: 'Win 3 battles', event: 'wins', goal: 3 },
-  { id: 'break-6', text: 'Break 6 enemies', event: 'breaks', goal: 6 },
-  { id: 'encore-4', text: 'Earn 4 Encores', event: 'encores', goal: 4 },
-  { id: 'pass-2', text: 'Pass the baton twice', event: 'passes', goal: 2 },
+  { id: 'win-3', text: 'Win 3 fights', event: 'wins', goal: 3 },
+  { id: 'break-5', text: 'Break 5 foes', event: 'breaks', goal: 5 },
+  { id: 'chain-3', text: 'Make 3 Chains', event: 'chains', goal: 3 },
   { id: 'ult-2', text: 'Unleash 2 ultimates', event: 'ultimates', goal: 2 },
-  { id: 'burst-1', text: 'Land a Horizon Burst', event: 'bursts', goal: 1 },
-  { id: 'floor-1', text: 'Clear a Descent floor', event: 'descentFloors', goal: 1 },
+  { id: 'floor-2', text: 'Clear 2 floors of the Gnomon', event: 'floors', goal: 2 },
+  { id: 'elite-1', text: 'Defeat an elite', event: 'elites', goal: 1 },
+  { id: 'echo-1', text: 'Take an Echo from a Mirror', event: 'echoes', goal: 1 },
 ];
 
 export interface TaskState {

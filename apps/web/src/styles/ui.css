@@ -1,0 +1,665 @@
+/* Shared components */
+
+/* Backdrop: the Gnomon against a stuck sun. Drawn by ui/Sky.tsx as one SVG. */
+.sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ink-0);
+  pointer-events: none;
+}
+
+.sky svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sky-drift {
+  transform-origin: 50% 64%;
+  animation: drift 240s linear infinite;
+}
+
+@keyframes drift {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Buttons: rectangles with a notch, like a paper seal. */
+.btn {
+  --notch: 8px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  padding: 0.55rem 1.3rem;
+  border: 1px solid var(--hair-2);
+  background: rgba(236, 230, 216, 0.04);
+  color: var(--bone);
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  clip-path: polygon(var(--notch) 0, 100% 0, 100% calc(100% - var(--notch)), calc(100% - var(--notch)) 100%, 0 100%, 0 var(--notch));
+  transition:
+    filter 0.12s,
+    transform 0.08s,
+    background 0.15s;
+}
+
+/* Only where a pointer can hover: on a touch screen the highlight would stick to the button after a tap. */
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    filter: brightness(1.2);
+  }
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
+
+.btn-primary {
+  background: var(--blood);
+  border-color: var(--ember);
+  color: #fff4ee;
+}
+
+.btn-gold {
+  background: var(--gold);
+  border-color: #f0c86e;
+  color: #1a1206;
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.btn-small {
+  min-height: 34px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.75rem;
+  --notch: 6px;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+.btn-icon {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+/* A label with a line of small print under it. */
+.btn-stacked {
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.btn .sub {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.85;
+}
+
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Panels: hairline borders with corner ticks. */
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(28, 24, 38, 0.92), rgba(13, 11, 19, 0.92));
+  border: 1px solid var(--hair);
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--bone), var(--bone)) top left / 10px 1px no-repeat,
+    linear-gradient(var(--bone), var(--bone)) top left / 1px 10px no-repeat,
+    linear-gradient(var(--bone), var(--bone)) bottom right / 10px 1px no-repeat,
+    linear-gradient(var(--bone), var(--bone)) bottom right / 1px 10px no-repeat;
+  opacity: 0.55;
+}
+
+.panel-pad {
+  padding: 0.85rem 0.95rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--hair-2);
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bone-2);
+  white-space: nowrap;
+}
+
+.chip-rose,
+.chip-blood {
+  border-color: var(--blood);
+  color: var(--ember);
+}
+
+.chip-gold {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.gloam {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid rgba(217, 164, 65, 0.5);
+  color: var(--gold);
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: rgba(217, 164, 65, 0.06);
+}
+
+.gloam svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* On a gold button the price reads in ink. */
+.btn-gold .gloam {
+  color: #1a1206;
+  border-color: rgba(26, 18, 6, 0.35);
+  background: rgba(26, 18, 6, 0.06);
+}
+
+/* Meters */
+.meter {
+  position: relative;
+  height: 6px;
+  background: rgba(236, 230, 216, 0.12);
+  overflow: hidden;
+}
+
+.meter > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  transition: width 0.28s ease-out;
+}
+
+.meter-hp > i {
+  background: var(--good);
+}
+
+.meter-hp.low > i {
+  background: var(--ember);
+}
+
+.meter-foe > i {
+  background: var(--blood);
+}
+
+.meter-shell > i {
+  background: var(--bone);
+}
+
+.meter-gauge > i {
+  background: var(--gold);
+}
+
+.meter-xp > i {
+  background: var(--moon);
+}
+
+/* Affinity marks: shape and colour, never colour alone */
+.aff {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.aff svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.aff-sun {
+  color: var(--aff-sun);
+}
+.aff-moon {
+  color: var(--aff-moon);
+}
+.aff-flame {
+  color: var(--aff-flame);
+}
+.aff-frost {
+  color: var(--aff-frost);
+}
+.aff-gale {
+  color: var(--aff-gale);
+}
+.aff-volt {
+  color: var(--aff-volt);
+}
+
+.aff-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid currentColor;
+  font-family: var(--font-label);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aff-tag .aff {
+  width: 11px;
+  height: 11px;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.stars svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+.r5 {
+  color: var(--r5);
+}
+.r4 {
+  color: var(--r4);
+}
+.r3 {
+  color: var(--r3);
+}
+
+/* Top bar */
+.topbar {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: calc(var(--safe-top) + 0.7rem) 0.9rem 0.6rem;
+}
+
+.topbar h1 {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar h1::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 2px;
+  margin-top: 2px;
+  background: var(--blood);
+}
+
+.body {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  padding: 0.3rem 0.9rem 1.2rem;
+}
+
+/* A list that runs to the bottom of the screen scrolls clear of the iPhone home indicator. A screen with a footer bar leaves that to the bar. */
+.screen > .body:last-child {
+  padding-bottom: calc(var(--safe-bottom) + 1.2rem);
+}
+
+/* Overlays and sheets */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(5, 4, 9, 0.78);
+  backdrop-filter: blur(2px);
+  animation: screen-in 0.2s ease-out both;
+}
+
+.overlay.center {
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-height: 88%;
+  overflow-y: auto;
+  padding: 1.1rem 1rem calc(var(--safe-bottom) + 1rem);
+  background: var(--ink-2);
+  border-top: 1px solid var(--hair-2);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.overlay.center .sheet {
+  max-width: 400px;
+  border: 1px solid var(--hair-2);
+  padding: 1.3rem 1.1rem 1.1rem;
+}
+
+.sheet h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.gap-s {
+  gap: 0.35rem;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+/* Toasts */
+.toasts {
+  position: absolute;
+  left: 0.8rem;
+  right: 0.8rem;
+  top: calc(var(--safe-top) + 0.6rem);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 0.45rem 0.75rem;
+  background: rgba(20, 17, 28, 0.94);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--hair-2);
+  border-left: 3px solid var(--moon);
+  font-size: 0.85rem;
+  animation: screen-in 0.2s ease-out both;
+}
+
+.toast.good {
+  border-left-color: var(--good);
+}
+
+.toast.warn {
+  border-left-color: var(--ember);
+}
+
+/* Settings rows: text on the left, a toggle or a segmented control on the right. */
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.switch:last-child {
+  border-bottom: 0;
+}
+
+.switch input[type='checkbox'] {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  background: var(--ink-4);
+  border: 1px solid var(--hair-2);
+  cursor: pointer;
+}
+
+.switch input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--bone-2);
+  transition: transform 0.15s;
+}
+
+.switch input[type='checkbox']:checked {
+  background: var(--blood);
+  border-color: var(--blood);
+}
+
+.switch input[type='checkbox']:checked::after {
+  transform: translateX(20px);
+  background: #fff;
+}
+
+.seg {
+  border-bottom: 0;
+  gap: 4px;
+}
+
+.seg .tab {
+  border: 1px solid var(--hair);
+  padding: 0.4rem 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.seg .tab[aria-pressed='true'] {
+  color: var(--bone);
+  border-color: var(--blood);
+  background: rgba(200, 50, 44, 0.18);
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  margin: 0.6rem 0;
+  padding: 0.6rem;
+  background: var(--ink-1);
+  color: var(--bone);
+  border: 1px solid var(--hair-2);
+  /* 16px: iOS zooms the whole page when a smaller field is focused, and the game has no way to zoom back out. */
+  font: 16px/1.4 ui-monospace, monospace;
+  resize: vertical;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--hair);
+}
+
+.tab {
+  flex: 1;
+  padding: 0.6rem 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-bottom: 2px solid transparent;
+}
+
+.tab[aria-selected='true'] {
+  color: var(--bone);
+  border-bottom-color: var(--blood);
+}
+
+.divider {
+  height: 1px;
+  background: var(--hair);
+  margin: 0.8rem 0;
+}
+
+.pop {
+  animation: pop 0.28s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+.foot {
+  position: relative;
+  z-index: 3;
+  padding: 0.6rem 0.9rem calc(var(--safe-bottom) + 0.9rem);
+}
+
+.foot .btn {
+  flex-direction: column;
+  gap: 0;
+}
+
+.center-col {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.4rem;
+  text-align: center;
+}
+
+.center-col h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+}
+
+.center-col .btn-stack {
+  width: 100%;
+  max-width: 320px;
+}
+
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--blood);
+  color: #fff4ee;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 0 0 2px var(--ink-0), 0 0 0 3px var(--blood);
+}
+
+/*
+ * The game is a portrait column. Android installs lock it upright from the manifest, but iOS ignores
+ * that, and on a phone turned sideways the fight has no room for the foes. So a sideways phone is
+ * asked to turn back. Tablets and desktop windows are tall enough and never see this.
+ */
+.turn-upright {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 480px) and (pointer: coarse) {
+  .turn-upright {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem calc(var(--safe-right) + 1rem) 1rem calc(var(--safe-left) + 1rem);
+    background: var(--ink-0);
+    text-align: center;
+  }
+}
+
+.turn-upright svg {
+  width: 56px;
+  height: 56px;
+  color: var(--bone-2);
+  animation: turn-upright 2.4s ease-in-out infinite;
+}
+
+@keyframes turn-upright {
+  0%,
+  25% {
+    transform: rotate(-90deg);
+  }
+  65%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.turn-upright .display {
+  font-size: 1.4rem;
+}

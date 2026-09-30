@@ -10,9 +10,9 @@ export type EarnSource =
   | 'dupe'
   | 'spark'
   | 'task'
-  | 'descentFloor'
-  | 'descentDaily'
-  | 'descentWeekly';
+  | 'climbFloor'
+  | 'climbDaily'
+  | 'climbWeekly';
 
 /** Caps per UTC day and per UTC ISO week. A missing cap means the source cannot be farmed. */
 export const EARN_CAPS: Record<EarnSource, { daily?: number; weekly?: number }> = {
@@ -22,9 +22,9 @@ export const EARN_CAPS: Record<EarnSource, { daily?: number; weekly?: number }> 
   dupe: {},
   spark: {},
   task: { daily: 75 },
-  descentFloor: { weekly: 300 },
-  descentDaily: { daily: 120 },
-  descentWeekly: { weekly: 300 },
+  climbFloor: { weekly: 300 },
+  climbDaily: { daily: 120 },
+  climbWeekly: { weekly: 300 },
 };
 
 export interface Ledger {
@@ -34,7 +34,7 @@ export interface Ledger {
   weekly: Record<string, number>;
 }
 
-/** UTC calendar day as YYYY-MM-DD. Also the seed of the daily Descent. */
+/** UTC calendar day as YYYY-MM-DD. Also the seed of the daily climb. */
 export function dayKey(now: number): string {
   return new Date(now).toISOString().slice(0, 10);
 }

@@ -4,7 +4,7 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "description": "Pure game rules: seeded RNG, battle engine, Kindling, Descent, economy. No rendering, no DOM.",
+  "description": "Pure game rules: seeded RNG, card combat, the climb, Kindling, economy. No rendering, no DOM.",
   "exports": {
     ".": "./src/index.ts"
   },

@@ -1,6 +1,6 @@
-import { MAX_RANK } from './battle/scaling';
+/** Lamplighter Rank: the account level. Each Rank adds a little max HP to every hero. */
 
-/** Lamplighter Rank: the account level that scales every hero's stats. */
+export const MAX_RANK = 30;
 
 /** Gloam awarded each time the player reaches a new Rank. */
 export const RANK_UP_GLOAM = 50;

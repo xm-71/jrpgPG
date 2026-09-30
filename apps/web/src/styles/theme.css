@@ -1,0 +1,263 @@
+/*
+ * Ink and Ember: the look of the Gnomon.
+ * Near-black ink, bone text, one vermilion accent, Gloam gold for money, occult geometry in hairlines.
+ * One deliberate dark world, so there is no light theme.
+ */
+:root {
+  color-scheme: dark;
+
+  --ink-0: #07060b;
+  --ink-1: #0d0b13;
+  --ink-2: #14111c;
+  --ink-3: #1c1826;
+  --ink-4: #262033;
+  --hair: rgba(236, 230, 216, 0.14);
+  --hair-2: rgba(236, 230, 216, 0.26);
+
+  --bone: #ece6d8;
+  --bone-2: #c9c0ae;
+  --muted: #8e8598;
+  --blood: #c8322c;
+  --ember: #e25a45;
+  --gold: #d9a441;
+  --moon: #a9b6cc;
+  --violet: #4e2f66;
+  --good: #4fc1b0;
+  --bad: #e25a45;
+
+  /* Older names still used by some screens. */
+  --bg: var(--ink-0);
+  --deep: var(--ink-1);
+  --panel: var(--ink-2);
+  --panel-2: var(--ink-3);
+  --panel-3: var(--ink-4);
+  --line: var(--hair-2);
+  --ink: var(--bone);
+  --ink-2t: var(--bone-2);
+  --rose: var(--blood);
+  --teal: var(--good);
+  --paper: var(--bone);
+  --fade: var(--muted);
+  --night: var(--ink-2);
+
+  --aff-sun: #e8b04a;
+  --aff-moon: #a3aeff;
+  --aff-flame: #ec6a3c;
+  --aff-frost: #80d2ef;
+  --aff-gale: #6fd6a6;
+  --aff-volt: #e6df55;
+
+  --r5: #d9a441;
+  --r4: #b28ae6;
+  --r3: #8fb0cc;
+
+  --font-display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', Georgia, serif;
+  --font-label: 'Chakra Petch', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Zen Kaku Gothic New', system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans', sans-serif;
+
+  --text-scale: 1;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: calc(16px * var(--text-scale));
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+  background: var(--ink-0);
+  overscroll-behavior: none;
+}
+
+/* Installed as an app (see game/offline.ts): its own controls are not text, so no selection loupe or long-press menu. */
+html[data-standalone] body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* iOS cannot type into a field that sits inside text that cannot be selected. */
+html[data-standalone] textarea,
+html[data-standalone] input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(90% 60% at 50% 115%, rgba(200, 50, 44, 0.22), transparent 70%),
+    radial-gradient(120% 90% at 50% -10%, #17111f 0%, var(--ink-0) 60%);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+#app {
+  height: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The game column: a phone-shaped stage, centred on wide screens. */
+.stage {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--ink-1);
+  isolation: isolate;
+}
+
+/* Film grain over everything, very faint. */
+.stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
+}
+
+@media (min-width: 640px) and (min-height: 720px) {
+  #app {
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+  .stage {
+    height: min(100%, 900px);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 1px var(--hair),
+      0 30px 90px -20px rgba(0, 0, 0, 0.9),
+      0 0 140px -30px rgba(200, 50, 44, 0.35);
+  }
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: screen-in 0.26s ease-out both;
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    filter: brightness(0.4);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* Motion: honour the OS setting and the in-game one. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Type */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.label {
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+}
+
+/* Inside a scrolling column, content scrolls; it never squashes. */
+.scroll > * {
+  flex-shrink: 0;
+}

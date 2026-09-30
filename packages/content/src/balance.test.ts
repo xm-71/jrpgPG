@@ -1,63 +1,52 @@
 import { describe, expect, test } from 'vitest';
-import { checkInvariants, encounterFoes, heroUnit, playout, recommendParty, type BattleSetup } from '@duskline/core';
-import { STAGES, ownedHeroIdsBefore, rankBefore, requireEncounter, requireEnemy, requireHero } from './index';
+import { autoClimb, startClimb } from '@duskline/core';
+import { HEROES, STRATA, climbDeps } from './index';
 
-/** A player who arrives at each stage at the intended Rank, with a sensible party. */
-function onCurve(index: number, rankDelta = 0): BattleSetup {
-  const stage = STAGES[index]!;
-  const encounter = requireEncounter(stage.encounter);
-  const owned = ownedHeroIdsBefore(index).map(requireHero);
-  const party = stage.forcedParty ?? recommendParty(owned, encounter.foes.map((f) => requireEnemy(f.enemy)));
-  const rank = Math.max(1, rankBefore(index) + rankDelta);
-  return {
-    party: party.map((id) => heroUnit(requireHero(id), rank)),
-    foes: encounterFoes(encounter, stage.level, requireEnemy),
-  };
+/**
+ * Difficulty regression. The plain auto-climber (see core/climb/auto.ts) plays whole climbs with
+ * a fresh Rank 1 profile. It is a cautious, ordinary player, so these bands sit below what a
+ * thoughtful person manages. Retune them with `pnpm sim climb` when content changes on purpose.
+ */
+
+const RUNS = 10;
+
+function clearRate(stratum: number, heroes: readonly string[]): number {
+  let clears = 0;
+  let total = 0;
+  for (const hero of heroes) {
+    for (let i = 0; i < RUNS; i++) {
+      const run = autoClimb(startClimb({ seed: `bal-${stratum}-${hero}-${i}`, daily: null, stratum, hero, resonance: 1, rank: 1, kindled: {}, archive: [] }, climbDeps), climbDeps);
+      total++;
+      if (run.result === 'cleared') clears++;
+    }
+  }
+  return clears / total;
 }
 
-const SEEDS = 120;
+describe('difficulty', () => {
+  const all = HEROES.map((h) => h.id);
+  const bands: Array<[number, number]> = [
+    [0.6, 0.92],
+    [0.28, 0.6],
+    [0.14, 0.45],
+  ];
 
-describe('campaign difficulty, played by the auto-play policy', () => {
-  test('the intended Rank arrives at each stage at that stage’s level', () => {
-    STAGES.forEach((stage, i) => expect(rankBefore(i), stage.id).toBe(stage.level));
-  });
-
-  for (const [index, stage] of STAGES.entries()) {
-    test(`${stage.id} ${stage.name}: winnable, never breaks a rule, sensible length`, () => {
-      const setup = onCurve(index);
-      let wins = 0;
-      let actions = 0;
-      const problems: string[] = [];
-      for (let seed = 0; seed < SEEDS; seed++) {
-        const r = playout(setup, `balance:${stage.id}:${seed}`, {
-          onStep: (b) => problems.push(...checkInvariants(b.state)),
-        });
-        expect(r.timedOut, `seed ${seed} did not finish`).toBe(false);
-        if (r.result === 'victory') wins++;
-        actions += r.actions;
-      }
-      expect(problems).toEqual([]);
-      const rate = wins / SEEDS;
-      const avgActions = actions / SEEDS;
-      // The tutorial is close to a sure thing, the boss is allowed to bite.
-      expect(rate).toBeGreaterThanOrEqual(stage.id === '0-1' ? 0.99 : stage.id === '1-5' ? 0.85 : 0.95);
-      // About five seconds an action: between half a minute and six minutes.
-      expect(avgActions).toBeGreaterThan(6);
-      expect(avgActions).toBeLessThan(72);
-    });
+  for (const s of STRATA) {
+    test(`${s.name} is cleared about as often as intended`, () => {
+      const [lo, hi] = bands[s.index]!;
+      const rate = clearRate(s.index, all);
+      expect(rate).toBeGreaterThanOrEqual(lo);
+      expect(rate).toBeLessThanOrEqual(hi);
+    }, 60_000);
   }
 
-  test('falling well behind the curve hurts on the elite and the boss', () => {
-    for (const id of ['1-4', '1-5']) {
-      const index = STAGES.findIndex((s) => s.id === id);
-      const wins = (delta: number): number => {
-        const setup = onCurve(index, delta);
-        let w = 0;
-        for (let seed = 0; seed < SEEDS; seed++) if (playout(setup, `behind:${id}:${seed}`).result === 'victory') w++;
-        return w / SEEDS;
-      };
-      expect(wins(-4), id).toBeLessThan(wins(0));
-      expect(wins(-4), id).toBeLessThan(0.6);
-    }
-  });
+  test('every hero can clear the Root, and the tutorial hero comfortably', () => {
+    for (const h of all) expect(clearRate(0, [h]), h).toBeGreaterThanOrEqual(h === 'wren' ? 0.4 : 0.3);
+  }, 60_000);
+
+  test('the strata get harder as you climb', () => {
+    const rates = STRATA.map((s) => clearRate(s.index, ['wren', 'marisol', 'io', 'tamsin']));
+    expect(rates[0]!).toBeGreaterThan(rates[1]!);
+    expect(rates[1]!).toBeGreaterThan(rates[2]! - 0.05);
+  }, 60_000);
 });
