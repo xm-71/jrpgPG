@@ -43,14 +43,6 @@
   color: var(--bone-2);
 }
 
-.title-line {
-  margin-top: 1rem;
-  max-width: 26ch;
-  text-wrap: balance;
-  font-size: 0.9rem;
-  color: var(--bone-2);
-}
-
 .title-actions {
   position: relative;
   z-index: 2;
@@ -58,11 +50,6 @@
   flex-direction: column;
   gap: 8px;
   padding: 0 1.4rem calc(var(--safe-bottom) + 1.4rem);
-}
-
-.title-foot {
-  text-align: center;
-  margin-top: 0.4rem;
 }
 
 .pill-note {
