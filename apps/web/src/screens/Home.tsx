@@ -7,6 +7,7 @@ import { hasScenes } from '../game/flow';
 import { go } from '../game/nav';
 import { sfx } from '../game/sfx';
 import { mutate, profile } from '../game/store';
+import { useTeach } from '../tutorial/useTeach';
 import { HeroImg } from '../ui/Art';
 import { AffinityIcon, GloamIcon } from '../ui/Icons';
 import { Sky } from '../ui/Sky';
@@ -46,6 +47,7 @@ function MenuCard({ title, hint, feature, onOpen, glow = false }: { title: strin
 
 export function Home(): JSX.Element {
   const p = profile.value;
+  useTeach(isUnlocked(p, 'tasks') ? ['home.first', 'home.menu', 'home.tasks'] : ['home.first', 'home.menu'], 'home');
   const today = dayKey(now());
 
   useEffect(() => {
@@ -74,6 +76,9 @@ export function Home(): JSX.Element {
         </div>
         <span class="grow" />
         <GloamPill amount={p.gloam} />
+        <button class="btn btn-ghost btn-icon" aria-label="How to play" onClick={() => go({ name: 'guide' })}>
+          ?
+        </button>
         <button class="btn btn-ghost btn-icon" aria-label="Settings" onClick={() => go({ name: 'settings' })}>
           ⚙
         </button>

@@ -1,0 +1,441 @@
+/* The coach: a dimmed screen with one part lit, and a card that says what it is. */
+.coach {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  padding: var(--safe-top) 0 var(--safe-bottom);
+  pointer-events: none;
+}
+
+.coach-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+/* With no part to light, the whole screen dims. With one, the hole's shadow does the dimming. */
+.coach-veil:not(.has-hole) {
+  background: rgba(5, 4, 9, 0.74);
+}
+
+.coach-hole {
+  position: absolute;
+  pointer-events: none;
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  transition:
+    left 0.22s ease,
+    top 0.22s ease,
+    width 0.22s ease,
+    height 0.22s ease;
+}
+
+.is-modal .coach-hole {
+  box-shadow:
+    0 0 0 100vmax rgba(5, 4, 9, 0.74),
+    0 0 18px rgba(217, 164, 65, 0.5);
+}
+
+.is-nudge .coach-hole {
+  box-shadow: 0 0 14px rgba(217, 164, 65, 0.6);
+  animation: coach-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes coach-pulse {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.coach-card {
+  position: absolute;
+  z-index: 2;
+  padding: 0.7rem 0.85rem 0.8rem;
+  pointer-events: auto;
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(34, 28, 46, 0.98), rgba(16, 13, 24, 0.98));
+  box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.85);
+  animation: coach-in 0.18s ease-out both;
+}
+
+@keyframes coach-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.coach-head {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.coach-step {
+  color: var(--gold);
+}
+
+.coach-skip {
+  padding: 0.15rem 0.3rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-family: var(--font-label);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.coach-title {
+  margin: 0.2rem 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+.coach-body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--bone-2);
+}
+
+.coach-actions {
+  margin-top: 0.7rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* How to play */
+.guide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.g-sec {
+  padding: 0;
+}
+
+.g-sec h2 {
+  margin: 0;
+}
+
+.g-sec.on {
+  border-color: var(--hair-2);
+}
+
+.g-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 0;
+  background: none;
+  color: var(--bone);
+  text-align: left;
+  font-size: 1.05rem;
+}
+
+.g-caret {
+  margin-left: auto;
+  color: var(--gold);
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.g-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.9rem 0.95rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--bone-2);
+}
+
+.g-content p,
+.g-content ul,
+.g-content ol {
+  margin: 0;
+}
+
+.g-content b,
+.g-content strong {
+  color: var(--bone);
+}
+
+.g-list,
+.g-steps {
+  display: grid;
+  gap: 0.55rem;
+  padding-left: 1.15rem;
+}
+
+.g-list.g-tight {
+  gap: 0.4rem;
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.g-list svg,
+.g-list .aff {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+}
+
+.g-list .light-pip {
+  width: 0.75em;
+}
+
+.g-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.g-fact-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-family: var(--font-label);
+}
+
+.g-fact p {
+  margin-top: 0.1rem;
+}
+
+.g-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.g-strip-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.2rem;
+  border: 1px solid var(--hair);
+  background: rgba(236, 230, 216, 0.03);
+  font-family: var(--font-label);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--bone-2);
+}
+
+.g-strip-art {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 26px;
+  color: var(--bone);
+}
+
+.g-strip-art .light-pip {
+  width: 9px;
+  height: 14px;
+}
+
+.g-back {
+  width: 13px;
+  height: 19px;
+  border: 1px solid var(--bone-2);
+  background: var(--ink-4);
+  transform: rotate(-7deg);
+}
+
+.g-back:nth-child(2) {
+  transform: none;
+}
+
+.g-back:nth-child(3) {
+  transform: rotate(7deg);
+}
+
+.g-or {
+  font-size: 0.66rem;
+}
+
+.g-end {
+  color: var(--blood);
+  font-size: 0.8rem;
+}
+
+.g-card-demo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.g-card-demo .cardf.size-list {
+  flex: none;
+  width: 150px;
+}
+
+.g-foe {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 250px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--hair-2);
+  background: var(--ink-2);
+}
+
+.g-foe-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--bone);
+}
+
+.g-aff {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.g-aff-one {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--hair);
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.g-statuses {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.g-status,
+.g-room {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.g-status .st-chip {
+  flex: none;
+  margin-top: 0.2rem;
+}
+
+.g-status p,
+.g-room p {
+  margin-top: 0.1rem;
+}
+
+.g-gauge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-label);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.g-gauge svg {
+  width: 54px;
+  height: 54px;
+  transform: rotate(-90deg);
+}
+
+.g-gauge circle {
+  fill: none;
+  stroke: rgba(236, 230, 216, 0.15);
+  stroke-width: 3;
+}
+
+.g-gauge .fill {
+  stroke: var(--gold);
+}
+
+.g-rooms {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.g-glyph {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 7px;
+  border: 1px solid rgba(236, 230, 216, 0.25);
+  border-radius: 50%;
+  background: rgba(7, 6, 11, 0.9);
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.g-foot {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.4rem;
+}
+
+.help-overlay {
+  z-index: 70;
+}
+
+.help-sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 92%;
+  overflow: hidden;
+}
+
+.help-head {
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.help-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* A nudge's words: a strip in the fight's own layout, between the hero panel and the hand. */
+.coach-nudge {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--ink-1);
+  border-left: 3px solid var(--gold);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--bone-2);
+}
+
+.coach-nudge p {
+  flex: 1;
+  margin: 0;
+}
+
+.coach-nudge b {
+  color: var(--bone);
+}

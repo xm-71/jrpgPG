@@ -4,7 +4,7 @@ A tower-climbing card game for the browser and phones, in ink and ember. The sun
 
 **No real money, ever.** The gacha, called Kindling, is paid for with **Gloam**, a currency you only earn by playing. There is nothing to buy.
 
-- How to play: [Fights](#fights) and [The climb](#the-climb) below.
+- How to play: the **How to play** pages in the game (title screen, Home, Settings, or the ? in a fight), or [The tutorial](#the-tutorial), [Fights](#fights) and [The climb](#the-climb) below.
 - The original research and roadmap: open [`docs/roadmap.html`](docs/roadmap.html) in a browser.
 
 ## Play it
@@ -17,6 +17,18 @@ pnpm dev          # http://localhost:5173
 Requires Node 22.12 or newer and pnpm 10. Everything runs in the browser; progress is saved to `localStorage`.
 
 Useful URL parameters while testing: `?now=2026-10-05T10:00:00Z` moves the game clock (daily tasks, the daily climb, banner rotation) and `?cycle=2` pins the rate-up banner.
+
+## The tutorial
+
+A new player is offered a guide the first time they tap **Begin**. Saying yes turns on coaching; saying no leaves the game quiet.
+
+- **Basics first.** The first fight is coached one card at a time: Light, the hand of three, playing or holding, what the foes are about to do, the forecast above End turn, and then a nudge to try a card. Nudges outline the part of the screen they are about and put their words in a strip the layout makes room for, so nothing the player has to tap is ever covered.
+- **The rest as it comes up.** Weakness, Break, Chains, ultimates, statuses, Ash and the late hour, and each room and menu (the map, spoils, the Ghost market, a rest, a Mirror, the results, Home, Kindling, Lamplighters, the Climb screen), get one short card the first time they appear, with a **Full rules** link into the guide.
+- **Always there.** **How to play** holds every rule and every screen in 13 sections. It is on the title screen, Home, Settings and the ? in a fight. Settings also has a **Tutorial hints** switch and **Replay the tutorial**.
+
+What the tutorial remembers (whether hints are on, and which lessons have been given) lives in the save's `progress.flags` as `coach:on`, `coach:offered` and `coach:seen:<lesson>`, so it travels with Copy save and needs no change to the save format. Saves from before the tutorial have hints off; they can turn them on in Settings.
+
+The lessons are in `apps/web/src/tutorial/lessons.ts`. Numbers in the copy (Light, hand size, Break damage, Chain steps, pity and so on) are read from the game's rules so the words cannot drift from the engine, and a test checks that every part of the screen a lesson points at still exists in the markup.
 
 ## Play offline
 
@@ -123,8 +135,9 @@ packages/core     Rules and data types. No DOM, no randomness except a seeded RN
 packages/content  Heroes and their decks, cards, Fades, strata, events, Glimmers, story scenes and banners, with schema validation.
 apps/web          Vite + Preact + PixiJS client.
   offline/          The build step that makes it installable and offline: icons, iOS launch images, manifest, service worker.
+  src/tutorial/     The coach (lessons shown once and remembered in the save) and the How to play guide.
 tools/sim         Headless simulator used to balance the game.
-tools/e2e         Browser smoke test: a new player's first climb, first Kindling, a reload, play with no connection, and the iPhone Home Screen pieces.
+tools/e2e         Browser smoke test: a new player's first climb, first Kindling, a reload, play with no connection, the guided tutorial, and the iPhone Home Screen pieces.
 docs/roadmap.html The original research and roadmap.
 ```
 
@@ -136,7 +149,7 @@ pnpm test         # Vitest across packages
 pnpm build        # production build to apps/web/dist
 pnpm build:site   # that, plus the single-file build copied in as dist/duskline-offline.html (what Vercel runs)
 pnpm check        # all three
-pnpm e2e          # after a build: plays the first climb in headless Chromium, again with the network cut, then checks the iPhone app pieces
+pnpm e2e          # after a build: plays the first climb in headless Chromium, again with the network cut, takes the tutorial, then checks the iPhone app pieces
 pnpm sim all      # balance report: climbs, single fights, Kindling
 pnpm sim climb --stratum 1 --hero io --n 200
 ```

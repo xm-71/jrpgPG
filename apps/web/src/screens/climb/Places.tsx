@@ -6,10 +6,12 @@ import { mutate, toast } from '../../game/store';
 import { CardFace } from '../../ui/CardFace';
 import { EmberIcon } from '../../ui/Icons';
 import { Sky } from '../../ui/Sky';
+import { useTeach } from '../../tutorial/useTeach';
 import { ClimbHud } from './Hud';
 
 export function EventView({ run }: { run: ClimbRun }): JSX.Element {
   const ev = run.event!;
+  useTeach(['event.first'], 'event');
   const def = requireEvent(ev.id);
   const chosen = ev.choice !== null ? def.choices[ev.choice] : undefined;
   return (
@@ -68,6 +70,7 @@ export function EventView({ run }: { run: ClimbRun }): JSX.Element {
 
 export function ShopView({ run }: { run: ClimbRun }): JSX.Element {
   const items = run.shop ?? [];
+  useTeach(['shop.first'], 'shop');
   const purchase = (i: number): void => {
     try {
       sfx.spend();
@@ -124,6 +127,7 @@ export function ShopView({ run }: { run: ClimbRun }): JSX.Element {
 
 export function RestView({ run }: { run: ClimbRun }): JSX.Element {
   const canUp = run.deck.some((c) => canTemper(findCard(run, climbDeps, c.id), c.up));
+  useTeach(['rest.first'], 'rest');
   const heal = Math.min(run.maxHp - run.hp, Math.round(run.maxHp * REST_HEAL));
   return (
     <div class="screen">

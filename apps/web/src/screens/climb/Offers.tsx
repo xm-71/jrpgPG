@@ -7,6 +7,7 @@ import { mutate, toast } from '../../game/store';
 import { CardFace } from '../../ui/CardFace';
 import { EmberIcon } from '../../ui/Icons';
 import { Sky } from '../../ui/Sky';
+import { useTeach } from '../../tutorial/useTeach';
 import { ClimbHud } from './Hud';
 
 const PATH_LABEL = { noonward: 'Noonward', duskward: 'Duskward', nightward: 'Nightward' } as const;
@@ -14,6 +15,7 @@ const PATH_HINT = { noonward: 'Offence', duskward: 'Tempo', nightward: 'Enduranc
 
 export function RewardView({ run }: { run: ClimbRun }): JSX.Element {
   const r = run.reward!;
+  useTeach(['offer.first'], 'offer');
   return (
     <div class="screen">
       <Sky variant="tower" />
@@ -64,6 +66,7 @@ export function RewardView({ run }: { run: ClimbRun }): JSX.Element {
 
 export function GlimmerView({ run }: { run: ClimbRun }): JSX.Element {
   const opening = run.node === null;
+  useTeach(['glimmer.first'], 'glimmer');
   return (
     <div class="screen">
       <Sky variant={opening ? 'night' : 'tower'} />
@@ -103,6 +106,7 @@ export function GlimmerView({ run }: { run: ClimbRun }): JSX.Element {
 
 export function MirrorView({ run }: { run: ClimbRun }): JSX.Element {
   const echoes = run.mirror ?? [];
+  useTeach(['mirror.first'], 'mirror');
   return (
     <div class="screen">
       <Sky variant="night" />

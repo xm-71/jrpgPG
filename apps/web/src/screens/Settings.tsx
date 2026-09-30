@@ -3,12 +3,13 @@ import type { JSX } from 'preact';
 import { newProfile } from '@duskline/core';
 import { STARTER_HEROES } from '@duskline/content';
 import { now } from '../game/clock';
-import { back } from '../game/nav';
+import { back, go } from '../game/nav';
 import { applyUpdate, cacheVersion, canAddToHome, canInstall, installed, needsShareSheet, offlineState, online, persisted, promptInstall, updateReady } from '../game/offline';
 import { copyMode, downloadOfflineCopy, isDownloadedCopy, type CopyMode } from '../game/offlineCopy';
 import { exportProfile, importProfile } from '../game/persist';
 import { sfx } from '../game/sfx';
 import { isFreshSave, mutate, profile, replaceProfile, resetProfile, savingWorks, toast } from '../game/store';
+import { coachOn, skipTutorial, startTutorial } from '../tutorial/coach';
 import { AddToHomeSteps } from '../ui/AddToHome';
 import { ask } from '../ui/Dialog';
 import { Sky } from '../ui/Sky';
@@ -197,6 +198,38 @@ export function Settings(): JSX.Element {
                 </button>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section class="panel panel-pad">
+          <label class="switch">
+            <span>
+              <strong>Tutorial hints</strong>
+              <br />
+              <span class="muted small">Short coaching cards the first time each part of the game comes up.</span>
+            </span>
+            <input type="checkbox" checked={coachOn.value} onChange={(e) => (e.currentTarget.checked ? startTutorial(false) : skipTutorial())} />
+          </label>
+          <div class="row wrap">
+            <button
+              class="btn btn-small btn-ghost"
+              onClick={() => {
+                sfx.tap();
+                go({ name: 'guide' });
+              }}
+            >
+              How to play
+            </button>
+            <button
+              class="btn btn-small btn-ghost"
+              onClick={() => {
+                sfx.tap();
+                startTutorial(true);
+                toast('The tutorial will play again as you go.', 'good');
+              }}
+            >
+              Replay the tutorial
+            </button>
           </div>
         </section>
 

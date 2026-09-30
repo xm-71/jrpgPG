@@ -19,6 +19,7 @@ import { beginClimb } from '../game/flow';
 import { back } from '../game/nav';
 import { sfx } from '../game/sfx';
 import { mutate, profile } from '../game/store';
+import { useTeach } from '../tutorial/useTeach';
 import { HeroImg } from '../ui/Art';
 import { CardFace } from '../ui/CardFace';
 import { AffinityIcon, GloamIcon } from '../ui/Icons';
@@ -35,6 +36,7 @@ function weaknessesOf(stratum: number): Affinity[] {
 }
 
 export function ClimbNew({ daily = false }: { daily?: boolean }): JSX.Element {
+  useTeach(['climbnew.first'], 'climbnew');
   const p = profile.value;
   const open = unlockedStrata(p, STRATA.length);
   const [stratum, setStratum] = useState(Math.min(open - 1, 0));

@@ -13,6 +13,8 @@ import { Roster } from './screens/Roster';
 import { Scene } from './screens/Scene';
 import { Settings } from './screens/Settings';
 import { Title } from './screens/Title';
+import { Coach } from './tutorial/Coach';
+import { Guide, HelpHost } from './tutorial/Guide';
 import { DialogHost } from './ui/Dialog';
 import { Toasts } from './ui/Toasts';
 import { TurnUpright } from './ui/TurnUpright';
@@ -65,10 +67,15 @@ export function App(): JSX.Element {
     case 'settings':
       view = <Settings />;
       break;
+    case 'guide':
+      view = <Guide {...(s.section ? { section: s.section } : {})} />;
+      break;
   }
   return (
     <div class="stage">
       {view}
+      <Coach />
+      <HelpHost />
       <Toasts />
       <DialogHost />
       <TurnUpright />

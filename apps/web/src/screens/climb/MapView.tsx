@@ -5,10 +5,11 @@ import { STRATA, climbDeps, requireEncounter, requireEvent, requireFoe } from '@
 import { sfx } from '../../game/sfx';
 import { mutate } from '../../game/store';
 import { AffinityIcon } from '../../ui/Icons';
+import { useTeach } from '../../tutorial/useTeach';
 import { Sky } from '../../ui/Sky';
 import { ClimbHud } from './Hud';
 
-const KIND_NAME: Record<NodeKind, string> = {
+export const KIND_NAME: Record<NodeKind, string> = {
   battle: 'Fades',
   elite: 'Elite',
   event: 'Unknown',
@@ -19,7 +20,7 @@ const KIND_NAME: Record<NodeKind, string> = {
   boss: 'Boss',
 };
 
-const KIND_HELP: Record<NodeKind, string> = {
+export const KIND_HELP: Record<NodeKind, string> = {
   battle: 'A fight. Win Embers and a card, maybe one bound from the Fades you beat.',
   elite: 'A hard fight. Better cards, more Embers, and a Glimmer.',
   event: 'Something happens on the stair. Every choice says what it costs.',
@@ -31,7 +32,7 @@ const KIND_HELP: Record<NodeKind, string> = {
 };
 
 /** Node glyphs, drawn in a 24 x 24 box. */
-function Glyph({ kind }: { kind: NodeKind }): JSX.Element {
+export function Glyph({ kind }: { kind: NodeKind }): JSX.Element {
   switch (kind) {
     case 'battle':
       return <path d="M5 19 16 8l1-4-4 1L2 16l3 3ZM19 19 8 8 7 4l4 1 11 11-3 3Z" />;
@@ -86,6 +87,7 @@ export function MapView({ run }: { run: ClimbRun }): JSX.Element {
   const node = picked ? choices.find((n) => n.id === picked) : undefined;
   const all = map.rows.flat();
   const pos = (n: MapNode): [number, number] => [X[n.col]!, yOf(n.row, rows)];
+  useTeach(['map.first', 'map.hud', 'map.rooms'], 'map');
 
   return (
     <div class="screen climb-map">

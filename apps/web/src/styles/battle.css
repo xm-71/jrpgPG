@@ -687,18 +687,6 @@
   }
 }
 
-.bt-tip {
-  position: relative;
-  z-index: 3;
-  margin: 0;
-  padding: 0.35rem 0.8rem;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  color: var(--bone-2);
-  background: var(--ink-1);
-  border-left: 3px solid var(--gold);
-}
-
 .bt-hand {
   position: relative;
   z-index: 3;

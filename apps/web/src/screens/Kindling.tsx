@@ -8,6 +8,7 @@ import { cycleOverride, now, randomSeed } from '../game/clock';
 import { back, go } from '../game/nav';
 import { sfx } from '../game/sfx';
 import { mutate, profile, toast } from '../game/store';
+import { useTeach } from '../tutorial/useTeach';
 import { GloamIcon, Stars } from '../ui/Icons';
 import { Sky } from '../ui/Sky';
 import { dateLabel } from '../ui/text';
@@ -223,6 +224,7 @@ function BannerPanel({ banner, ends }: { banner: BannerDef; ends: number | null 
 }
 
 export function Kindling(): JSX.Element {
+  useTeach(['kindling.first'], 'kindling');
   const active = activeBanners(now(), cycleOverride);
   const [tab, setTab] = useState<'rate' | 'std'>('rate');
   const p = profile.value;

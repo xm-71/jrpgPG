@@ -6,6 +6,7 @@ import { now } from '../../game/clock';
 import { afterward, finished } from '../../game/flow';
 import { sfx } from '../../game/sfx';
 import { mutate, profile, toast } from '../../game/store';
+import { useTeach } from '../../tutorial/useTeach';
 import { HeroImg } from '../../ui/Art';
 import { CardFace } from '../../ui/CardFace';
 import { GloamIcon } from '../../ui/Icons';
@@ -26,6 +27,7 @@ function Line({ label, value }: { label: string; value: number }): JSX.Element |
 /** The end of a climb: pay out, keep an Echo if there is one, then the story or home. */
 export function Results({ run }: { run: ClimbRun }): JSX.Element {
   const [kept] = useState(() => structuredClone(run));
+  useTeach(['results.first'], 'results');
   const [paid, setPaid] = useState<ClimbSettlement | null>(null);
   const [archived, setArchived] = useState<string | null>(null);
   const cleared = kept.result === 'cleared';

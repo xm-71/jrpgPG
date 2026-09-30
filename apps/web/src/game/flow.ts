@@ -28,6 +28,3 @@ export const hasScenes = (p: Profile): boolean => dueBeats(p, BEATS).length > 0;
 export function afterward(p: Profile): void {
   go({ name: hasScenes(p) ? 'scene' : 'home' }, { replace: true });
 }
-
-/** A player still in their first climb gets the tips. */
-export const isTutorial = (p: Profile): boolean => p.climb.runs === 0;

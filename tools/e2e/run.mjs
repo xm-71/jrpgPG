@@ -1,5 +1,6 @@
 // End-to-end smoke test: a new player climbs the Root for the first time, meets Io, kindles, reloads,
-// and plays again with the connection cut. Then an iPhone-shaped browser checks the Home Screen app pieces.
+// and plays again with the connection cut. Then a second new player takes the guided tutorial, and an
+// iPhone-shaped browser checks the Home Screen app pieces.
 // Run `pnpm build` first. Uses the Chromium that Playwright is configured to find (PLAYWRIGHT_BROWSERS_PATH)
 // or CHROMIUM_PATH. Falls back to /opt/pw-browsers/chromium when it exists.
 import { spawn } from 'node:child_process';
@@ -33,6 +34,11 @@ async function waitForServer() {
 }
 
 const errors = [];
+/** Collect page errors and console errors from a page, the same way for every browser context. */
+const watch = (pg) => {
+  pg.on('pageerror', (e) => errors.push(e.message));
+  pg.on('console', (m) => m.type() === 'error' && !/ERR_CERT|fonts\.g|Failed to load resource/.test(m.text()) && errors.push(m.text()));
+};
 const check = (cond, msg) => {
   if (!cond) throw new Error(`FAILED: ${msg}`);
   console.log(`ok  ${msg}`);
@@ -194,6 +200,200 @@ async function climbStep(page, log) {
   return 'climbing';
 }
 
+/** Waits for the coaching card with this title, then taps its Next (or Got it). */
+async function nextLesson(pg, title) {
+  await pg.locator('.coach-card .coach-title', { hasText: title }).waitFor({ timeout: 20000 });
+  await pg.locator('.coach-next').click();
+}
+
+/**
+ * The tutorial, as a brand-new player who says yes to the guide. The How to play pages are there from the
+ * title. The first fight is coached one step at a time without ever covering what must be tapped, each new
+ * rule is explained the first time it comes up (and only then), and the coaching can be skipped and replayed.
+ */
+async function tutorialChecks(browser) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const pg = await ctx.newPage();
+  watch(pg);
+  await pg.goto(GAME_URL);
+  const flags = async () => (await saved(pg))?.progress.flags ?? {};
+
+  // Reduced motion keeps the fights quick. Hints are off until the player says yes.
+  await pg.getByRole('button', { name: 'Settings' }).click();
+  check(!(await pg.getByRole('checkbox', { name: /Tutorial hints/ }).isChecked()), 'Tutorial hints start off, until a new player says yes');
+  await pg.getByRole('checkbox', { name: /Reduce motion/ }).check();
+  await pg.getByRole('button', { name: 'Back' }).click();
+
+  // How to play is on the title screen, before anything has been started.
+  await pg.getByRole('button', { name: 'How to play' }).click();
+  await pg.locator('.guide').waitFor();
+  check((await pg.locator('.g-sec').count()) === 13, 'How to play has a section for each part of the game');
+  check((await pg.locator('.g-sec.on .display').innerText()) === 'The goal', 'and opens on the goal');
+  await pg.locator('.g-head', { hasText: 'A fight, turn by turn' }).click();
+  await pg.locator('.g-card-demo .cardf').waitFor();
+  check(await shown(pg, '.g-strip'), 'the fight section shows how a turn goes, with a real card');
+  await pg.getByRole('button', { name: 'Back' }).click();
+
+  // The offer, and saying yes.
+  await pg.getByRole('button', { name: 'Begin' }).click();
+  const offer = pg.getByRole('dialog', { name: 'Want a guide?' });
+  await offer.waitFor();
+  check((await offer.getByRole('button', { name: 'I will work it out' }).isVisible()) && (await offer.getByRole('button', { name: 'Guide me' }).isVisible()), 'a new player is offered a guide and can turn it down');
+  await offer.getByRole('button', { name: 'Guide me' }).click();
+  await pg.locator('.dialogue').click();
+  await pg.getByRole('button', { name: 'Skip', exact: true }).click();
+  await pg.locator('.glimmer').first().waitFor();
+  let f = await flags();
+  check(f['coach:on'] === true && f['coach:offered'] === true, 'saying yes turns the tutorial on in the save');
+
+  // The first screen of the climb is explained, pointing at the part it is about.
+  await pg.locator('.coach-card .coach-title', { hasText: 'A Glimmer' }).waitFor();
+  check(await shown(pg, '.coach-hole'), 'a lesson lights up the part of the screen it is about');
+  await pg.locator('.coach-next').click();
+  await pg.locator('.coach-card').waitFor({ state: 'detached' });
+  check(`coach:seen:glimmer.first` in (await flags()), 'Got it closes a lesson and the save remembers it');
+  await pg.locator('.glimmer').first().click();
+  for (const t of ['The floor ahead', 'HP, Embers and your deck', 'Read before you go']) await nextLesson(pg, t);
+
+  // The first fight: the basics in the order a turn goes.
+  await pg.locator('.map-node.open.k-battle').first().click();
+  await pg.getByRole('button', { name: 'Go', exact: true }).click();
+  for (const t of ['Light', 'Your hand', 'Play it or hold it', 'What the foe will do', 'The forecast']) await nextLesson(pg, t);
+  const strip = pg.locator('.coach-nudge', { hasText: 'Your turn' });
+  await strip.waitFor();
+  check((await pg.locator('.coach-card').count()) === 0 && (await pg.locator('.coach-veil').count()) === 0, 'trying the first card is a nudge: nothing dims and no card covers the game');
+  const [sb, hb] = [await strip.boundingBox(), await pg.locator('.bt-hand').boundingBox()];
+  check(sb.y + sb.height <= hb.y + 1, 'the nudge makes room above the hand instead of sitting on it');
+  const cards = pg.locator('.bt-hand .cardf');
+  await cards.first().click();
+  await cards.first().click();
+  await pg.locator('.coach-nudge', { hasText: 'End the turn' }).waitFor({ timeout: 10000 });
+  check(true, 'playing the card completes the nudge and moves on to End turn');
+  await pg.getByRole('button', { name: 'How to play' }).click();
+  await pg.locator('.help-sheet').waitFor();
+  check((await pg.locator('.help-sheet .g-sec.on .display').innerText()) === 'A fight, turn by turn', 'the ? in a fight opens the rules for fights over the game');
+  await pg.locator('.help-sheet').getByRole('button', { name: 'Close' }).click();
+  await pg.locator('.help-sheet').waitFor({ state: 'detached' });
+
+  // Climb on by hand. Each rule is explained the first time it comes up, and never again. A lesson can land
+  // between looking and tapping, so taps here give up quickly and the next pass reads whatever came up.
+  const taught = [];
+  const readLesson = async () => {
+    const title = await pg.locator('.coach-title').innerText();
+    if (title === 'A weakness') {
+      await pg.getByRole('button', { name: 'Full rules' }).click();
+      check((await pg.locator('.help-sheet .g-sec.on .display').innerText()) === 'Weakness and Break', 'Full rules on a lesson opens the matching page of the guide');
+      await pg.locator('.help-sheet').getByRole('button', { name: 'Close' }).click();
+    }
+    taught.push(title);
+    await pg.locator('.coach-next').click();
+  };
+  let fights = 0;
+  pg.setDefaultTimeout(4000);
+  for (let i = 0; i < 800 && !taught.includes('A weakness') && fights < 6; i++) {
+    await pg.waitForTimeout(100);
+    try {
+      if ((await pg.locator('.coach-veil').count()) > 0) {
+        if (await shown(pg, '.coach-card')) await readLesson();
+      } else if (await shown(pg, '.screen.battle')) {
+        if (await pg.locator('.bt-result').count()) {
+          await pg.locator('.bt-result .btn-primary').click();
+          fights++;
+          continue;
+        }
+        const end = pg.locator('.bt-end');
+        if (!(await end.isEnabled().catch(() => false))) continue;
+        const playable = pg.locator('.bt-hand .cardf:not(.dim)');
+        if ((await playable.count()) > 0) {
+          await playable.first().click();
+          if (await shown(pg, '.bt-hit')) await pg.locator('.bt-hit').first().click();
+          else await playable.first().click();
+        } else {
+          await end.click();
+        }
+        await pg.waitForTimeout(250);
+      } else {
+        await climbStep(pg, []);
+      }
+    } catch (e) {
+      if (!/Timeout/.test(String(e))) throw e;
+    }
+  }
+  pg.setDefaultTimeout(30000);
+  // Anything still queued from the last action is read, then Auto finishes the fight.
+  for (let i = 0; i < 6 && (await pg.locator('.coach-veil').count()) > 0; i++) {
+    await pg.waitForTimeout(300);
+    if (await shown(pg, '.coach-card')) await readLesson();
+  }
+  check(taught.includes('Spoils') && taught.includes('A weakness'), `the rules arrive as they come up (${taught.join(', ')})`);
+  check(new Set(taught).size === taught.length, 'and no lesson is given twice');
+  if (await shown(pg, '.screen.battle')) await fight(pg);
+  await pg.locator('.climb-map, .offer-cards').first().waitFor();
+  f = await flags();
+  check(['fight.light', 'fight.try', 'offer.first', 'map.first'].every((id) => f[`coach:seen:${id}`] === true), 'every lesson given is remembered in the save');
+  if (await shown(pg, '.offer-cards')) await pg.locator('.offer-cards .cardf').first().click();
+
+  // Lessons that were seen stay seen after a reload.
+  await pg.locator('.climb-map').waitFor();
+  await pg.reload();
+  await pg.getByRole('button', { name: 'Resume the climb' }).click();
+  await pg.locator('.climb-map').waitFor();
+  await pg.waitForTimeout(700);
+  check((await pg.locator('.coach-card').count()) === 0, 'a reload does not bring back lessons already given');
+
+  // Replaying forgets them, and Skip tutorial turns the coaching off.
+  await pg.reload();
+  await pg.getByRole('button', { name: 'Settings' }).click();
+  check(await pg.getByRole('checkbox', { name: /Tutorial hints/ }).isChecked(), 'Settings shows the tutorial is on');
+  await pg.getByRole('button', { name: 'Replay the tutorial' }).click();
+  f = await flags();
+  check(f['coach:on'] === true && !Object.keys(f).some((k) => k.startsWith('coach:seen:')), 'Replay the tutorial forgets every lesson and keeps hints on');
+  await pg.getByRole('button', { name: 'Back' }).click();
+  await pg.getByRole('button', { name: 'Resume the climb' }).click();
+  await pg.locator('.coach-card .coach-title', { hasText: 'The floor ahead' }).waitFor();
+  check(true, 'and the lessons play again');
+  await pg.getByRole('button', { name: 'Skip tutorial' }).click();
+  await pg.locator('.coach-card').waitFor({ state: 'detached' });
+  check((await flags())['coach:on'] === false, 'Skip tutorial turns the coaching off for good');
+  await ctx.close();
+}
+
+/**
+ * The menu lessons, on a save that has finished its first climb: Home, Kindling, Lamplighters and the Climb
+ * screen each explain themselves the first time they are opened.
+ */
+async function menuLessons(browser, save) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const mine = structuredClone(save);
+  mine.climb.run = null;
+  // Everything the player has unlocked stays; only the coaching is switched on, with no lesson seen yet.
+  mine.progress.flags = { ...mine.progress.flags, 'coach:on': true, 'coach:offered': true };
+  await ctx.addInitScript(([k, v]) => {
+    if (!localStorage.getItem(k)) localStorage.setItem(k, v);
+  }, ['duskline:profile', JSON.stringify(mine)]);
+  const pg = await ctx.newPage();
+  watch(pg);
+  await pg.goto(GAME_URL);
+  await pg.getByRole('button', { name: 'Continue' }).click();
+  for (const t of ['Home', 'The rest of the tower', 'Daily tasks']) await nextLesson(pg, t);
+  await pg.getByRole('button', { name: /^Kindling/ }).click();
+  await nextLesson(pg, 'Kindling');
+  await pg.getByRole('button', { name: 'Back' }).click();
+  await pg.getByRole('button', { name: /^Lamplighters/ }).click();
+  await nextLesson(pg, 'Lamplighters');
+  await pg.getByRole('button', { name: 'Back' }).click();
+  await pg.locator('.cta-climb').click();
+  await nextLesson(pg, 'Who climbs');
+  const seen = Object.keys((await saved(pg)).progress.flags).filter((k) => k.startsWith('coach:seen:'));
+  check(['home.first', 'home.menu', 'home.tasks', 'kindling.first', 'roster.first', 'climbnew.first'].every((id) => seen.includes(`coach:seen:${id}`)), 'Home, Kindling, Lamplighters and Climb each explain themselves once');
+  await pg.getByRole('button', { name: 'Back' }).click();
+  await pg.getByRole('button', { name: /^Kindling/ }).click();
+  await pg.locator('.kx-actions').waitFor();
+  await pg.waitForTimeout(500);
+  check((await pg.locator('.coach-card').count()) === 0, 'and a screen visited again says nothing');
+  await ctx.close();
+}
+
 try {
   await waitForServer();
   const started = Date.now();
@@ -203,8 +403,7 @@ try {
   });
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await ctx.newPage();
-  page.on('pageerror', (e) => errors.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && !/ERR_CERT|fonts\.g|Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  watch(page);
   await page.goto(GAME_URL);
 
   // Settings first: reduced motion keeps the fights quick.
@@ -212,14 +411,16 @@ try {
   await page.getByRole('checkbox', { name: /Reduce motion/ }).check();
   await page.getByRole('button', { name: 'Back' }).click();
 
-  // The prologue, then straight up the tower with Wren.
+  // A new player is offered a guide. This run turns it down and plays on its own, so no coaching may appear.
   await page.getByRole('button', { name: 'Begin' }).click();
+  await page.getByRole('button', { name: 'I will work it out' }).click();
   await page.locator('.dialogue').click();
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.locator('.glimmer').first().waitFor();
   let p = await saved(page);
   check(p.v === 2 && p.climb.run?.hero === 'wren' && p.climb.run.seed === 'hush', 'the first climb starts with Wren on the tutorial seed');
   check(p.climb.run.deck.length === 8, 'Wren starts with 8 cards');
+  check(p.progress.flags['coach:on'] === false && p.progress.flags['coach:offered'] === true && !(await shown(page, '.coach-card')), 'turning the guide down is remembered, and nothing coaches the player');
   await page.locator('.glimmer').first().click();
 
   // First fight and its spoils.
@@ -316,6 +517,9 @@ try {
   check(true, 'with no connection, the game reloads and a fight starts');
   check(failedRequests.filter((u) => u.startsWith(`http://127.0.0.1:${PORT}`)).length === 0, 'nothing the game needs was fetched from the network');
   await ctx.setOffline(false);
+
+  await tutorialChecks(browser);
+  await menuLessons(browser, await saved(page));
 
   await iosChecks(browser);
 

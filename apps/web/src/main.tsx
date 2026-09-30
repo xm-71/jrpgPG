@@ -12,6 +12,7 @@ import './styles/cards.css';
 import './styles/battle.css';
 import './styles/climb.css';
 import './styles/story.css';
+import './styles/tutorial.css';
 
 import { render } from 'preact';
 import { expireBanners } from '@duskline/core';

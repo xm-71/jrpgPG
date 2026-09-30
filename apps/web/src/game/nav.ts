@@ -1,4 +1,5 @@
 import { signal } from '@preact/signals';
+import type { GuideSection } from '../tutorial/lessons';
 
 export type Screen =
   | { name: 'title' }
@@ -11,7 +12,8 @@ export type Screen =
   | { name: 'odds'; banner: string }
   | { name: 'history' }
   | { name: 'roster'; hero?: string }
-  | { name: 'settings' };
+  | { name: 'settings' }
+  | { name: 'guide'; section?: GuideSection };
 
 export const screen = signal<Screen>({ name: 'title' });
 

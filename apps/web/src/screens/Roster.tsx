@@ -5,6 +5,7 @@ import { AFTERLIGHTS, BEATS, BOUND, HEROES, KINDLED, POOL, requireCard, requireH
 import { go, back } from '../game/nav';
 import { sfx } from '../game/sfx';
 import { mutate, profile } from '../game/store';
+import { useTeach } from '../tutorial/useTeach';
 import { HeroImg, MOODS } from '../ui/Art';
 import { STYLE_NAME } from '../art/manga/names';
 import { CardFace } from '../ui/CardFace';
@@ -136,6 +137,7 @@ function HeroSheet({ hero, onClose }: { hero: HeroDef; onClose: () => void }): J
 }
 
 export function Roster({ hero }: { hero?: string }): JSX.Element {
+  useTeach(['roster.first'], 'roster');
   const p = profile.value;
   const [tab, setTab] = useState<'heroes' | 'cards' | 'echoes'>('heroes');
   const [open, setOpen] = useState<string | null>(hero ?? null);

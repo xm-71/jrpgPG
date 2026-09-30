@@ -10,6 +10,9 @@ import { CardFace } from '../ui/CardFace';
 import { ask } from '../ui/Dialog';
 import { AffinityIcon, BladeIcon, LightPip, ShieldIcon, StatusIcon } from '../ui/Icons';
 import { Sky } from '../ui/Sky';
+import { helpOpen, shown } from '../tutorial/coach';
+import { NudgeStrip } from '../tutorial/Coach';
+import { useBattleCoach } from '../tutorial/battle';
 import { CardController } from './controller';
 import { foeSpot } from './layout';
 import { BattleScene } from './scene';
@@ -30,8 +33,6 @@ interface Props {
   /** Give up. When omitted the fight cannot be left. */
   onQuit?: () => void;
   quitNote?: string;
-  /** Shown above the hand for the first fights. */
-  tips?: string[];
 }
 
 const PART_LABEL: Record<IntentPart, string> = {
@@ -137,7 +138,7 @@ function FoePlate({ f, count, ctl, targetable }: { f: FoeView; count: number; ct
   );
 }
 
-export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, quitNote, tips }: Props): JSX.Element {
+export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, quitNote }: Props): JSX.Element {
   const ctl = useMemo(() => {
     const c = new CardController(setup, seed);
     c.speed.value = settings.value.battleSpeed;
@@ -182,6 +183,7 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
     new Image().src = heroUrl(hero, 'half', 'fierce');
   }, [hero.id]);
   const canAct = !busy && !auto && !v.result;
+  useBattleCoach(ctl, v.turn, canAct && v.hand.length > 0);
   const alive = v.foes.filter((f) => f.alive);
   const targeting = selected !== null && ctl.needsTarget(selected);
   const perHeld = passiveSum(ctl.state.hero.passives, 'heldWard');
@@ -202,7 +204,7 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (!canAct) return;
+      if (!canAct || helpOpen.value || shown.value?.lesson.mode === 'modal') return;
       if (e.key === 'Escape') ctl.clearSelection();
       if (e.key === 'e' || e.key === 'E') void ctl.endTurn();
       const n = Number(e.key);
@@ -230,8 +232,6 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
     if (ok) onQuit();
   };
 
-  const tip = tips?.[Math.min(tips.length - 1, Math.max(0, v.turn - 1))];
-
   return (
     <div class="screen battle">
       <Sky variant="tower" />
@@ -245,6 +245,9 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
         </button>
         <button class={`btn btn-small btn-ghost${ctl.speed.value === 2 ? ' on' : ''}`} onClick={toggleSpeed} aria-pressed={ctl.speed.value === 2}>
           2×
+        </button>
+        <button class="btn btn-small btn-ghost btn-icon" onClick={() => (helpOpen.value = 'fight')} aria-label="How to play">
+          ?
         </button>
         {onQuit && (
           <button class="btn btn-small btn-ghost btn-icon" onClick={() => void quit()} disabled={!!v.result} aria-label="Give up the climb">
@@ -351,7 +354,7 @@ export function BattleScreen({ setup, seed, title, subtitle, onDone, onQuit, qui
         </div>
       </div>
 
-      {tip && !v.result && !auto && <p class="bt-tip">{tip}</p>}
+      <NudgeStrip />
 
       <div class="bt-hand" role="group" aria-label="Your hand">
         {handDefs.map(({ c, def }) => {

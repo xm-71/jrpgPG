@@ -50,6 +50,8 @@ export class CardController {
   readonly speed = signal(1);
   readonly ended = signal(false);
   scene: BattleScene | null = null;
+  /** Called once an action has finished playing out and the view has settled, with the events it produced. The tutorial listens. */
+  onEvents: ((events: readonly CardEvent[]) => void) | null = null;
   private disposed = false;
   private seq = 0;
   private faceSeq = 0;
@@ -235,6 +237,7 @@ export class CardController {
     }
     await this.playback(events);
     this.settle();
+    this.onEvents?.(events);
   }
 
   private async autoStep(): Promise<void> {

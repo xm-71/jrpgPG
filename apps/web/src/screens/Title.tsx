@@ -6,6 +6,7 @@ import { go } from '../game/nav';
 import { canAddToHome, canInstall, installed, needsShareSheet, promptInstall } from '../game/offline';
 import { sfx } from '../game/sfx';
 import { isFreshSave, profile, recoveredSave, savingWorks } from '../game/store';
+import { offerTutorial } from '../tutorial/coach';
 import { showAddToHome } from '../ui/AddToHome';
 import { Sky } from '../ui/Sky';
 
@@ -39,8 +40,9 @@ export function Title(): JSX.Element {
         ) : (
           <button
             class="btn btn-primary btn-block"
-            onClick={() => {
+            onClick={async () => {
               sfx.tap();
+              await offerTutorial();
               isFreshSave.value = false;
               go({ name: 'scene' });
             }}
@@ -70,6 +72,15 @@ export function Title(): JSX.Element {
             Add to Home Screen
           </button>
         )}
+        <button
+          class="btn btn-ghost btn-block"
+          onClick={() => {
+            sfx.tap();
+            go({ name: 'guide' });
+          }}
+        >
+          How to play
+        </button>
         <button
           class="btn btn-ghost btn-block"
           onClick={() => {
